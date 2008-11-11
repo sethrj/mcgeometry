@@ -4,6 +4,7 @@
 #define QUADRIC_HPP
 
 #include <iostream>
+#include <utility>
 
 using std::cout;
 using std::endl;
@@ -38,36 +39,36 @@ inline HitAndDist Quadric::intersect(double A, double B, double C, bool sense){
 	if (Q < 0) {
 		particleHitsSurface = false;
 		distanceToIntercept = 0.0;
-	} else {
-		if (isLocPos == false) { //inside the surface (negative orientation)
-			if (B <= 0) {
-				// headed away from the surface
-				if (A > 0) {
-					// surface is curving upward
+	} 
+    else {
+        if (isLocPos == false) { //inside the surface (negative orientation)
+			if (B <= 0) {   // headed away from the surface
+				if (A > 0) {    // surface is curving upward
 					particleHitsSurface = true;
 					distanceToIntercept = (std::sqrt(Q) - B)/A;
-				} else {
-					// surface curving away and headed in, never hits it
+				} 
+                else {  // surface curving away and headed in, never hits it
 					particleHitsSurface = false;
 					distanceToIntercept = 0.0;
 				}
-			} else {
-				//particle is heading toward the surface
+			} 
+            else {  // particle is heading toward the surface
 				particleHitsSurface = true;
 				distanceToIntercept = std::max(0.0, -C/(std::sqrt(Q) + B));
 			}
-		} else {
-			//particle is outside
-			if (B >= 0) {
-				//particle headed away
+		} 
+        else {  // particle is outside
+			if (B >= 0) {   // particle headed away
 				if (A >= 0) {
 					particleHitsSurface = false;
 					distanceToIntercept = 0.0;
-				} else {
+				} 
+                else {
 					particleHitsSurface = true;
 					distanceToIntercept = -(std::sqrt(Q) + B)/A;
 				}
-			} else {
+			} 
+            else {
 				particleHitsSurface = true;
 				distanceToIntercept = std::max(0.0, C/(std::sqrt(Q) - B));
 			}
