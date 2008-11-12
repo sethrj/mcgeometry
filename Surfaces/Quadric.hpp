@@ -18,17 +18,13 @@ class Quadric{
         // will intersect with the surface.  It returns a std::pair HitAndDist
         // It assumes that the PosSense defines whether the particles thinks it
         // has a positive sense with respect to the surface
-        virtual HitAndDist intersect(std::vector<double>& Position, 
-                std::vector<double& Direction, bool PosSense) = 0;
+        virtual HitAndDist intersect(const std::vector<double>& Position, 
+                const std::vector<double>& Direction, bool PosSense) = 0;
 
         friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
 
     protected:
-        unsigned int _ID;
-
-        QuadricSurface(unsigned int id) 
-            : _ID(id)         // Make a unique ID for each Quadric surface
-            {  }
+        QuadricSurface() {  }
 
         HitAndDist intersect( double A, double B, double C, bool sense );
 
@@ -38,7 +34,7 @@ class Quadric{
 
 
 
-inline HitAndDist Quadric::intersect(double A, double B, double C, bool sense){
+inline HitAndDist Quadric::intersect(double A, double B, double C, bool posSense){
 	bool particleHitsSurface = false;
 	double distanceToIntercept = -1.0;
 
@@ -49,7 +45,7 @@ inline HitAndDist Quadric::intersect(double A, double B, double C, bool sense){
 		distanceToIntercept = 0.0;
 	} 
     else {
-        if (isLocPos == false) { //inside the surface (negative orientation)
+        if (not posSense) { //inside the surface (negative orientation)
 			if (B <= 0) {   // headed away from the surface
 				if (A > 0) {    // surface is curving upward
 					particleHitsSurface = true;

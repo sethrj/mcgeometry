@@ -8,13 +8,12 @@
 
 class Ellipsoid : public Quadric {
     public:
-        Ellipsoid(unsigned int id)
-            : Quadric(id) {   }
+        Ellipsoid() {   }
 
         ~Ellipsoid();
 
-        HitAndDist intersect(std::vector<double>& Position, 
-                std::vector<double& Direction, bool PosSense);
+        HitAndDist intersect(const std::vector<double>& Position, 
+                const std::vector<double>& Direction, bool PosSense) const;
 
     private:
         

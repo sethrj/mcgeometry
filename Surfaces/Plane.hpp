@@ -9,12 +9,12 @@
 class Plane : public Quadric {
     public:
         Plane(std::vector<double> N, std::vector<double> C, unsigned int id) 
-            : _Normal(N), _Coordinate(C), Quadric(id) {   }
+            : _Normal(N), _Coordinate(C) {   }
 
         ~Plane();
 
-        HitAndDist intersect(std::vector<double>& Position, 
-                std::vector<double& Direction, bool PosSense);
+        HitAndDist intersect(const std::vector<double>& Position, 
+                const std::vector<double>& Direction, bool PosSense) const;
 
     private:
         std::vector<double> _Normal;
