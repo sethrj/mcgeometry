@@ -3,27 +3,24 @@
 #define CELL_HPP
 
 #include <iostream>
-#include <utility>
-#include <list>
-#include <map>
-#include "Quadric.hpp"
+#include <vector>
+#include "Surfaces/Quadric.hpp"
 
-using std::cout;
-using std::endl;
-
+/*----------------------------------------------------------------------------*/
 class Cell {
     public:
-        typedef std::pair<Quadric*, bool> QuadricSense;
+        typedef std::pair<Quadric*, bool> QuadricAndSense;
 
-        Cell()  {   }
+        Cell()  { /* * */ }
 
-        ~Cell() {   }
+        ~Cell() { /* * */ }
 
 
     private:
-        std::vector<QuadricSense> _boundingSurfaces;
+        std::vector<QuadricAndSense> _boundingSurfaces;
         std::map<Quadric*, std::list<Cell*> > _hood;
 };
+/*----------------------------------------------------------------------------*/
 
 #endif
 

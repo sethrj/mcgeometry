@@ -3,38 +3,39 @@
 #ifndef QUADRIC_HPP
 #define QUADRIC_HPP
 
-#include <iostream>
+#include <vector>
 #include <utility>
+#include <cmath>
+#include "transupport/dbc.hpp"
+//#include <iostream>
 
-using std::cout;
-using std::endl;
+/*----------------------------------------------------------------------------*/
+class Quadric {
+public:
+    typedef std::pair<bool, double> HitAndDist;
 
-class Quadric{
-    public:
-        virtual ~Quadric()  {   }
-        typedef std::pair<bool, double> HitAndDist;
+    // Intersect will determine if the particle at Postion and Direction
+    // will intersect with the surface.  It returns a std::pair HitAndDist
+    // It assumes that the PosSense defines whether the particles thinks it
+    // has a positive sense with respect to the surface
+    virtual HitAndDist intersect(const std::vector<double>& position, 
+                                 const std::vector<double>& direction,
+                                 bool PosSense) const = 0;
 
-        // Inersect will determine if the particle at Postion and Direction
-        // will intersect with the surface.  It returns a std::pair HitAndDist
-        // It assumes that the PosSense defines whether the particles thinks it
-        // has a positive sense with respect to the surface
-        virtual HitAndDist intersect(const std::vector<double>& Position, 
-                const std::vector<double>& Direction, bool PosSense) = 0;
+//        friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
 
-        friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
+protected:
+    Quadric() { /* * */ }
+    virtual ~Quadric()  { /* * */ }
 
-    protected:
-        QuadricSurface() {  }
-
-        HitAndDist intersect( double A, double B, double C, bool sense );
-
-    private:
-
+    HitAndDist calcQuadraticIntersect( double A, double B, double C,
+            bool posSense ) const;
 };
+/*----------------------------------------------------------------------------*/
 
-
-
-inline HitAndDist Quadric::intersect(double A, double B, double C, bool posSense){
+inline Quadric::HitAndDist Quadric::calcQuadraticIntersect(
+        double A, double B, double C, bool posSense) const
+{
 	bool particleHitsSurface = false;
 	double distanceToIntercept = -1.0;
 
@@ -78,8 +79,12 @@ inline HitAndDist Quadric::intersect(double A, double B, double C, bool posSense
 			}
 		}
 	}
+    Ensure( distanceToIntercept >= 0.0 );
+
 	return std::make_pair(particleHitsSurface, distanceToIntercept);
 }
+
+/*----------------------------------------------------------------------------*/
 
 #endif
 
