@@ -8,8 +8,8 @@
 
 class Plane : public Quadric {
     public:
-        Plane(std::vector<double> N, std::vector<double> C) 
-            : _Normal(N), _Coordinate(C) {   }
+        Plane(std::vector<double> N, std::vector<double> C, unsigned int id) 
+            : _Normal(N), _Coordinate(C), Quadric(id) {   }
 
         ~Plane();
 

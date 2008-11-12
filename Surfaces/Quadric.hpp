@@ -24,11 +24,19 @@ class Quadric{
         friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
 
     protected:
-        QuadricSurface() {  }
+        unsigned int _ID;
+
+        QuadricSurface(unsigned int id) 
+            : _ID(id)         // Make a unique ID for each Quadric surface
+            {  }
 
         HitAndDist intersect( double A, double B, double C, bool sense );
 
+    private:
+
 };
+
+
 
 inline HitAndDist Quadric::intersect(double A, double B, double C, bool sense){
 	bool particleHitsSurface = false;

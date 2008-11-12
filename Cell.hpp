@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <utility>
+#include <list>
+#include <map>
 #include "Quadric.hpp"
 
 using std::cout;
@@ -19,7 +21,8 @@ class Cell {
 
 
     private:
-        std::vector<QuadricSense> _BoundingSurfaces;
+        std::vector<QuadricSense> _boundingSurfaces;
+        std::map<Quadric*, std::list<Cell*> > _hood;
 };
 
 #endif

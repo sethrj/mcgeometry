@@ -7,12 +7,12 @@
 
 class Sphere : public Quadric {
     public:
-        Sphere(std::vector<double>& C, double R)
-            : _Center(C), _Radius(R)   {   }
+        Sphere(std::vector<double>& C, double R, unsigned int id)
+            : _Center(C), _Radius(R), Quadric(id)   {   }
 
         //! Sphere at origin
         Sphere(double R)
-            : _Center(3,0.0), _Radius(R)   {   }
+            : _Center(3,0.0), _Radius(R), Quadric()   {   }
 
         ~Sphere();
 

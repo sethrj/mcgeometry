@@ -8,7 +8,8 @@
 
 class Ellipsoid : public Quadric {
     public:
-        Ellipsoid();
+        Ellipsoid(unsigned int id)
+            : Quadric(id) {   }
 
         ~Ellipsoid();
 
