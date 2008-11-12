@@ -1,0 +1,8 @@
+In the process of finding the region on the other side (R') of a surface S from
+the initial region R:
+- reverse R's sense of S to get the sense that the "opposite side" region R' 	
+  will have of S
+- loop only through regions that have that opposite sense
+	- when checking "am I inside" for each region, loop over all surfaces that
+	  are *not* the surface being crossed (since you already know you're
+	  "inside" that surface)

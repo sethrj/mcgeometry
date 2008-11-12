@@ -6,8 +6,9 @@
 
 /*----------------------------------------------------------------------------*/
 
-#include "Surfaces/Quadric.hpp"
+// put our headers at top to check for dependency problems
 #include "Surfaces/Sphere.hpp"
+#include "Surfaces/Quadric.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -16,7 +17,7 @@
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-#include "transupport/VectorPrint.hpp"
+// #include "transupport/VectorPrint.hpp"
 
 using std::cout;
 using std::endl;

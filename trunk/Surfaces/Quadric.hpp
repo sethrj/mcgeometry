@@ -22,6 +22,10 @@ public:
                                  const std::vector<double>& direction,
                                  bool PosSense) const = 0;
 
+    // TODO: also need a method to calculate whether a point has a positive 
+    // sense to this quadric without doing all the distance calc
+    // bool hasPosSense(std::vector<double>& position) const = 0;
+
 //        friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
 
 protected:
