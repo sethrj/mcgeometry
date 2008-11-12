@@ -20,6 +20,23 @@ namespace tranSupport {
 
 /*----------------------------------------------------------------------------*/
 
+//! subtract b from a
+inline void vectorMinusEq( std::vector<double> &a, 
+                          const std::vector<double> &b) {
+   Require(a.size() == b.size());
+
+   std::vector<double>::iterator aIter       = a.begin();
+   std::vector<double>::const_iterator bIter = b.begin();
+
+   while(aIter != a.end()) {
+      // add value of bIter to aIter
+      *aIter -= *bIter;
+
+      ++aIter;
+      ++bIter;
+   }
+}
+
 //! add b to a
 inline void vectorPlusEq( std::vector<double> &a, 
                           const std::vector<double> &b) {
