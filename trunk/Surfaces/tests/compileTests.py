@@ -2,7 +2,7 @@
 
 import os;
 
-tests = ['Plane','Sphere']
+tests = ['Plane','Sphere','Cylinder']
 
 for file in tests:
 	compileStr = 'g++ -I../../ t%s.cpp -Wall -DDBC=7 -o t%s' % (file, file)
