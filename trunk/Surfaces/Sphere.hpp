@@ -56,29 +56,29 @@ Quadric::HitAndDist Sphere::intersect(const std::vector<double>& position,
         const std::vector<double>& direction, bool posSense) const
 {
     Require(direction.size() == 3);
-//	Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
-	Require(position.size() == 3);
+//    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
+    Require(position.size() == 3);
 
-	double selfDot = 0.0;
-	double B = 0.0;
-	double movedLoc;
-	
-	// subtract out the center of the sphere
-	for (int i = 0; i < 3; ++i) {
-		movedLoc = (position[i] - _center[i]);
-		B +=  movedLoc * direction[i]; 
-		selfDot += movedLoc * movedLoc;
-	}
+    double selfDot = 0.0;
+    double B = 0.0;
+    double movedLoc;
+    
+    // subtract out the center of the sphere
+    for (int i = 0; i < 3; ++i) {
+        movedLoc = (position[i] - _center[i]);
+        B +=  movedLoc * direction[i]; 
+        selfDot += movedLoc * movedLoc;
+    }
 
-	// find distance and whether it intercepts
-	Quadric::HitAndDist theResult =
-		_calcQuadraticIntersect(
-			1,  // A
-			B,  // B
-			selfDot - _radius * _radius, //C
-			posSense);
+    // find distance and whether it intercepts
+    Quadric::HitAndDist theResult =
+        _calcQuadraticIntersect(
+            1,  // A
+            B,  // B
+            selfDot - _radius * _radius, //C
+            posSense);
 
-	return theResult;
+    return theResult;
 
     // THIS CODE, SADLY, DOES NOT WORK :
 //
@@ -99,7 +99,8 @@ Quadric::HitAndDist Sphere::intersect(const std::vector<double>& position,
 
 //! output a stream which prints the Sphere's characteristics
 inline std::ostream& operator<<( std::ostream& os, const Sphere& s) {
-    os  << "[ SPHERE Center: " << s._center << "; Radius: " << s._radius
+    os  << "[ SPHERE Center: " << std::setw(10) << s._center
+        << " Radius: " << std::setw(5) << s._radius
         << " ]";
     return os;
 }

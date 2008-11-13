@@ -40,6 +40,8 @@ private:
     std::vector<double> _coordinate;    // Coordinate of point in plane
 };
 
+/*----------------------------------------------------------------------------*/
+//! calculate distance to intersection
 Quadric::HitAndDist Plane::intersect(const std::vector<double>& position, 
         const std::vector<double>& direction, bool posSense) const {
 
@@ -47,15 +49,18 @@ Quadric::HitAndDist Plane::intersect(const std::vector<double>& position,
     double distance(0.0);
 
     double cosine = tranSupport::vectorDot(_normal, direction);
-    if( (posSense and cosine < 0) or (posSense and cosine > 0 )) {
+    if( ((posSense == false) && (cosine > 0))
+         || ((posSense == true) and (cosine < 0)) )
+    {
         // Headed towards surface
         hit = true;
         for( int i = 0; i < 3; ++i ) {
-            distance += _normal[i]*(_coordinate[i] - position[i])/cosine;
+            distance += _normal[i]*(_coordinate[i] - position[i]);
         }
-        distance = std::max(0.0, distance);
+        distance = std::max(0.0, distance/cosine);
     }
-    else {   // Headed away from surface, no collision
+    else
+    {   // Headed away from surface, no collision
         hit = false;
         distance = 0.0;
     }
@@ -78,8 +83,8 @@ bool Plane::hasPosSense(std::vector<double>& position) const{
 
 
 inline std::ostream& operator<<( std::ostream& os, const Plane& p) {
-    os  << "[ PLANE Point: " << p._coordinate << " Normal vector: "
-        << p._normal << " ]";
+    os  << "[ PLANE  Point:  " << std::setw(10) << p._coordinate 
+        << " Normal vector: " << std::setw(10) << p._normal << " ]";
     return os;
 }
 #endif 
