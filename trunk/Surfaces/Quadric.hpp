@@ -27,9 +27,12 @@ public:
 
     // TODO: also need a method to calculate whether a point has a positive 
     // sense to this quadric without doing all the distance calc
-    // bool hasPosSense(std::vector<double>& position) const = 0;
+    virtual bool hasPosSense(std::vector<double>& position) const = 0;
 
-//        friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
+    // This allows operator<< to have access to the private and protected 
+    // members for writing to output.  Of course care must be taken that these
+    // members are not changed.
+    friend std::ostream& operator<<( std::ostream&, Quadric& );
 
     // NOTE: this must be public if we ever have a generic Quadric
     virtual ~Quadric()  { /* * */ }
@@ -37,12 +40,21 @@ public:
 protected:
     Quadric() { /* * */ }
 
-    HitAndDist calcQuadraticIntersect( double A, double B, double C,
+    bool _hasPosSense(double eval) const;
+    HitAndDist _calcQuadraticIntersect( double A, double B, double C,
             bool posSense ) const;
 };
 /*----------------------------------------------------------------------------*/
 
-inline Quadric::HitAndDist Quadric::calcQuadraticIntersect(
+// Defining this function here gives us the ability to make the same decision 
+// for all Quadric surfaces in one place.
+inline bool Quadric::_hasPosSense(double eval) const{
+    if( 0 < eval ) return true;        // Positive sense
+//  else if( 0 == eval ) return true;  // On surface
+    else return false;  // 0 > eval    // Negative sense
+}
+
+inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(
         double A, double B, double C, bool posSense) const
 {
 	bool particleHitsSurface = false;
