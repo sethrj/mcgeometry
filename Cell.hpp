@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <vector>
-#include <list>
 #include "Surfaces/Quadric.hpp"
 
 /*----------------------------------------------------------------------------*/
@@ -19,7 +18,7 @@ public:
 
 private:
     std::vector<QuadricAndSense> _boundingSurfaces;
-    std::map<Quadric*, std::list<Cell*> > _hood;
+    std::map<Quadric*, std::vector<Cell*> > _hood;
 };
 /*----------------------------------------------------------------------------*/
 
