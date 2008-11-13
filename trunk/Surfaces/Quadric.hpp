@@ -22,15 +22,20 @@ public:
                                  const std::vector<double>& direction,
                                  bool PosSense) const = 0;
 
+    //! create a copy of 
+//    virtual clone() = 0;
+
     // TODO: also need a method to calculate whether a point has a positive 
     // sense to this quadric without doing all the distance calc
     // bool hasPosSense(std::vector<double>& position) const = 0;
 
 //        friend std::ostream& operator<<( std::ostream& os, QuadricSurface );
 
+    // NOTE: this must be public if we ever have a generic Quadric
+    virtual ~Quadric()  { /* * */ }
+
 protected:
     Quadric() { /* * */ }
-    virtual ~Quadric()  { /* * */ }
 
     HitAndDist calcQuadraticIntersect( double A, double B, double C,
             bool posSense ) const;
