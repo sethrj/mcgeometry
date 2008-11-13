@@ -6,8 +6,8 @@
 #include <vector>
 #include <utility>
 #include <cmath>
+#include <iostream>
 #include "transupport/dbc.hpp"
-//#include <iostream>
 
 /*----------------------------------------------------------------------------*/
 class Quadric {
@@ -32,7 +32,7 @@ public:
     // This allows operator<< to have access to the private and protected 
     // members for writing to output.  Of course care must be taken that these
     // members are not changed.
-    friend std::ostream& operator<<( std::ostream&, Quadric& );
+    friend std::ostream& operator<<( std::ostream&, const Quadric& );
 
     // NOTE: this must be public if we ever have a generic Quadric
     virtual ~Quadric()  { /* * */ }
@@ -49,9 +49,10 @@ protected:
 // Defining this function here gives us the ability to make the same decision 
 // for all Quadric surfaces in one place.
 inline bool Quadric::_hasPosSense(double eval) const{
-    if( 0 < eval ) return true;        // Positive sense
-//  else if( 0 == eval ) return true;  // On surface
-    else return false;  // 0 > eval    // Negative sense
+    if ( 0 <= eval )
+        return true;        // Positive sense includes points "on" the surface
+    else
+        return false;       // Negative sense
 }
 
 inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(
