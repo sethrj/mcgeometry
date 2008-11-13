@@ -3,6 +3,7 @@
 #define SPHERE_HPP
 
 #include <vector>
+#include <cmath>
 #include "Surfaces/Quadric.hpp"
 #include "transupport/VectorMath.hpp"
 #include "transupport/dbc.hpp"
@@ -22,6 +23,7 @@ class Sphere : public Quadric {
             Insist(R > 0, "Sphere must have positive radius.");
         }
 
+        bool hasPosSense(std::vector<double>& position) const;
 
         HitAndDist intersect(const std::vector<double>& position, 
                 const std::vector<double>& direction, bool posSense) const;
@@ -32,6 +34,21 @@ class Sphere : public Quadric {
         const double _Radius;
         
 };
+
+std::ostream& operator<<( std::ostream& os, Sphere& s){
+    os  << "Center: (" << _center[0] << ", " << _center[1] << ", " << _center[1] 
+        << "), Radius = " << _radius;
+    return os;
+}
+
+// Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
+//      (x,y,z) = center of sphere
+//      (x0,y0,z0) = position
+bool Sphere::hasPosSense(std::vector<double>& position) const{
+    double eval = pow(position[0]-_Center[0],2) + pow(position[1]-_Center[1],2)
+                 + pow(position[2]-_Center[2],2) - pow(_Radius,2);
+    return _hasPosSense(eval);
+}
 
 Quadric::HitAndDist Sphere::intersect(const std::vector<double>& position, 
         const std::vector<double>& direction, bool posSense) const
@@ -53,7 +70,7 @@ Quadric::HitAndDist Sphere::intersect(const std::vector<double>& position,
 
 	// find distance and whether it intercepts
 	Quadric::HitAndDist theResult =
-		calcQuadraticIntersect(
+		_calcQuadraticIntersect(
 			1,  // A
 			B,  // B
 			selfDot - _Radius * _Radius, //C
