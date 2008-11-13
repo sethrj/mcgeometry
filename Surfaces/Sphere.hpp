@@ -26,6 +26,8 @@ public:
         Insist(R > 0, "Sphere must have positive radius.");
     }
 
+    Sphere* clone() const { return new Sphere(*this); }
+
     bool hasPosSense(std::vector<double>& position) const;
 
     HitAndDist intersect(const std::vector<double>& position, 

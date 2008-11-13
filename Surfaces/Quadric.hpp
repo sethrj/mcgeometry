@@ -23,7 +23,7 @@ public:
                                  bool PosSense) const = 0;
 
     //! create a copy of 
-//    virtual clone() = 0;
+    virtual Quadric* clone() const = 0;
 
     // TODO: also need a method to calculate whether a point has a positive 
     // sense to this quadric without doing all the distance calc

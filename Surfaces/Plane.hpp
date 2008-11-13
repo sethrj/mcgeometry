@@ -26,6 +26,8 @@ public:
         //Require(tranSupport::vectorDot(n,n) != 0);
     }
 
+    Plane* clone() const { return new Plane(*this); }
+
     ~Plane() { /* * */} 
 
     bool hasPosSense(std::vector<double>& position) const;
@@ -77,7 +79,7 @@ bool Plane::hasPosSense(std::vector<double>& position) const{
 
 inline std::ostream& operator<<( std::ostream& os, const Plane& p) {
     os  << "[ PLANE Point: " << p._coordinate << " Normal vector: "
-        << p._coordinate << " ]";
+        << p._normal << " ]";
     return os;
 }
 #endif 
