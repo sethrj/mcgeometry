@@ -21,15 +21,10 @@ bool MCGeometry::addSurface( const unsigned int surfaceId,
     // (the return value from "insert" has a weird type)
     typedef std::pair<SurfaceMap::iterator, bool> ReturnedPair;
 
-    // allocate new const quadric using the input value
-    /* * * * * * * * * * * \
-     * WRONG WRONG WRONG
-     * WE NEED TO CREATE OUR OWN COPY OF INQUADRIC, OR RATHER HAVE IT
-     * COPY ITSELF AND SEND THAT TO US
-     * SEE "VIRTUAL COPY CONSTRUCTOR"
-     * http://en.wikibooks.org/wiki/C%2B%2B_Programming/Classes/Polymorphism
-     * * * * * * * * * * */
-    Quadric* newQuadric = &inQuadric; //new Quadric(inQuadric);
+    // this calls a routine in the quadric which allocates new memory
+    // WE ARE NOW RESPONSIBLE FOR THIS MEMORY (and must delete it when
+    // appropriate)
+    Quadric* newQuadric = inQuadric.clone();
 
     ReturnedPair result =
         _surfaces.insert( std::make_pair(surfaceId, newQuadric) );
@@ -37,7 +32,6 @@ bool MCGeometry::addSurface( const unsigned int surfaceId,
     // check return value to make sure surfaceId was not already taken
     Insist(result.second == true,
             "Tried to add a surface with an ID that was already there.");
-
 }
 
 /*----------------------------------------------------------------------------*/
