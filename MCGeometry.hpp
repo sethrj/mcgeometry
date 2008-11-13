@@ -9,8 +9,10 @@
 #define MCGEOMETRY_HPP
 
 #include <map>
-#include "Surfaces/Quadric.hpp"
-#include "Cell.hpp"
+#include <vector>
+
+class Quadric;
+class Cell;
 
 /*----------------------------------------------------------------------------*/
 class MCGeometry {
@@ -37,14 +39,11 @@ public:
 
 
 private:
-    typedef const Quadric CQuadric;
-    typedef const Cell    CCell;
+    typedef std::map<unsigned int, Quadric*> SurfaceMap;
+    typedef std::map<unsigned int, Cell*>    CellMap;
 
-    typedef std::map<unsigned int, CQuadric*> SurfaceMap;
-    typedef std::map<unsigned int, CCell*>    CellMap;
-
-    SurfaceMap _Surfaces;
-    CellMap    _Cells;
+    SurfaceMap _surfaces;
+    CellMap    _cells;
 };
 /*----------------------------------------------------------------------------*/
 #endif

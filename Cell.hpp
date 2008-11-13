@@ -4,21 +4,22 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include "Surfaces/Quadric.hpp"
 
 /*----------------------------------------------------------------------------*/
 class Cell {
-    public:
-        typedef std::pair<Quadric*, bool> QuadricAndSense;
+public:
+    typedef std::pair<Quadric*, bool> QuadricAndSense;
 
-        Cell()  { /* * */ }
+    Cell()  { /* * */ }
 
-        ~Cell() { /* * */ }
+    ~Cell() { /* * */ }
 
 
-    private:
-        std::vector<QuadricAndSense> _boundingSurfaces;
-        std::map<Quadric*, std::list<Cell*> > _hood;
+private:
+    std::vector<QuadricAndSense> _boundingSurfaces;
+    std::map<Quadric*, std::list<Cell*> > _hood;
 };
 /*----------------------------------------------------------------------------*/
 

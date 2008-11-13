@@ -5,7 +5,7 @@
  * 
  */
 
-#include <iostream>
+//#include <iostream>
 #include <utility>
 #include <map>
 #include "transupport/dbc.hpp"
@@ -22,46 +22,53 @@ bool MCGeometry::addSurface( const unsigned int surfaceId,
     typedef std::pair<SurfaceMap::iterator, bool> ReturnedPair;
 
     // allocate new const quadric using the input value
-    CQuadric* newQuadric = new Quadric(inQuadric);
+    /* * * * * * * * * * * \
+     * WRONG WRONG WRONG
+     * WE NEED TO CREATE OUR OWN COPY OF INQUADRIC, OR RATHER HAVE IT
+     * COPY ITSELF AND SEND THAT TO US
+     * SEE "VIRTUAL COPY CONSTRUCTOR"
+     * http://en.wikibooks.org/wiki/C%2B%2B_Programming/Classes/Polymorphism
+     * * * * * * * * * * */
+    Quadric* newQuadric = &inQuadric; //new Quadric(inQuadric);
 
     ReturnedPair result =
-        _Surfaces.insert( std::make_pair<surfaceId, inQuadric> );
+        _surfaces.insert( std::make_pair(surfaceId, newQuadric) );
 
     // check return value to make sure surfaceId was not already taken
-    Insist(result.first == true,
+    Insist(result.second == true,
             "Tried to add a surface with an ID that was already there.");
 
 }
 
 /*----------------------------------------------------------------------------*/
-bool MCGeometry::addCell(const unsigned int cellId, const IntVec surfaces)
+bool MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 {
-    using Cell::QuadricAndSense;
+//    using Cell::QuadricAndSense;
 }
 
 /*----------------------------------------------------------------------------*/
-MCGeometry::~MCGeometry() {
+MCGeometry::~MCGeometry()
+{
     // clean up after ourselves
     
 
-    SurfaceMap::iterator it = _Surfaces.begin();
+    SurfaceMap::iterator itSur = _surfaces.begin();
     
-    while (it != _Surfaces.end()) {
+    while (itSur != _surfaces.end()) {
         // delete the surface to which the iterator points
-        delete *it;
+        delete itSur->second;
 
-        ++it;
+        ++itSur;
     }
     
-    CellMap::iterator it = _Cells.begin();
+    CellMap::iterator itCel = _cells.begin();
     
-    while (it != _Cells.end()) {
+    while (itCel != _cells.end()) {
         // delete the cell to which the iterator points
-        delete *it;
+        delete itCel->second;
 
-        ++it;
+        ++itCel;
     }
 }
 /*----------------------------------------------------------------------------*/
-#endif
 
