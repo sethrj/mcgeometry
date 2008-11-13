@@ -14,14 +14,14 @@ class Sphere : public Quadric {
     friend std::ostream& operator<<( std::ostream& , const Sphere& );
 public:
     Sphere(std::vector<double>& C, double R)
-        : _center(C), _radius(R), Quadric() 
+        : _center(C), _radius(R)
     { 
         Insist(R > 0, "Sphere must have positive radius.");
     }
 
     //! create sphere at origin
     Sphere(double R)
-        : _center(3,0.0), _radius(R), Quadric() 
+        : _center(3,0.0), _radius(R)
     { 
         Insist(R > 0, "Sphere must have positive radius.");
     }

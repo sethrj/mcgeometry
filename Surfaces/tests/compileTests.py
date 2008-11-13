@@ -2,9 +2,9 @@
 
 import os;
 
-tests = ['tQuadric']
+tests = ['Plane','Sphere']
 
 for file in tests:
-	compileStr = 'g++ -I../../ %s.cpp -DDBC=7 -o %s' % (file, file)
+	compileStr = 'g++ -I../../ t%s.cpp -Wall -DDBC=7 -o t%s' % (file, file)
 	print compileStr
 	os.system(compileStr)
