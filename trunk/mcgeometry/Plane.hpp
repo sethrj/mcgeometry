@@ -30,14 +30,14 @@ public:
 
     ~Plane() { /* * */} 
 
-    bool hasPosSense(std::vector<double>& position) const;
+    bool hasPosSense(const std::vector<double>& position) const;
 
     HitAndDist intersect(const std::vector<double>& Position, 
             const std::vector<double>& Direction, bool PosSense) const;
 
 private:
-    std::vector<double> _normal;
-    std::vector<double> _coordinate;    // Coordinate of point in plane
+    const std::vector<double> _normal;
+    const std::vector<double> _coordinate;    // Coordinate of point in plane
 };
 
 /*----------------------------------------------------------------------------*/
@@ -72,7 +72,7 @@ Quadric::HitAndDist Plane::intersect(const std::vector<double>& position,
 // Equation: n.p - n.p0     n = normal vector to plane
 //      p = position
 //      p0 = point on plane
-bool Plane::hasPosSense(std::vector<double>& position) const{
+bool Plane::hasPosSense(const std::vector<double>& position) const{
     double eval(0);
     for( int i = 0; i < 3; ++i ){
         eval += _normal[i]*position[i] - _normal[i]*_coordinate[i];
