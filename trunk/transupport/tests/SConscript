@@ -1,0 +1,28 @@
+import re
+
+Import('env')
+Import('useLibrary')
+e = env.Clone()
+
+useLibrary(e, 'mcgeometry')
+
+Import('outputDirPath')
+testDirPath     = outputDirPath + 'test/transupport/'
+
+#testSupportPath = testDirPath + 'aux/'
+
+################## SET UP REAL WORK ##################
+# Compile test executables
+sourceFiles = Glob('*.cc', strings=True)
+
+for file in sourceFiles:
+	execName = re.sub(r'\.cc$','',file)
+	if (execName != "tTemplate"):
+		e.Program(testDirPath + execName, file)
+
+# Copy auxiliary files
+#auxFiles = Glob('*.in', strings=True)
+#e.Install(testSupportPath, auxFiles)
+
+# Copy the python script
+e.Install(outputDirPath + 'test/', 'runTests.py')
