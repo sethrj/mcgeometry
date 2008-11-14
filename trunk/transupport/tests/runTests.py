@@ -21,7 +21,7 @@ print "="*80
 
 for file in testFiles:
 	if (os.access(file, os.X_OK)):
-		print "   Running test <%s>" % file
+		print "  Running test <%s>" % file
 		print "="*80
 		os.system(file);
 		print "="*80

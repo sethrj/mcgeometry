@@ -3,6 +3,9 @@
  * \brief Geometry class
  * \author Seth R. Johnson
  * 
+ * The MCGeometry parent class handles all the external associations between
+ * Surfaces and Cells. It maps the user's IDs to internal pointers for both
+ * surfaces and cells.
  */
 
 //#include <iostream>
@@ -18,6 +21,8 @@
 void MCGeometry::addSurface( const unsigned int surfaceId,
                                     const Quadric& inQuadric)
 {
+    Insist(surfaceId > 0, "Things will break if surfaceId = 0 is allowed.");
+
     // (the return value from "insert" has a weird type)
     typedef std::pair<SurfaceMap::iterator, bool> ReturnedPair;
 
@@ -30,51 +35,83 @@ void MCGeometry::addSurface( const unsigned int surfaceId,
     // check return value to make sure surfaceId was not already taken
     Insist(result.second == true,
             "Tried to add a surface with an ID that was already there.");
-
 }
 
 /*----------------------------------------------------------------------------*/
 void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 {
-    typedef std::pair<CellMap::iterator, bool> ReturnedPair;
+    typedef std::pair<CellMap::iterator, bool>      CMReturnedPair;
+    typedef std::pair<SCConnectMap::iterator, bool> SCCMReturnedPair;
+    typedef std::vector<QuadricAndSense>            QASVec;
 
-//    //====== convert surface ID to pairs of unsigned ints (surfaceIds) and bools
-//    // (surface sense)
-//    std::vector<Cell::QuadricAndSense> boundingSurfaces;
-//
-//    IntVec::const_iterator it = surfaceIds.begin();
-//
-//    bool surfaceSense;
-//    unsigned int surfaceId;
-//    while(it != surfaceIds.end()) {
-//        // user inputs a positive value
-//        if (*it > 0)
-//        {
-//            surfaceSense = true;
-//            surfaceId    = *it;
-//        }
-//        else
-//        {
-//            surfaceSense = false;
-//            surfaceId    = -(*it);
-//        }
-//
-//        ++it;
-//    }
-//
-//    //====== add cell to the map
-//    Cell* newCell = new Cell(boundingSurfaces);
-//    ReturnedPair result =
-//        _surfaces.insert( std::make_pair(cellId, newCell) );
-//
-//    // check return value to make sure surfaceId was not already taken
-//    Insist(result.second == true,
-//            "Tried to add a cell with an ID that was already there.");
+    //---- convert surface ID to pairs of unsigned ints (surfaceIds) and bools
+    //                                                  (surface sense) -----//
+    QASVec boundingSurfaces;
 
-    //====== add surface/positivity to the vector of surface to cell
-    //       connectivity
+    // bounding surfaces should have same length as input list of surface IDs
+    // so from the start just reserve that many spaces in memory
+    boundingSurfaces.reserve(surfaceIds.size());
 
 
+    // -------- ITERATE OVER INPUT SURFACE LIST -------- //
+    IntVec::const_iterator it = surfaceIds.begin();
+
+    while (it != surfaceIds.end()) {
+        unsigned int userSurfaceId; //an integer that only the user deals with
+        QuadricAndSense newSurface;
+
+        if (*it > 0) // user inputs a positive value (positive sense surface)
+        {
+            userSurfaceId     = *it;
+            newSurface.second = true;
+        }
+        else // user input a negative value (negative surface sense)
+        {
+            userSurfaceId     = -(*it);
+            newSurface.second = false;
+        }
+
+        // translate the user's given surface ID to a Quadric pointer
+        SurfaceMap::iterator findSMResult = 
+            _surfaces.find(userSurfaceId);
+
+        if (findSMResult != _surfaces.end()) {
+            Insist(0,
+            "FATAL ERROR: this cell references a surface that does not exist.");
+        }
+        // the value from the find result is the pointer to the Quadric
+        newSurface.first = findSMResult->second;
+
+        // add the surface to the vector of bounding surfaces
+        boundingSurfaces.push_back(newSurface);
+
+        ++it;
+    }
+    Check(surfaceIds.size() == boundingSurfaces.size());
+
+    //====== add cell to the map
+    Cell* newCell = new Cell(boundingSurfaces);
+    CMReturnedPair result =
+        _cells.insert( std::make_pair(cellId, newCell) );
+
+    // check return value to make sure surfaceId was not already taken
+    Insist(result.second == true,
+            "Tried to add a cell with an ID that was already there.");
+
+    //====== loop back through the surfaces and add the connectivity
+    QASVec::iterator bsIt = boundingSurfaces.begin();
+
+    while (bsIt != boundingSurfaces.end()) {
+        QuadricAndSense &newQandS = *bsIt;
+
+        // using the "associative array" capability of maps lets us access a
+        // key, and it will either automatically initialize an empty vector or
+        // return the vector that is already  
+        // see C++ Standard Library pp. 182-183
+        _surfToCellConnectivity[newQandS].push_back(newCell);
+
+        ++bsIt;
+    }
 }
 
 /*----------------------------------------------------------------------------*/
