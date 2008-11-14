@@ -9,7 +9,7 @@
 #include <utility>
 #include <map>
 #include "transupport/dbc.hpp"
-#include "Surfaces/Quadric.hpp"
+#include "Quadric.hpp"
 #include "Cell.hpp"
 #include "MCGeometry.hpp"
 
@@ -38,24 +38,38 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 {
     typedef std::pair<CellMap::iterator, bool> ReturnedPair;
 
-    //====== convert surface ID to pairs of unsigned ints (surfaceIds) and bools
-    // (surface sense)
-    std::vector<Cell::QuadricAndSense> boundingSurfaces;
-
-    IntVec::iterator it = surfaceIds.begin();
-    while(it != surfaceIds.end()) {
-        if (*it > 0)
-        ++it;
-    }
-
-    //====== add cell to the map
-    Cell* newCell = new Cell(boundingSurfaces);
-    ReturnedPair result =
-        _surfaces.insert( std::make_pair(cellId, newCell) );
-
-    // check return value to make sure surfaceId was not already taken
-    Insist(result.second == true,
-            "Tried to add a cell with an ID that was already there.");
+//    //====== convert surface ID to pairs of unsigned ints (surfaceIds) and bools
+//    // (surface sense)
+//    std::vector<Cell::QuadricAndSense> boundingSurfaces;
+//
+//    IntVec::const_iterator it = surfaceIds.begin();
+//
+//    bool surfaceSense;
+//    unsigned int surfaceId;
+//    while(it != surfaceIds.end()) {
+//        // user inputs a positive value
+//        if (*it > 0)
+//        {
+//            surfaceSense = true;
+//            surfaceId    = *it;
+//        }
+//        else
+//        {
+//            surfaceSense = false;
+//            surfaceId    = -(*it);
+//        }
+//
+//        ++it;
+//    }
+//
+//    //====== add cell to the map
+//    Cell* newCell = new Cell(boundingSurfaces);
+//    ReturnedPair result =
+//        _surfaces.insert( std::make_pair(cellId, newCell) );
+//
+//    // check return value to make sure surfaceId was not already taken
+//    Insist(result.second == true,
+//            "Tried to add a cell with an ID that was already there.");
 
     //====== add surface/positivity to the vector of surface to cell
     //       connectivity

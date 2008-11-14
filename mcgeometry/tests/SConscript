@@ -5,9 +5,10 @@ Import('useLibrary')
 e = env.Clone()
 
 useLibrary(e, 'transupport')
+useLibrary(e, 'mcgeometry')
 
 Import('outputDirPath')
-testDirPath     = outputDirPath + 'test/transupport/'
+testDirPath     = outputDirPath + 'test/mcgeometry/'
 
 #testSupportPath = testDirPath + 'aux/'
 
@@ -23,6 +24,3 @@ for file in sourceFiles:
 # Copy auxiliary files
 #auxFiles = Glob('*.in', strings=True)
 #e.Install(testSupportPath, auxFiles)
-
-# Copy the python script
-e.Install(outputDirPath + 'test/', 'runTests.py')

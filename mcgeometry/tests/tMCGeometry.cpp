@@ -6,9 +6,9 @@
 
 /*----------------------------------------------------------------------------*/
 
-#include "MCGeometry.hpp"
-#include "Surfaces/Plane.hpp"
-#include "Surfaces/Sphere.hpp"
+#include "mcgeometry/MCGeometry.hpp"
+#include "mcgeometry/Plane.hpp"
+#include "mcgeometry/Sphere.hpp"
 
 #include <iostream>
 #include <vector>

@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <iostream>
 #include "transupport/dbc.hpp"
-#include "Surfaces/Quadric.hpp"
 #include "transupport/VectorMath.hpp"
 #include "transupport/VectorPrint.hpp"
+#include "Quadric.hpp"
 
 class Plane : public Quadric {
     friend std::ostream& operator<<( std::ostream& , const Plane& );

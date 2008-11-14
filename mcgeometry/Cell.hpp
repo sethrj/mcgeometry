@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <vector>
-#include "Surfaces/Quadric.hpp"
+#include "Quadric.hpp"
 #include "transupport/dbc.hpp"
 
 /*----------------------------------------------------------------------------*/
