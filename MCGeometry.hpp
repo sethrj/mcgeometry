@@ -21,14 +21,16 @@ public:
 
     //! user creates an arbitrary quadric surface and passes it in with ID
     // return success
-    bool addSurface(const unsigned int surfaceId,
+    void addSurface(const unsigned int surfaceId,
                     const Quadric& newQuadric);
 
     //! user passes in a vector of surface IDs with +/- 
     // return success
-    bool addCell(const unsigned int cellId,
+    void addCell(const unsigned int cellId,
                  const IntVec surfaces);
 
+    //! do optimization after input is finished
+    // void 
 
     //! empty constructor
     MCGeometry()
@@ -44,6 +46,10 @@ private:
 
     SurfaceMap _surfaces;
     CellMap    _cells;
+
+    // surface --> cell connectivity
+    // std::map<Quadric*, std::vector< std::vector<Cell*> > > ???
+    // std::map<signed int, std::vector<Cell*> > ???
 };
 /*----------------------------------------------------------------------------*/
 #endif

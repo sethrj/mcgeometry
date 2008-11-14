@@ -5,19 +5,24 @@
 #include <iostream>
 #include <vector>
 #include "Surfaces/Quadric.hpp"
+#include "transupport/dbc.hpp"
 
 /*----------------------------------------------------------------------------*/
 class Cell {
 public:
     typedef std::pair<Quadric*, bool> QuadricAndSense;
 
-    Cell()  { /* * */ }
+    Cell(const std::vector<QuadricAndSense>& boundingSurfaces) 
+        : _boundingSurfaces(boundingSurfaces)
+    {
+        Require(_boundingSurfaces.size() > 0);
+    }
 
     ~Cell() { /* * */ }
 
 
 private:
-    std::vector<QuadricAndSense> _boundingSurfaces;
+    const std::vector<QuadricAndSense> _boundingSurfaces;
     std::map<Quadric*, std::vector<Cell*> > _hood;
 };
 /*----------------------------------------------------------------------------*/

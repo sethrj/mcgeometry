@@ -15,29 +15,52 @@
 
 /*----------------------------------------------------------------------------*/
 
-bool MCGeometry::addSurface( const unsigned int surfaceId,
+void MCGeometry::addSurface( const unsigned int surfaceId,
                                     const Quadric& inQuadric)
 {
     // (the return value from "insert" has a weird type)
     typedef std::pair<SurfaceMap::iterator, bool> ReturnedPair;
 
-    // this calls a routine in the quadric which allocates new memory
+    // "clone" calls a routine in the quadric which allocates new memory
     // WE ARE NOW RESPONSIBLE FOR THIS MEMORY (and must delete it when
     // appropriate)
-    Quadric* newQuadric = inQuadric.clone();
-
     ReturnedPair result =
-        _surfaces.insert( std::make_pair(surfaceId, newQuadric) );
+        _surfaces.insert( std::make_pair(surfaceId, inQuadric.clone()) );
 
     // check return value to make sure surfaceId was not already taken
     Insist(result.second == true,
             "Tried to add a surface with an ID that was already there.");
+
 }
 
 /*----------------------------------------------------------------------------*/
-bool MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
+void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 {
-//    using Cell::QuadricAndSense;
+    typedef std::pair<CellMap::iterator, bool> ReturnedPair;
+
+    //====== convert surface ID to pairs of unsigned ints (surfaceIds) and bools
+    // (surface sense)
+    std::vector<Cell::QuadricAndSense> boundingSurfaces;
+
+    IntVec::iterator it = surfaceIds.begin();
+    while(it != surfaceIds.end()) {
+        if (*it > 0)
+        ++it;
+    }
+
+    //====== add cell to the map
+    Cell* newCell = new Cell(boundingSurfaces);
+    ReturnedPair result =
+        _surfaces.insert( std::make_pair(cellId, newCell) );
+
+    // check return value to make sure surfaceId was not already taken
+    Insist(result.second == true,
+            "Tried to add a cell with an ID that was already there.");
+
+    //====== add surface/positivity to the vector of surface to cell
+    //       connectivity
+
+
 }
 
 /*----------------------------------------------------------------------------*/
