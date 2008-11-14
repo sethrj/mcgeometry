@@ -7,7 +7,7 @@ sourceFiles = Glob('*.cpp')
 #headerFiles = Glob('*.hpp')
 
 #Compile all the source files together into a library
-e.StaticLibrary(target = 'mcgeometry', source = sourceFiles)
+e.StaticLibrary(target = 'transupport', source = sourceFiles)
 
 #compile unit tests
 SConscript('tests/SConscript')

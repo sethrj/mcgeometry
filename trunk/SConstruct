@@ -35,12 +35,16 @@ print env.subst("Using design by contract options DBC=${DBC}")
 
 env.Append(CPPDEFINES = {'DBC' : '${DBC}'} )
 
+
+buildDir = "#build/"
+outputDirPath = "#bin/"
+
 #### check to see whether to build optimized or not ####
 # and change the build or output directories
 if env['DEBUG'] == True:
 	print("Using debug mode")
-	buildDir = '#build-debug/'
-	outputDirPath = '#bin/'
+	#buildDir = '#build-debug/'
+	#outputDirPath = '#bin/'
 else:
 	print("Using optimized mode")
 	if (str(env['DBC']) != '0'):
@@ -48,8 +52,8 @@ else:
 					env.subst("${DBC}"))
 
 	env.MergeFlags('-O3')
-	buildDir = '#build-optimized/'
-	outputDirPath = '#bin-optimized/'
+	#buildDir = '#build-optimized/'
+	#outputDirPath = '#bin-optimized/'
 
 ### have compiler warn about everything
 env.MergeFlags('-Wall')
@@ -64,4 +68,7 @@ Export('outputDirPath')
 Export('useLibrary')
 
 # Tell all the inside directories to compile
-SConscript(name + '/SConscript', variant_dir=(buildDir + name))
+projectNames = ['transupport', 'mcgeometry']
+
+for name in projectNames:
+	SConscript(name + '/SConscript', variant_dir=(buildDir + name))

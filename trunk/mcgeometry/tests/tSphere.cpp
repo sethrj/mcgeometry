@@ -7,8 +7,8 @@
 /*----------------------------------------------------------------------------*/
 
 // put our headers at top to check for dependency problems
-#include "Surfaces/Sphere.hpp"
-#include "Surfaces/Quadric.hpp"
+#include "mcgeometry/Sphere.hpp"
+#include "mcgeometry/Quadric.hpp"
 
 #include <iostream>
 #include <iomanip>

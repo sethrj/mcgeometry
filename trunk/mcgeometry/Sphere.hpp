@@ -5,10 +5,10 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
-#include "Surfaces/Quadric.hpp"
 #include "transupport/VectorPrint.hpp"
 #include "transupport/VectorMath.hpp"
 #include "transupport/dbc.hpp"
+#include "Quadric.hpp"
 
 class Sphere : public Quadric {
     friend std::ostream& operator<<( std::ostream& , const Sphere& );
