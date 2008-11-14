@@ -43,8 +43,9 @@ void UnitTester::checkForPass(
    } else {
       //test failure
       cout << "  FAILED: " << failureMessage << endl;
-      cout << "      in <" << fileName << "> on line " << lineNumber << endl;
-      cout << "      " << code << endl;
+      cout << "  |   in <" << fileName << "> on line " << lineNumber << endl;
+      cout << "  |   " << code << endl;
+      cout << "  +-------------------------------" << endl;
 
       stillPassing = false;
    }

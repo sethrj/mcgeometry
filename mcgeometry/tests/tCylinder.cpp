@@ -66,8 +66,8 @@ void runTestA() {
 
     theResult  = theCylinder.intersect(particleLoc, particleDir, true);
 
-//    cout << "Did hit: "  << theResult.first << endl
-//         << "distance: " << theResult.second << endl;
+    cout << "Did hit: "  << theResult.first << endl
+         << "distance: " << theResult.second << endl;
 
     TESTER_CHECKFORPASS(theResult.first == true);
     TESTER_CHECKFORPASS(softEquiv(theResult.second, 0.0593405544489074));
@@ -79,6 +79,9 @@ void runTestA() {
     particleDir[2] = 0.0;
 
     theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+
+    cout << "Did hit: "  << theResult.first << endl
+         << "distance: " << theResult.second << endl;
 
     TESTER_CHECKFORPASS(theResult.first == false);
     /********************/

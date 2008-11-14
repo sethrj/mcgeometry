@@ -19,6 +19,13 @@ class MCGeometry {
 public:
     typedef std::vector<signed int> IntVec;
 
+    //! ReturnStatus indicates whether it interacted with a special geometry
+    enum ReturnStatus {
+        MCG_DEADCELL  = 0,
+        MCG_REFLECTED = 1,
+        MCG_LOST      = 2  // God help us all if 2 is ever returned!
+    };
+
     //! user creates an arbitrary quadric surface and passes it in with ID
     // return success
     void addSurface(const unsigned int surfaceId,
@@ -30,7 +37,7 @@ public:
                  const IntVec surfaces);
 
     //! do optimization after input is finished
-    // void 
+    // void completedGeometryInput();
 
     //! empty constructor
     MCGeometry()
@@ -41,15 +48,38 @@ public:
 
 
 private:
-    typedef std::map<unsigned int, Quadric*> SurfaceMap;
-    typedef std::map<unsigned int, Cell*>    CellMap;
+    typedef std::pair<Quadric*, bool> QuadricAndSense;
+
+    typedef std::map< unsigned int, Quadric* >              SurfaceMap;
+    typedef std::map< unsigned int, Cell* >                 CellMap;
+    typedef std::map< QuadricAndSense, std::vector<Cell*> > SCConnectMap;
+
 
     SurfaceMap _surfaces;
     CellMap    _cells;
 
+    //! a surface 
     // surface --> cell connectivity
+    SCConnectMap _surfToCellConnectivity;
+
+    /* NOTE: using a pair as a key value should be legit, because when a pair
+     * searches by testing for "less than" or "greater than" it tests the first
+     * member, then the second; so for all comparisons except for the surface
+     * sense it tests only a memory reference (integer) and on the last
+     * comparison it tests for the boolean sense. SO MAKE SURE QUADRIC AND
+     * SENSE HAS QUADRIC DEFINED AS THE FIRST PART OF THE PAIR.
+     */
+
+
+
+    //typedef std::pair< std::vector<Cell*>, std::vector<Cell*> > PmCellVec;
+    //std::map<Quadric*, PmCellVec> _surfToCellConnectivity;
+
+    // different (probably inferior) ways to do this might have been:
     // std::map<Quadric*, std::vector< std::vector<Cell*> > > ???
-    // std::map<signed int, std::vector<Cell*> > ???
+    // std::map<signed int, std::vector<Cell*> > ??? Maybe not since that will
+    // not be portable (if anything other than ints is used; also the
+    // conversion will not be efficient)
 };
 /*----------------------------------------------------------------------------*/
 #endif
