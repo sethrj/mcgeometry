@@ -22,12 +22,12 @@ public:
                                  const std::vector<double>& direction,
                                  bool PosSense) const = 0;
 
-    //! create a copy of 
+    //! create a copy of ourself
     virtual Quadric* clone() const = 0;
 
-    // TODO: also need a method to calculate whether a point has a positive 
-    // sense to this quadric without doing all the distance calc
-    virtual bool hasPosSense(std::vector<double>& position) const = 0;
+    //!Calculate whether a point has a positive 
+    // sense to this quadric without doing all the distance calcs
+    virtual bool hasPosSense(const std::vector<double>& position) const = 0;
 
     // This allows operator<< to have access to the private and protected 
     // members for writing to output.  Of course care must be taken that these
@@ -40,7 +40,7 @@ public:
 protected:
     Quadric() { /* * */ }
 
-    bool _hasPosSense(double eval) const;
+    bool _hasPosSense(const double eval) const;
     HitAndDist _calcQuadraticIntersect( double A, double B, double C,
             bool posSense ) const;
 };
@@ -48,11 +48,10 @@ protected:
 
 // Defining this function here gives us the ability to make the same decision 
 // for all Quadric surfaces in one place.
-inline bool Quadric::_hasPosSense(double eval) const{
-    if ( 0 <= eval )
-        return true;        // Positive sense includes points "on" the surface
-    else
-        return false;       // Negative sense
+inline bool Quadric::_hasPosSense(const double eval) const{
+    // Positive sense includes points "on" the surface (i.e. includes zero)
+    // negative sense if the evaluated is strictly less than zero
+    return ( eval >= 0 );
 }
 
 inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(

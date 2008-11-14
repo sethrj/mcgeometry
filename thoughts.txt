@@ -6,3 +6,8 @@ the initial region R:
 	- when checking "am I inside" for each region, loop over all surfaces that
 	  are *not* the surface being crossed (since you already know you're
 	  "inside" that surface)
+
+
+second-iteration optimizations:
+   - add explicit px, py, pz to save flops (no need to mult by zero)
+   - use list when building connectivity, use vector after that
