@@ -9,8 +9,14 @@
 #include <iostream>
 #include "transupport/dbc.hpp"
 
+//#include <iostream>
+//using std::cout;
+//using std::endl;
+
 /*----------------------------------------------------------------------------*/
 class Quadric {
+    //! Output a Quadric to a stream 
+    friend std::ostream& operator<<( std::ostream&, const Quadric& );
 public:
     typedef std::pair<bool, double> HitAndDist;
 
@@ -29,14 +35,11 @@ public:
     // sense to this quadric without doing all the distance calcs
     virtual bool hasPosSense(const std::vector<double>& position) const = 0;
 
-    // This allows operator<< to have access to the private and protected 
-    // members for writing to output.  Of course care must be taken that these
-    // members are not changed.
-    friend std::ostream& operator<<( std::ostream&, const Quadric& );
-
     // NOTE: this must be public if we ever have a generic Quadric
-    virtual ~Quadric()  { /* * */ }
-
+    virtual ~Quadric() {
+//        cout << "Oh no, I (quadric " << this << ") am dying!" << endl;
+        /* * */
+    }
 protected:
     Quadric() { /* * */ }
 

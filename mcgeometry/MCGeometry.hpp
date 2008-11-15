@@ -39,6 +39,9 @@ public:
     //! do optimization after input is finished
     // void completedGeometryInput();
 
+    //! Debug printing; will be incorporated into file IO etc.
+    void debugPrint() const;
+
     //! empty constructor
     MCGeometry()
     { /* * */ }
@@ -48,11 +51,13 @@ public:
 
 
 private:
-    typedef std::pair<Quadric*, bool> QuadricAndSense;
+    typedef std::pair<Quadric*, bool>               QuadricAndSense;
+    typedef std::vector<QuadricAndSense>            QASVec;
+    typedef std::vector<Cell*>                      CellPVec;
 
     typedef std::map< unsigned int, Quadric* >              SurfaceMap;
     typedef std::map< unsigned int, Cell* >                 CellMap;
-    typedef std::map< QuadricAndSense, std::vector<Cell*> > SCConnectMap;
+    typedef std::map< QuadricAndSense, CellPVec > SCConnectMap;
 
 
     SurfaceMap _surfaces;
@@ -70,8 +75,6 @@ private:
      * SENSE HAS QUADRIC DEFINED AS THE FIRST PART OF THE PAIR.
      */
 
-
-
     //typedef std::pair< std::vector<Cell*>, std::vector<Cell*> > PmCellVec;
     //std::map<Quadric*, PmCellVec> _surfToCellConnectivity;
 
@@ -80,6 +83,8 @@ private:
     // std::map<signed int, std::vector<Cell*> > ??? Maybe not since that will
     // not be portable (if anything other than ints is used; also the
     // conversion will not be efficient)
+
+    void _printQAS(const QuadricAndSense& qas) const;
 };
 /*----------------------------------------------------------------------------*/
 #endif
