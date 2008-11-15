@@ -36,7 +36,6 @@ public:
 
     ~Sphere() { /* * */ };
 
-
 private:
     const std::vector<double> _center;
     const double _radius;

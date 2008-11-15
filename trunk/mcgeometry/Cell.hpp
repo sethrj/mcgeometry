@@ -19,13 +19,12 @@ class Cell {
 public:
     typedef std::pair<Quadric*, bool>          QuadricAndSense;
     typedef std::vector<QuadricAndSense>       QASVec;
-    typedef std::vector<Cell*>                 CellPVec;
-
-    typedef std::pair<Quadric*, double>        QuadricAndDist;
+    typedef std::vector<Cell*>                 CellVec;
 
     //! constructor requires an immutable bounding surface
-    Cell(const QASVec& boundingSurfaces) 
-        : _boundingSurfaces(boundingSurfaces)
+    Cell(const QASVec& boundingSurfaces, const unsigned int userId = 0) 
+        : _boundingSurfaces(boundingSurfaces),
+          _userId(userId)
     {
         Require(_boundingSurfaces.size() > 0);
     }
@@ -41,6 +40,28 @@ public:
         return _boundingSurfaces;
     }
 
+    //! get a list of known cell neighbors for a quadric
+    //  non-const so that whatever we pass can add to it
+    //  possibly poor design here?
+    //const CellVec& getNeighbors(const Quadric* surface) const {
+    CellVec& getNeighbors(Quadric* surface) {
+        // I think surface can't be const because findResult returns a pair
+        // that has a non-const Quadric* in it
+        HoodMap::iterator findResult = _hood.find(surface);
+        Require(findResult != _hood.end());
+
+        return findResult->second;
+    }
+
+    const unsigned int getUserId() const {
+        return _userId;
+    }
+
+    ////! get a list of known cell neighbors for a quadric
+    //void addNeighbor(const Quadric*, ) {
+    //    return _boundingSurfaces;
+    //}
+
     //! see if our cell contains the point; possibly skip one surface if
     // testing "next region"
     //  do this by comparing the "sense" of each of our surface to what the
@@ -49,13 +70,18 @@ public:
                        const Quadric* surfaceToSkip = NULL) const;
 
     //! find the nearest surface from a point in a given direction
-    QuadricAndDist intersect( const std::vector<double>& position,
-                              const std::vector<double>& direction) const;
+    void intersect( const std::vector<double>& position,
+                    const std::vector<double>& direction,
+                    Quadric*& hitQuadric,
+                    bool&     quadricSense,
+                    double&   distance) const;
 
 private:
-    typedef std::map< Quadric*, CellPVec > HoodMap;
+    typedef std::map< Quadric*, CellVec > HoodMap;
 
     const QASVec _boundingSurfaces;
+    const unsigned int _userId;
+
     HoodMap _hood;
 };
 
@@ -86,15 +112,23 @@ inline bool Cell::isPointInside(const std::vector<double>& position,
     return true;
 }
 /*----------------------------------------------------------------------------*/
-inline Cell::QuadricAndDist Cell::intersect(
-                            const std::vector<double>& position,
-                            const std::vector<double>& direction) const
+inline void Cell::intersect(
+                    const std::vector<double>& position,
+                    const std::vector<double>& direction,
+                    Quadric*& hitQuadric,
+                    bool&     quadricSense,
+                    double&   distance) const
 {
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
+    //since we only *pass* these variables to the lower level and don't actually
+    //base anything on their properties in this function; let the lower level
+    //handle the input checking instead of being redundant by including it here
+    //and at MCGeometry
+//    Require(position.size() == 3);
+//    Require(direction.size() == 3);
 
-    Quadric* hitQuadric = NULL;
-    double   distance   = std::numeric_limits<double>::infinity();
+    hitQuadric   = NULL;
+    quadricSense = false;
+    distance     = std::numeric_limits<double>::infinity();
 
     // loop over all surfaces
     for (QASVec::const_iterator it =  _boundingSurfaces.begin();
@@ -117,8 +151,9 @@ inline Cell::QuadricAndDist Cell::intersect(
         if (theResult.first // if it hits, and if it's a smaller distance
                 && (theResult.second < distance))
         {
-            distance = theResult.second;
-            hitQuadric = it->first;
+            distance     = theResult.second;
+            hitQuadric   = it->first;
+            quadricSense = it->second;
         }
     }
 
@@ -126,8 +161,6 @@ inline Cell::QuadricAndDist Cell::intersect(
     // certainty
     Ensure(hitQuadric != NULL);
     Ensure(distance   != std::numeric_limits<double>::infinity());
-
-    return std::make_pair(hitQuadric, distance);
 }
 
 /*----------------------------------------------------------------------------*/
