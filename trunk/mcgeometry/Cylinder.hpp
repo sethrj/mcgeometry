@@ -7,12 +7,11 @@
 #include "transupport/dbc.hpp"
 #include "transupport/SoftEquiv.hpp"
 #include "transupport/VectorMath.hpp"
+#include "transupport/VectorPrint.hpp"
 
 #include "Quadric.hpp"
 
 class Cylinder : public Quadric {
-    friend std::ostream& operator<< ( std::ostream&, const Cylinder& );
-
 public:
     Cylinder(const std::vector<double>& point, const std::vector<double>& axis,
              double radius)
@@ -33,6 +32,10 @@ public:
 
     HitAndDist intersect(const std::vector<double>& Position, 
             const std::vector<double>& Direction, bool PosSense) const;
+
+protected:
+    //! output to a stream
+    std::ostream& _output( std::ostream& os ) const;
 
 private:
     const std::vector<double> _point;
@@ -103,5 +106,11 @@ inline Quadric::HitAndDist Cylinder::intersect(
     return _calcQuadraticIntersect(A, B, C, posSense);
 }
 
+inline std::ostream& Cylinder::_output( std::ostream& os ) const {
+    os  << "[ CYL   Point:  " << std::setw(10) << _point
+        << " Axis: " << std::setw(10) << _axis 
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}
 #endif
 

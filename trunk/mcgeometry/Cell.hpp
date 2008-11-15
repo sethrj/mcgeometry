@@ -27,6 +27,18 @@ public:
           _userId(userId)
     {
         Require(_boundingSurfaces.size() > 0);
+
+        // initialize hood map
+        QASVec::const_iterator bsIt = _boundingSurfaces.begin();
+        typedef std::pair<HoodMap::iterator, bool> ReturnedPair;
+
+        while (bsIt != _boundingSurfaces.end()) {
+            ReturnedPair result = 
+                _hood.insert(std::make_pair(bsIt->first, CellVec()));
+
+            Insist(result.second == true, "Duplicate surface in this cell.");
+            ++bsIt;
+        }
     }
 
     ~Cell() {

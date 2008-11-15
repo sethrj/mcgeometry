@@ -14,7 +14,6 @@
 #include "Quadric.hpp"
 
 class Plane : public Quadric {
-    friend std::ostream& operator<<( std::ostream& , const Plane& );
 public:
     Plane( std::vector<double>& normal, std::vector<double>& coord) 
                         : _normal(normal), _coordinate(coord)
@@ -34,6 +33,10 @@ public:
 
     HitAndDist intersect(const std::vector<double>& Position, 
             const std::vector<double>& Direction, bool PosSense) const;
+
+protected:
+    //! output to a stream
+    std::ostream& _output( std::ostream& os ) const;
 
 private:
     const std::vector<double> _normal;
@@ -86,9 +89,9 @@ bool Plane::hasPosSense(const std::vector<double>& position) const{
 }
 
 
-inline std::ostream& operator<<( std::ostream& os, const Plane& p) {
-    os  << "[ PLANE  Point:  " << std::setw(10) << p._coordinate 
-        << " Normal vector: " << std::setw(10) << p._normal << " ]";
+inline std::ostream& Plane::_output( std::ostream& os ) const {
+    os  << "[ PLANE  Point:  " << std::setw(10) << _coordinate 
+        << " Normal vector: " << std::setw(10) << _normal << " ]";
     return os;
 }
 #endif 

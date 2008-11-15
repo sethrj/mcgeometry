@@ -58,6 +58,9 @@ public:
                             double& distanceTraveled,
                             ReturnStatus& returnStatus);
 
+    //! find a cell given a point
+    unsigned int findCell(const std::vector<double>& position) const;
+
     //TODO: define IMP=0 cells, reflecting surfaces, etc.
 
     //! Debug printing; will be incorporated into file IO etc.
@@ -88,6 +91,11 @@ private:
     CellMap    _cells;
     //! surface --> cell connectivity
     SCConnectMap _surfToCellConnectivity;
+
+
+    //! probably a better way of doing this but it's quick for now
+    typedef std::map< Quadric*, unsigned int >    SurfaceUserIdMap;
+    SurfaceUserIdMap _surfaceIds;
 
     //! keep track of surface neighborhood connectivity
     //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
@@ -194,9 +202,9 @@ inline void MCGeometry::intersect(
             // add old cell to new cell's hood connectivity
             (*pNewCell)->getNeighbors(hitQuadric).push_back(&oldCell);
 
-            // the surface was matched from two sides, so decrement the
-            // unmatched count by two
-            _unMatchedSurfaces -= 2;
+//            // the surface was matched from two sides, so decrement the
+//            // unmatched count by two
+//            _unMatchedSurfaces -= 2;
 
             // we have found the new cell
             newCellId = (*pNewCell)->getUserId();
@@ -211,6 +219,24 @@ inline void MCGeometry::intersect(
     newCellId = 0;
     returnStatus = MCG_LOST;
     Insist(0, "Ruh-roh, new cell not found!");
+}
+/*----------------------------------------------------------------------------*/
+inline unsigned int MCGeometry::findCell(
+                                const std::vector<double>& position) const
+{
+    // loop through all cells in problem
+    CellMap::const_iterator itCel = _cells.begin();
+    
+    while (itCel != _cells.end()) {
+        if (itCel->second->isPointInside(position))  {
+            return itCel->first;
+        }
+
+        ++itCel;
+    }
+
+    // cell not found!
+    return 0;
 }
 /*----------------------------------------------------------------------------*/
 #endif
