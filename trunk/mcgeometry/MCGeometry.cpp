@@ -8,13 +8,16 @@
  * surfaces and cells.
  */
 
-//#include <iostream>
 #include <utility>
 #include <map>
 #include "transupport/dbc.hpp"
 #include "Quadric.hpp"
 #include "Cell.hpp"
 #include "MCGeometry.hpp"
+
+#include <iostream>
+using std::cout;
+using std::endl;
 
 /*----------------------------------------------------------------------------*/
 
@@ -42,7 +45,6 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 {
     typedef std::pair<CellMap::iterator, bool>      CMReturnedPair;
     typedef std::pair<SCConnectMap::iterator, bool> SCCMReturnedPair;
-    typedef std::vector<QuadricAndSense>            QASVec;
 
     //---- convert surface ID to pairs of unsigned ints (surfaceIds) and bools
     //                                                  (surface sense) -----//
@@ -75,7 +77,7 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
         SurfaceMap::iterator findSMResult = 
             _surfaces.find(userSurfaceId);
 
-        if (findSMResult != _surfaces.end()) {
+        if (findSMResult == _surfaces.end()) {
             Insist(0,
             "FATAL ERROR: this cell references a surface that does not exist.");
         }
@@ -88,6 +90,9 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
         ++it;
     }
     Check(surfaceIds.size() == boundingSurfaces.size());
+
+    // TODO: make sure surfaces inside each cell are unique (no duplications or
+    // having both plus and minus)
 
     //====== add cell to the map
     Cell* newCell = new Cell(boundingSurfaces);
@@ -113,7 +118,86 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
         ++bsIt;
     }
 }
+/*----------------------------------------------------------------------------*/
+void MCGeometry::debugPrint() const
+{
 
+    //-------------- PRINT SURFACES ----------------//
+    cout << "SURFACES: " << endl;
+    SurfaceMap::const_iterator itSur = _surfaces.begin();
+    
+    while (itSur != _surfaces.end()) {
+        cout << itSur->first << " ";
+        ++itSur;
+    }
+    cout << endl;
+
+    //-------------- PRINT CELLS TO SURFACES ----------------//
+    cout << "CELLS: " << endl;
+    CellMap::const_iterator itCel = _cells.begin();
+    
+    while (itCel != _cells.end()) {
+        cout << " CELL " << itCel->first << ": ";
+
+        // query cell for surface pointers
+        const QASVec& boundingSurfaces = itCel->second->getBoundingSurfaces();
+
+        QASVec::const_iterator bsIt = boundingSurfaces.begin();
+
+        while (bsIt != boundingSurfaces.end()) {
+
+            _printQAS(*bsIt);
+            cout << " ";
+
+            ++bsIt;
+        }
+
+        // use find_if to translate surface pointers to user-input 
+        // geometry numbers?
+        // cout << _quadricPointerToSurfaceId( pTheSurface )
+
+        cout << endl;
+        ++itCel;
+    }
+
+    cout << "SURFACES TO CELLS: " << endl;
+    //-------------- PRINT SURFACES TO CELLS ----------------//
+    SCConnectMap::const_iterator itSC = _surfToCellConnectivity.begin();
+    
+    while (itSC != _surfToCellConnectivity.end()) {
+        // print the surface and orientation
+        _printQAS(itSC->first);
+
+        cout << ": ";
+        
+        // print the cells
+        const CellPVec& theCells = itSC->second;
+
+        CellPVec::const_iterator cIt = theCells.begin();
+        while (cIt != theCells.end()) {
+
+            cout << (*cIt) << " ";
+
+            ++cIt;
+        }
+
+        cout << endl;
+        ++itSC;
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+void MCGeometry::_printQAS(const QuadricAndSense& qas) const
+{
+    if (qas.second == true)
+        cout << "+";
+    else
+        cout << "-";
+
+    // look up quadric's user ID based on quadric pointer
+    // instead of printing the pointer address
+    cout << qas.first;
+}
 /*----------------------------------------------------------------------------*/
 MCGeometry::~MCGeometry()
 {

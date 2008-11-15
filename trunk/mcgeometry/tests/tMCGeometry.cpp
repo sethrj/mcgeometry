@@ -20,13 +20,12 @@ using std::cout;
 using std::endl;
 
 typedef std::vector<double> doubleVec;
+typedef std::vector<signed int> IntVec;
 
 void createGeometry( MCGeometry& theGeom) {
     /* * * create sphere * * */
     doubleVec center(3,0.0);
     double      sphRadius = 2.0;
-
-    center[0] = 1.0;
 
     Sphere    theSphere(center, sphRadius);
 
@@ -40,7 +39,7 @@ void createGeometry( MCGeometry& theGeom) {
 
     Plane thePlane(normal, center);
 
-    // ADD SURFACES
+    //========== ADD SURFACES
     theGeom.addSurface(1, theSphere);
     theGeom.addSurface(2, thePlane);
 
@@ -51,8 +50,49 @@ void createGeometry( MCGeometry& theGeom) {
         theGeom.addSurface(2, theSphere);
     } 
     catch (tranSupport::tranError &theErr) {
-        //cout     << "Caught error:" << endl
-        //        << theErr.what();
+        caughtError = true;
+    }
+    TESTER_CHECKFORPASS(caughtError);
+
+
+    //========== ADD CELLS
+    IntVec theSurfaces(2,0);
+
+    theSurfaces[0] = -1;
+    theSurfaces[1] = 2;
+
+    theGeom.addCell(10, theSurfaces);
+
+    theSurfaces[0] = -1;
+    theSurfaces[1] = -2;
+
+    theGeom.addCell(20, theSurfaces);
+
+    theSurfaces.resize(1);
+    theSurfaces[0] = 1;
+
+    theGeom.addCell(30, theSurfaces);
+
+    //===== try adding a fake cell
+    theSurfaces[0] = 1337;
+
+    caughtError = false;
+    try {
+        theGeom.addCell(100, theSurfaces);
+    } 
+    catch (tranSupport::tranError &theErr) {
+        caughtError = true;
+    }
+    TESTER_CHECKFORPASS(caughtError);
+
+    //===== try adding a duplicate cell
+    theSurfaces[0] = 2;
+
+    caughtError = false;
+    try {
+        theGeom.addCell(10, theSurfaces);
+    } 
+    catch (tranSupport::tranError &theErr) {
         caughtError = true;
     }
     TESTER_CHECKFORPASS(caughtError);
@@ -64,6 +104,7 @@ void runTests() {
 
     createGeometry(theGeom);
 
+    theGeom.debugPrint();
 //   TESTER_CHECKFORPASS(softEquiv(1.0, 1.0));
 }
 
