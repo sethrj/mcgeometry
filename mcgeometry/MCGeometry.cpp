@@ -87,6 +87,9 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
         // add the surface to the vector of bounding surfaces
         boundingSurfaces.push_back(newSurface);
 
+        // this counts as another unmatched surface
+        _unMatchedSurfaces++;
+
         ++it;
     }
     Check(surfaceIds.size() == boundingSurfaces.size());
@@ -95,7 +98,7 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
     // having both plus and minus)
 
     //====== add cell to the map
-    Cell* newCell = new Cell(boundingSurfaces);
+    Cell* newCell = new Cell(boundingSurfaces, cellId);
     CMReturnedPair result =
         _cells.insert( std::make_pair(cellId, newCell) );
 
@@ -153,7 +156,7 @@ void MCGeometry::debugPrint() const
 
         // use find_if to translate surface pointers to user-input 
         // geometry numbers?
-        // cout << _quadricPointerToSurfaceId( pTheSurface )
+        // or store user ID in each cell and surface?
 
         cout << endl;
         ++itCel;
@@ -170,12 +173,11 @@ void MCGeometry::debugPrint() const
         cout << ": ";
         
         // print the cells
-        const CellPVec& theCells = itSC->second;
+        const CellVec& theCells = itSC->second;
 
-        CellPVec::const_iterator cIt = theCells.begin();
+        CellVec::const_iterator cIt = theCells.begin();
         while (cIt != theCells.end()) {
-
-            cout << (*cIt) << " ";
+            cout << (*cIt)->getUserId() << " ";
 
             ++cIt;
         }
