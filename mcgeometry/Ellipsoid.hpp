@@ -7,16 +7,20 @@
 #include "Quadric.hpp"
 
 class Ellipsoid : public Quadric {
-    public:
-        Ellipsoid() {   }
+public:
+    Ellipsoid() {   }
 
-        ~Ellipsoid();
+    ~Ellipsoid();
 
-        HitAndDist intersect(const std::vector<double>& Position, 
-                const std::vector<double>& Direction, bool PosSense) const;
+    HitAndDist intersect(const std::vector<double>& Position, 
+            const std::vector<double>& Direction, bool PosSense) const;
 
-    private:
-        
+protected:
+    //! output to a stream
+    std::ostream& _output( std::ostream& os ) const;
+
+private:
+    
 };
 
 #endif 

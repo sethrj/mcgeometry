@@ -40,12 +40,16 @@ public:
 //        cout << "Oh no, I (quadric " << this << ") am dying!" << endl;
         /* * */
     }
+
 protected:
     Quadric() { /* * */ }
 
     bool _hasPosSense(const double eval) const;
     HitAndDist _calcQuadraticIntersect( double A, double B, double C,
             bool posSense ) const;
+
+    //! output to a stream
+    virtual std::ostream& _output( std::ostream& os ) const = 0;
 };
 /*----------------------------------------------------------------------------*/
 
@@ -108,6 +112,11 @@ inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(
     return std::make_pair(particleHitsSurface, distanceToIntercept);
 }
 
+/*----------------------------------------------------------------------------*/
+inline std::ostream& operator<<( std::ostream& os, const Quadric& q)
+{
+    return q._output(os);
+}
 /*----------------------------------------------------------------------------*/
 
 #endif

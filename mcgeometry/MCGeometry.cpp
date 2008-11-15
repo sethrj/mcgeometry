@@ -32,12 +32,19 @@ void MCGeometry::addSurface( const unsigned int surfaceId,
     // "clone" calls a routine in the quadric which allocates new memory
     // WE ARE NOW RESPONSIBLE FOR THIS MEMORY (and must delete it when
     // appropriate)
+    Quadric* newQuadric = inQuadric.clone();
+
     ReturnedPair result =
-        _surfaces.insert( std::make_pair(surfaceId, inQuadric.clone()) );
+        _surfaces.insert( std::make_pair(surfaceId, newQuadric) );
 
     // check return value to make sure surfaceId was not already taken
     Insist(result.second == true,
             "Tried to add a surface with an ID that was already there.");
+
+
+    // **** temporary code? ****
+    _surfaceIds.insert( std::make_pair(newQuadric, surfaceId) );
+
 }
 
 /*----------------------------------------------------------------------------*/
@@ -129,10 +136,10 @@ void MCGeometry::debugPrint() const
     SurfaceMap::const_iterator itSur = _surfaces.begin();
     
     while (itSur != _surfaces.end()) {
-        cout << itSur->first << " ";
+        cout << " SURFACE " << itSur->first << ": "
+             << *(itSur->second) << endl;
         ++itSur;
     }
-    cout << endl;
 
     //-------------- PRINT CELLS TO SURFACES ----------------//
     cout << "CELLS: " << endl;
@@ -168,6 +175,8 @@ void MCGeometry::debugPrint() const
     
     while (itSC != _surfToCellConnectivity.end()) {
         // print the surface and orientation
+        cout << " ";
+
         _printQAS(itSC->first);
 
         cout << ": ";
@@ -195,9 +204,10 @@ void MCGeometry::_printQAS(const QuadricAndSense& qas) const
     else
         cout << "-";
 
-    // look up quadric's user ID based on quadric pointer
-    // instead of printing the pointer address
-    cout << qas.first;
+    SurfaceUserIdMap::const_iterator findResult = _surfaceIds.find(qas.first);
+    Require(findResult != _surfaceIds.end());
+    // print the "value" corresponding to the key (i.e. unsigned int)
+    cout << findResult->second;
 }
 /*----------------------------------------------------------------------------*/
 MCGeometry::~MCGeometry()

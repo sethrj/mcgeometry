@@ -12,7 +12,6 @@
 #include "Quadric.hpp"
 
 class Sphere : public Quadric {
-    friend std::ostream& operator<<( std::ostream& , const Sphere& );
 public:
     Sphere(std::vector<double>& C, double R)
         : _center(C), _radius(R)
@@ -35,6 +34,10 @@ public:
             const std::vector<double>& direction, bool posSense) const;
 
     ~Sphere() { /* * */ };
+
+protected:
+    //! output to a stream
+    std::ostream& _output( std::ostream& os ) const;
 
 private:
     const std::vector<double> _center;
@@ -111,9 +114,9 @@ inline Quadric::HitAndDist Sphere::intersect(
 }
 
 //! output a stream which prints the Sphere's characteristics
-inline std::ostream& operator<<( std::ostream& os, const Sphere& s) {
-    os  << "[ SPHERE Center: " << std::setw(10) << s._center
-        << " Radius: " << std::setw(5) << s._radius
+inline std::ostream& Sphere::_output( std::ostream& os ) const {
+    os  << "[ SPHERE Center: " << std::setw(10) << _center
+        << " Radius: " << std::setw(5) << _radius
         << " ]";
     return os;
 }
