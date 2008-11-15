@@ -11,9 +11,9 @@
 #include <utility>
 #include <map>
 #include "transupport/dbc.hpp"
+#include "MCGeometry.hpp"
 #include "Quadric.hpp"
 #include "Cell.hpp"
-#include "MCGeometry.hpp"
 
 #include <iostream>
 using std::cout;
@@ -121,7 +121,6 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 /*----------------------------------------------------------------------------*/
 void MCGeometry::debugPrint() const
 {
-
     //-------------- PRINT SURFACES ----------------//
     cout << "SURFACES: " << endl;
     SurfaceMap::const_iterator itSur = _surfaces.begin();

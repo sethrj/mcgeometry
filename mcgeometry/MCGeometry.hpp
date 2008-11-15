@@ -10,21 +10,23 @@
 
 #include <map>
 #include <vector>
+#include <utility>
 
-class Quadric;
-class Cell;
+#include "Quadric.hpp"
+#include "Cell.hpp"
 
 /*----------------------------------------------------------------------------*/
 class MCGeometry {
 public:
-    typedef std::vector<signed int> IntVec;
-
     //! ReturnStatus indicates whether it interacted with a special geometry
     enum ReturnStatus {
-        MCG_DEADCELL  = 0,
-        MCG_REFLECTED = 1,
-        MCG_LOST      = 2  // God help us all if 2 is ever returned!
+        MCG_NORMAL    = 0,
+        MCG_DEADCELL,
+        MCG_REFLECTED,
+        MCG_LOST  // God help us all if this is ever returned!
     };
+
+    typedef std::vector<signed int>                 IntVec;
 
     //! user creates an arbitrary quadric surface and passes it in with ID
     // return success
@@ -39,6 +41,20 @@ public:
     //! do optimization after input is finished
     // void completedGeometryInput();
 
+
+
+
+    //! given a current position, location, and cell; find the new one
+    // we may have to add further code to pass back a surface ID for a surface
+    // tally, for example
+    void intersect( const std::vector<double>& position,
+                    const std::vector<double>& direction,
+                    const unsigned int oldCellId,
+                    double& distanceTraveled,
+                    unsigned int& newCellId);
+
+    //TODO: define IMP=0 cells, reflecting surfaces, etc.
+
     //! Debug printing; will be incorporated into file IO etc.
     void debugPrint() const;
 
@@ -51,12 +67,12 @@ public:
 
 
 private:
-    typedef std::pair<Quadric*, bool>               QuadricAndSense;
-    typedef std::vector<QuadricAndSense>            QASVec;
-    typedef std::vector<Cell*>                      CellPVec;
+    typedef std::pair<Quadric*, bool>             QuadricAndSense;
+    typedef std::vector<QuadricAndSense>          QASVec;
+    typedef std::vector<Cell*>                    CellPVec;
 
-    typedef std::map< unsigned int, Quadric* >              SurfaceMap;
-    typedef std::map< unsigned int, Cell* >                 CellMap;
+    typedef std::map< unsigned int, Quadric* >    SurfaceMap;
+    typedef std::map< unsigned int, Cell* >       CellMap;
     typedef std::map< QuadricAndSense, CellPVec > SCConnectMap;
 
 
@@ -86,6 +102,17 @@ private:
 
     void _printQAS(const QuadricAndSense& qas) const;
 };
+/*----------------------------------------------------------------------------*/
+inline void MCGeometry::intersect(
+                            const std::vector<double>& position,
+                            const std::vector<double>& direction,
+                            const unsigned int oldCellId,
+                            double& distanceTraveled,
+                            unsigned int& newCellId)
+{
+    distanceTraveled = 0.0;
+    newCellId = 0;
+}
 /*----------------------------------------------------------------------------*/
 #endif
 

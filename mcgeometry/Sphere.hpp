@@ -8,6 +8,7 @@
 #include "transupport/VectorPrint.hpp"
 #include "transupport/VectorMath.hpp"
 #include "transupport/dbc.hpp"
+#include "transupport/SoftEquiv.hpp"
 #include "Quadric.hpp"
 
 class Sphere : public Quadric {
@@ -45,19 +46,32 @@ private:
 // Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
 //      (x,y,z) = center of sphere
 //      (x0,y0,z0) = position
-bool Sphere::hasPosSense(const std::vector<double>& position) const
+inline bool Sphere::hasPosSense(const std::vector<double>& position) const
 {
-    double eval = pow(position[0]-_center[0],2) + pow(position[1]-_center[1],2)
-                 + pow(position[2]-_center[2],2) - pow(_radius,2);
+    double eval = 0.0;
+    double temp;
+
+    temp = position[0]-_center[0];
+    eval += temp*temp;
+
+    temp = position[1]-_center[1];
+    eval += temp*temp;
+
+    temp = position[2]-_center[2];
+    eval += temp*temp;
+
+    eval -= _radius*_radius;
+
     return _hasPosSense(eval);
 }
 
-Quadric::HitAndDist Sphere::intersect(const std::vector<double>& position, 
+inline Quadric::HitAndDist Sphere::intersect(
+        const std::vector<double>& position, 
         const std::vector<double>& direction, bool posSense) const
 {
-    Require(direction.size() == 3);
-//    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
     Require(position.size() == 3);
+    Require(direction.size() == 3);
+    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
 
     double selfDot = 0.0;
     double B = 0.0;
