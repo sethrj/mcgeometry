@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include "transupport/dbc.hpp"
+#include "transupport/SoftEquiv.hpp"
 #include "transupport/VectorMath.hpp"
 
 #include "Quadric.hpp"
@@ -21,7 +22,7 @@ public:
         Require( _point.size() == 3 );
         Require( _axis.size() == 3 );
         // require unit normal 
-        Require(tranSupport::vectorNorm(_axis) == 1);
+        Require(softEquiv(tranSupport::vectorNorm(_axis), 1.0));
     }
 
     Cylinder* clone() const { return new Cylinder(*this); }
@@ -47,7 +48,8 @@ private:
 //      X = position 
 //      P = point on axis of cylinder
 //      U = direction vector of cylinder axis
-inline bool Cylinder::hasPosSense(const std::vector<double>& position) const {
+inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
+{
     double eval(0);
 
     // Perform (X-P)^2
@@ -70,7 +72,12 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const {
 // the original math.
 inline Quadric::HitAndDist Cylinder::intersect(
         const std::vector<double>& position, 
-        const std::vector<double>& direction, bool posSense) const {
+        const std::vector<double>& direction, bool posSense) const
+{
+    Require(position.size() == 3);
+    Require(direction.size() == 3);
+    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
+
     double A(0.0);   // 1-(direction._axis)^2
     for( int i = 0; i < 3; ++i ) {
         A += direction[i]*_axis[i];

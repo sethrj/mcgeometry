@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <iostream>
 #include "transupport/dbc.hpp"
+#include "transupport/SoftEquiv.hpp"
 #include "transupport/VectorMath.hpp"
 #include "transupport/VectorPrint.hpp"
+
 #include "Quadric.hpp"
 
 class Plane : public Quadric {
@@ -21,9 +23,7 @@ public:
         Require(_normal.size() == 3);
         Require(_coordinate.size() == 3);
         // require unit normal 
-        Require(tranSupport::vectorNorm(_normal) == 1);
-        
-        //Require(tranSupport::vectorDot(n,n) != 0);
+        Require(softEquiv(tranSupport::vectorNorm(_normal), 1.0));
     }
 
     Plane* clone() const { return new Plane(*this); }
@@ -43,7 +43,11 @@ private:
 /*----------------------------------------------------------------------------*/
 //! calculate distance to intersection
 Quadric::HitAndDist Plane::intersect(const std::vector<double>& position, 
-        const std::vector<double>& direction, bool posSense) const {
+        const std::vector<double>& direction, bool posSense) const
+{
+    Require(position.size() == 3);
+    Require(direction.size() == 3);
+    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
 
     bool hit;
     double distance(0.0);
