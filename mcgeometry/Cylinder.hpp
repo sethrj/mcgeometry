@@ -1,6 +1,12 @@
+/*!
+ * \file Cylinder.hpp
+ * \brief 
+ * \author Jeremy L. Conlin
+ * 
+ */
 
-#ifndef CYLINDER_HPP
-#define CYLINDER_HPP
+#ifndef MCG_CYLINDER_HPP
+#define MCG_CYLINDER_HPP
 
 #include <vector>
 #include <cmath>
@@ -11,6 +17,8 @@
 
 #include "Quadric.hpp"
 
+namespace mcGeometry {
+/*----------------------------------------------------------------------------*/
 class Cylinder : public Quadric {
 public:
     Cylinder(const std::vector<double>& point, const std::vector<double>& axis,
@@ -112,5 +120,7 @@ inline std::ostream& Cylinder::_output( std::ostream& os ) const {
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
+/*----------------------------------------------------------------------------*/
+} // end namespace mcGeometry
 #endif
 

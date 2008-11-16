@@ -5,8 +5,8 @@
  * 
  */
 
-#ifndef MCGEOMETRY_HPP
-#define MCGEOMETRY_HPP
+#ifndef MCG_MCGEOMETRY_HPP
+#define MCG_MCGEOMETRY_HPP
 
 #include <map>
 #include <vector>
@@ -18,6 +18,11 @@
 #include "Quadric.hpp"
 #include "Cell.hpp"
 
+//#include <iostream>
+//using std::cout;
+//using std::endl;
+
+namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
 class MCGeometry {
 public:
@@ -97,11 +102,6 @@ private:
     typedef std::map< Quadric*, unsigned int >    SurfaceUserIdMap;
     SurfaceUserIdMap _surfaceIds;
 
-    //! keep track of surface neighborhood connectivity
-    //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
-    //  and probably will be double-counted
-    unsigned int _unMatchedSurfaces;
-
     /* NOTE: using a pair as a key value should be legit, because when a pair
      * searches by testing for "less than" or "greater than" it tests the first
      * member, then the second; so for all comparisons except for the surface
@@ -119,6 +119,13 @@ private:
     // not be portable (if anything other than ints is used; also the
     // conversion will not be efficient)
 
+
+    //! keep track of surface neighborhood connectivity
+    //  when this reaches zero, connectivity is complete
+    //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
+    //  and probably will be double-counted
+    unsigned int _unMatchedSurfaces;
+
     void _printQAS(const QuadricAndSense& qas) const;
 };
 /*----------------------------------------------------------------------------*/
@@ -131,6 +138,8 @@ inline void MCGeometry::intersect(
                             double& distanceTraveled,
                             ReturnStatus& returnStatus)
 {
+//    cout << "unmatched surface count: " << _unMatchedSurfaces << endl;
+
     Require(position.size() == 3);
     Require(direction.size() == 3);
     Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
@@ -149,6 +158,7 @@ inline void MCGeometry::intersect(
                       distanceTraveled);
 
     Check(hitQuadric != NULL);
+    Check(distanceTraveled >= 0.0);
 
     returnStatus = MCG_NORMAL;
 
@@ -172,6 +182,11 @@ inline void MCGeometry::intersect(
         {
             //we have found the new cell
             newCellId = (*it)->getUserId();
+
+//            cout << "Found ending cell " << newCellId
+//                 << " already connected to starting cell "
+//                 << oldCellId << " through hood" << endl;
+
             return;
         }
     }
@@ -196,18 +211,32 @@ inline void MCGeometry::intersect(
         // checking it)
         if ( (*pNewCell)->isPointInside( newPosition, hitQuadric ) )
         {
+            // if this is the first cell linked to this surface, we decrement 
+            // the unmatched surfaces
+            if (neighborhood.size() == 0)
+                _unMatchedSurfaces--;
+
             // add new cell to old cell's hood connectivity
             neighborhood.push_back(*pNewCell);
 
-            // add old cell to new cell's hood connectivity
-            (*pNewCell)->getNeighbors(hitQuadric).push_back(&oldCell);
+            Cell::CellVec& newNeighborhood
+                = (*pNewCell)->getNeighbors(hitQuadric);
 
-//            // the surface was matched from two sides, so decrement the
-//            // unmatched count by two
-//            _unMatchedSurfaces -= 2;
+            // if this is the first cell linked to this surface, we decrement 
+            // the unmatched surfaces
+            if (newNeighborhood.size() == 0)
+                _unMatchedSurfaces--;
+
+            // add old cell to new cell's hood connectivity
+            newNeighborhood.push_back(&oldCell);
 
             // we have found the new cell
             newCellId = (*pNewCell)->getUserId();
+
+//            cout << "Connected ending cell " << newCellId
+//                 << " to starting cell " << oldCellId << endl;
+//            if (_unMatchedSurfaces == 0)
+//                cout << "CONNECTIVITY COMPLETE." << endl;
             return;
         }
     }
@@ -239,5 +268,6 @@ inline unsigned int MCGeometry::findCell(
     return 0;
 }
 /*----------------------------------------------------------------------------*/
+} // end namespace mcGeometry
 #endif
 

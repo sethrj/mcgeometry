@@ -14,6 +14,8 @@
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
 
+using namespace mcGeometry;
+
 using std::cout;
 using std::endl;
 

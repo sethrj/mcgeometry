@@ -19,6 +19,8 @@
 #include "transupport/SoftEquiv.hpp"
 // #include "transupport/VectorPrint.hpp"
 
+using namespace mcGeometry;
+
 using std::cout;
 using std::endl;
 
@@ -26,7 +28,7 @@ using std::endl;
 typedef std::vector<double> doubleVec;
 
 /*============================================================================*/
-void runTests() {
+void testPlane() {
     /* * * create plane * * */
     doubleVec center(3,0.0);
     doubleVec normal(3,0.0);
@@ -90,10 +92,49 @@ void runTests() {
     /********************/
 }
 /*============================================================================*/
+void testPlaneX() {
+    /* * * create plane * * */
+    PlaneX thePlane(1.0);
+
+    /* * * create "particle" * * */
+    doubleVec particleLoc(3,0.0);
+    doubleVec particleDir(3,0.0);
+
+
+    particleLoc[0] = 1.5;
+    particleDir[1] = 1.0;
+
+    /********************/
+    Quadric::HitAndDist planeResult;
+
+    TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
+
+    planeResult  = thePlane.intersect(particleLoc, particleDir, true);
+
+    TESTER_CHECKFORPASS(planeResult.first == false);
+
+    /********************/
+    particleLoc[0] = -1;
+    particleLoc[1] = -1;
+    particleLoc[2] = 0.5;
+
+    particleDir[0] = 0.707106781186547;
+    particleDir[1] = 0.707106781186547;
+    particleDir[2] = 0.0;
+
+    TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == false);
+
+    planeResult  = thePlane.intersect(particleLoc, particleDir, false);
+
+    TESTER_CHECKFORPASS(planeResult.first == true);
+    TESTER_CHECKFORPASS(softEquiv(planeResult.second, 2.828427124746190));
+}
+/*============================================================================*/
 int main(int argc, char *argv[]) {
     TESTER_INIT("Plane");
     try {
-        runTests();
+        testPlane();
+        testPlaneX();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl

@@ -19,6 +19,7 @@
 using std::cout;
 using std::endl;
 
+namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
 
 void MCGeometry::addSurface( const unsigned int surfaceId,
@@ -63,9 +64,9 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 
 
     // -------- ITERATE OVER INPUT SURFACE LIST -------- //
-    IntVec::const_iterator it = surfaceIds.begin();
-
-    while (it != surfaceIds.end()) {
+    
+    for (IntVec::const_iterator it = surfaceIds.begin();
+                                it != surfaceIds.end(); ++it) {
         unsigned int userSurfaceId; //an integer that only the user deals with
         QuadricAndSense newSurface;
 
@@ -96,9 +97,11 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
 
         // this counts as another unmatched surface
         _unMatchedSurfaces++;
-
-        ++it;
+//        cout << "Added surface " << userSurfaceId << " to cell " << cellId
+//             << " (unmatched surface count: " << _unMatchedSurfaces << ")"
+//             << endl;
     }
+
     Check(surfaceIds.size() == boundingSurfaces.size());
 
     // TODO: make sure surfaces inside each cell are unique (no duplications or
@@ -114,9 +117,9 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
             "Tried to add a cell with an ID that was already there.");
 
     //====== loop back through the surfaces and add the connectivity
-    QASVec::iterator bsIt = boundingSurfaces.begin();
-
-    while (bsIt != boundingSurfaces.end()) {
+    for (QASVec::iterator bsIt = boundingSurfaces.begin();
+                          bsIt != boundingSurfaces.end(); ++bsIt)
+    {
         QuadricAndSense &newQandS = *bsIt;
 
         // using the "associative array" capability of maps lets us access a
@@ -124,8 +127,6 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
         // return the vector that is already  
         // see C++ Standard Library pp. 182-183
         _surfToCellConnectivity[newQandS].push_back(newCell);
-
-        ++bsIt;
     }
 }
 /*----------------------------------------------------------------------------*/
@@ -143,13 +144,13 @@ void MCGeometry::debugPrint() const
 
     //-------------- PRINT CELLS TO SURFACES ----------------//
     cout << "CELLS: " << endl;
-    CellMap::const_iterator itCel = _cells.begin();
+    CellMap::const_iterator celIt = _cells.begin();
     
-    while (itCel != _cells.end()) {
-        cout << " CELL " << itCel->first << ": ";
+    while (celIt != _cells.end()) {
+        cout << " CELL " << celIt->first << ": ";
 
         // query cell for surface pointers
-        const QASVec& boundingSurfaces = itCel->second->getBoundingSurfaces();
+        const QASVec& boundingSurfaces = celIt->second->getBoundingSurfaces();
 
         QASVec::const_iterator bsIt = boundingSurfaces.begin();
 
@@ -161,28 +162,24 @@ void MCGeometry::debugPrint() const
             ++bsIt;
         }
 
-        // use find_if to translate surface pointers to user-input 
-        // geometry numbers?
-        // or store user ID in each cell and surface?
-
         cout << endl;
-        ++itCel;
+        ++celIt;
     }
 
     cout << "SURFACES TO CELLS: " << endl;
     //-------------- PRINT SURFACES TO CELLS ----------------//
-    SCConnectMap::const_iterator itSC = _surfToCellConnectivity.begin();
+    SCConnectMap::const_iterator surfToCellIt = _surfToCellConnectivity.begin();
     
-    while (itSC != _surfToCellConnectivity.end()) {
+    while (surfToCellIt != _surfToCellConnectivity.end()) {
         // print the surface and orientation
         cout << " ";
 
-        _printQAS(itSC->first);
+        _printQAS(surfToCellIt->first);
 
         cout << ": ";
         
         // print the cells
-        const CellVec& theCells = itSC->second;
+        const CellVec& theCells = surfToCellIt->second;
 
         CellVec::const_iterator cIt = theCells.begin();
         while (cIt != theCells.end()) {
@@ -192,8 +189,43 @@ void MCGeometry::debugPrint() const
         }
 
         cout << endl;
-        ++itSC;
+        ++surfToCellIt;
     }
+
+    cout << "NEIGHBORHOOD CONNECTIVITY: " << endl;
+    //-------------- PRINT CELLS TO CELLS ----------------//
+    celIt = _cells.begin();
+    
+    while (celIt != _cells.end()) {
+        cout << " CELL " << celIt->first << ": ";
+
+        // query cell for surface pointers
+        const QASVec& boundingSurfaces = celIt->second->getBoundingSurfaces();
+
+        QASVec::const_iterator bsIt = boundingSurfaces.begin();
+
+        while (bsIt != boundingSurfaces.end()) {
+
+            _printQAS(*bsIt);
+            cout << ":{";
+
+            const CellVec& otherCells =
+                celIt->second->getNeighbors(bsIt->first);
+
+            CellVec::const_iterator outCelIt = otherCells.begin();
+
+            while (outCelIt != otherCells.end()) {
+                cout << (*outCelIt)->getUserId() << " ";
+
+                ++outCelIt;
+            }
+            cout << "} ";
+            ++bsIt;
+        }
+
+        cout << endl;
+        ++celIt;
+    }  
 }
 
 /*----------------------------------------------------------------------------*/
@@ -224,14 +256,15 @@ MCGeometry::~MCGeometry()
         ++itSur;
     }
     
-    CellMap::iterator itCel = _cells.begin();
+    CellMap::iterator celIt = _cells.begin();
     
-    while (itCel != _cells.end()) {
+    while (celIt != _cells.end()) {
         // delete the cell to which the iterator points
-        delete itCel->second;
+        delete celIt->second;
 
-        ++itCel;
+        ++celIt;
     }
 }
-/*----------------------------------------------------------------------------*/
 
+/*----------------------------------------------------------------------------*/
+} // end namespace mcGeometry

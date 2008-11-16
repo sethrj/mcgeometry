@@ -1,7 +1,13 @@
+/*!
+ * \file Quadric.hpp
+ * \brief The parent abstract class of all the other surfaces
+ * \author Jeremy L. Conlin
+ * 
+ */
 
 
-#ifndef QUADRIC_HPP
-#define QUADRIC_HPP
+#ifndef MCG_QUADRIC_HPP
+#define MCG_QUADRIC_HPP
 
 #include <vector>
 #include <utility>
@@ -12,6 +18,8 @@
 //#include <iostream>
 //using std::cout;
 //using std::endl;
+
+namespace mcGeometry {
 
 /*----------------------------------------------------------------------------*/
 class Quadric {
@@ -118,6 +126,7 @@ inline std::ostream& operator<<( std::ostream& os, const Quadric& q)
     return q._output(os);
 }
 /*----------------------------------------------------------------------------*/
-
+} // end namespace mcGeometry
+/*----------------------------------------------------------------------------*/
 #endif
 
