@@ -1,5 +1,5 @@
 /*!
- * \file MCGeometry
+ * \file tMCGeometry.cpp
  * \brief Unit tests for MCGeometry
  * \author Seth R. Johnson
  */
@@ -262,17 +262,18 @@ void runTests() {
 
 /*============================================================================*/
 int main(int argc, char *argv[]) {
-   TESTER_INIT("MCGeometry");
-   try {
-      runTests();
-   }
-   catch (tranSupport::tranError &theErr) {
-      cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl
-         << theErr.what() << endl;
-      TESTER_CHECKFORPASS(false);
-   }
+    TESTER_INIT("MCGeometry");
+    try {
+        testGeometryErrorChecking();
+        runTests();
+    }
+    catch (tranSupport::tranError &theErr) {
+        cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl
+             << theErr.what() << endl;
+        TESTER_CHECKFORPASS(false);
+    }
 
-   TESTER_PRINTRESULT();
-   
-   return 0;
+    TESTER_PRINTRESULT();
+
+    return 0;
 }

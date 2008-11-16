@@ -1,6 +1,6 @@
 /*!
- * \file tPlane.cc
- * \brief Test the Quadric geometry capability
+ * \file tPlane.cpp
+ * \brief Test the Plane geometry capabilities
  * \author Seth R. Johnson
  */
 

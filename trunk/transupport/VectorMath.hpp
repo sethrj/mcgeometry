@@ -20,7 +20,7 @@ namespace tranSupport {
 
 /*----------------------------------------------------------------------------*/
 
-//! subtract b from a
+//! decrement a by b
 inline void vectorMinusEq( std::vector<double> &a, 
                           const std::vector<double> &b)
 {
@@ -38,7 +38,7 @@ inline void vectorMinusEq( std::vector<double> &a,
    }
 }
 
-//! add b to a
+//! increment a by b
 inline void vectorPlusEq( std::vector<double> &a, 
                           const std::vector<double> &b)
 {
@@ -56,16 +56,20 @@ inline void vectorPlusEq( std::vector<double> &a,
    }
 }
 
+//! get the dot product of two vectors
 inline double vectorDot( const std::vector<double> &a,
                          const std::vector<double> &b) {
    return std::inner_product(a.begin(), a.end(),
                                b.begin(), 0.0);
 }
 
+//! get the total element-wise sum of a vector
 inline double vectorSum( const std::vector<double> &a) {
    return std::accumulate(a.begin(), a.end(), 0.0);
 }
 
+//! get the vector's 2-norm
+// square root of sum of squares
 inline double vectorNorm( const std::vector<double> &a) {
    double theSum = 0.0;
 
@@ -78,6 +82,8 @@ inline double vectorNorm( const std::vector<double> &a) {
    return std::sqrt(theSum);
 }
 
+//! get the distance between two vectors
+// square root of sum of differences squared
 inline double distance( const std::vector<double> &a,
                         const std::vector<double> &b) {
    Require(a.size() == b.size());

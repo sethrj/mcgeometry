@@ -29,9 +29,11 @@ public:
    SoftEquivFunctor() : eps(1.e-15)
    { /* * */ }
 
+   //! create with a non-default epsilon
    SoftEquivFunctor(double _eps) : eps(_eps)
    { /* * */ }
    
+   //! compare target to reference, see if they're close enough
    bool operator() (const double target, const double ref) const
    {
       using std::fabs;
@@ -51,6 +53,7 @@ public:
    } 
 
 private:
+   //! the tolerated relative error
    const double eps;
 };
 
@@ -61,6 +64,7 @@ public:
    IsNonZeroFunctor()
    { /* * */ }
    
+   //! test if target is nonzero
    bool operator() (const double target) const
    {
       if (target == 0) {
@@ -78,6 +82,7 @@ public:
    IsNonNegativeFunctor()
    { /* * */ }
    
+   //! test that the target is positive
    bool operator() (const double target) const
    {
       if (target < 0.0) {

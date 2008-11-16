@@ -1,3 +1,10 @@
+/*!
+ * \file tCylinder.cpp
+ * \brief Unit tests for Cylinder
+ * \author Seth R. Johnson
+ */
+
+/*----------------------------------------------------------------------------*/
 
 // put our headers at top to check for dependency problems
 #include "mcgeometry/Cylinder.hpp"

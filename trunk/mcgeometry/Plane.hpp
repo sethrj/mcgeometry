@@ -1,6 +1,6 @@
 /*!
  * \file Plane.hpp
- * \brief 
+ * \brief Plane surface
  * \author Jeremy L. Conlin
  * 
  */
@@ -20,6 +20,10 @@
 
 namespace mcGeometry {
 /*============================================================================*/
+/*!
+ * \class Plane
+ * \brief General plane
+ */
 class Plane : public Quadric {
 public:
     Plane( const std::vector<double>& normal,
@@ -103,7 +107,10 @@ inline std::ostream& Plane::_output( std::ostream& os ) const {
     return os;
 }
 /*============================================================================*/
-//! A plane normal to the X axis
+/*!
+ * \class PlaneX
+ * \brief Plane normal to the X axis
+ */
 class PlaneX : public Quadric {
 public:
     PlaneX( const double coord) : _coordinate(coord)

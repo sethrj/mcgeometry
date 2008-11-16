@@ -1,5 +1,5 @@
 /*!
- * \file tVecComp.cpp
+ * \file tVectorComp.cpp
  * \brief Unit tests for soft equivalence
  * \author Seth R. Johnson
  */

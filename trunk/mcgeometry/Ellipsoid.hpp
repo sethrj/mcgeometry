@@ -1,6 +1,6 @@
 /*!
  * \file Ellipsoid.hpp
- * \brief 
+ * \brief Ellipsoid object
  * \author Jeremy L. Conlin
  * 
  */
@@ -14,6 +14,10 @@
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
+/*!
+ * \class Ellipsoid
+ * \brief A general ellipsoid
+ */
 class Ellipsoid : public Quadric {
 public:
     Ellipsoid() {   }

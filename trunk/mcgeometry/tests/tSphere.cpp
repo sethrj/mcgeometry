@@ -1,6 +1,6 @@
 /*!
- * \file tSphere.cc
- * \brief Test the Quadric geometry capability
+ * \file tSphere.cpp
+ * \brief Test the Sphere geometry capability
  * \author Seth R. Johnson
  */
 
