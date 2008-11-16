@@ -24,6 +24,13 @@
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
+/*!
+ * \class MCGeometry
+ * \brief Umbrella class that coordinates the cells in a problem
+ *
+ * Various maps translate user input to Cell and Quadric pointers, and we also
+ * keep track of what surfaces and senses connect to various cells.
+ */
 class MCGeometry {
 public:
     //! ReturnStatus indicates whether it interacted with a special geometry

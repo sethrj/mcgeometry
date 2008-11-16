@@ -16,6 +16,8 @@
 namespace tranSupport {
 /*----------------------------------------------------------------------------*/
 
+//! \brief Unit tester class checks for failures in tests
+// it also prints messages
 class UnitTester {
 
 public:
@@ -35,7 +37,8 @@ public:
 
    //! verify the check condition, report if failure
    void checkForPass(const bool cond, 
-                     const std::string passMessage, const std::string failureMessage,
+                     const std::string passMessage,
+                     const std::string failureMessage,
                      const char code[], const char fileName[],
                      const int lineNumber);
 
@@ -50,14 +53,18 @@ public:
    void printResult() const;
 
 private:
-   // hide constructors to prevent instantiation outside this class
+   //! hide constructor to prevent instantiation outside this class
    UnitTester() : stillPassing(true), testerName("Unnamed")
    { /* * */ }
+   //! hide copy constructor
    UnitTester(UnitTester const&) { /* * */ }
+   //! hide equivalence
    UnitTester& operator=(UnitTester const&) { /* * */ return *this;  }
 
 
+   //! stores if we've failed a test or not
    bool      stillPassing;
+   //! the name of the unit test for printing later
    std::string    testerName;
 };
 

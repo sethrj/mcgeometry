@@ -19,6 +19,7 @@
 namespace tranSupport {
 /*----------------------------------------------------------------------------*/
 
+//! Subclass of logic_error so that we can specifically catch our own errors
 class tranError : public std::logic_error {
 
 public:
@@ -60,7 +61,8 @@ inline void throwInsist(const char theMessage[], const char fileName[],
 }
 /*============================================================================*/
 
-// for user-given input, shouldn't be turned off
+//! \brief Assert for user-given input
+// will never be turned off
 #define Insist(cond, msg) if (!(cond)) tranSupport::throwInsist(msg, __FILE__, __LINE__)
 
 //! \brief Checks incoming data

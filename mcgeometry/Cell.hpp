@@ -1,8 +1,7 @@
 /*!
- * \file Cell.hpp
- * \brief 
- * \author Jeremy L. Conlin
- * 
+ * \file   Cell.hpp
+ * \brief  Contains Cell class
+ * \author Seth R. Johnson
  */
 
 #ifndef MCG_CELL_HPP
@@ -21,11 +20,23 @@
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
+/*!
+ * \class Cell
+ * \brief Cell object defined by bounding surface+senses
+ *
+ * It finds the intersected surface, and it also stores cell-->cell
+ * connectivity. Currently it also stores a user ID number, which is only to
+ * interface with the user.
+ */
 class Cell {
 //    friend class MCGeometry;
 public:
+    //! Stores a pointer to a Quadric as well as the "sense" of that quadric
+    //  as viewed from this cell
     typedef std::pair<Quadric*, bool>          QuadricAndSense;
+    //! A vector of Quadric/sense pairs (e.g. for bounding surfaces)
     typedef std::vector<QuadricAndSense>       QASVec;
+    //! A vector of pointers to Cells for connectivity
     typedef std::vector<Cell*>                 CellVec;
 
     //! constructor requires an immutable bounding surface
@@ -48,13 +59,14 @@ public:
         }
     }
 
+    //! destructor doesn't have to do anything
     ~Cell() {
 //        cout << "Oh no, I (cell " << this << ") am dying!" << endl;
         /* * */
     }
 
     //! get a list of bounding surfaces; maybe should make MCGeometry a friend
-    // instead?
+    //  instead?
     const QASVec& getBoundingSurfaces() const {
         return _boundingSurfaces;
     }
@@ -72,6 +84,7 @@ public:
         return findResult->second;
     }
 
+    //! Return the user ID 
     const unsigned int getUserId() const {
         return _userId;
     }
@@ -81,10 +94,10 @@ public:
     //    return _boundingSurfaces;
     //}
 
-    //! see if our cell contains the point; possibly skip one surface if
-    // testing "next region"
-    //  do this by comparing the "sense" of each of our surface to what the
-    //  surface says about the position's sense relative to it
+    //! \brief see if our cell contains the point; possibly skip one surface if
+    //         testing "next region"
+    // do this by comparing the "sense" of each of our surface to what the
+    // surface says about the position's sense relative to it
     bool isPointInside(const std::vector<double>& position,
                        const Quadric* surfaceToSkip = NULL) const;
 
@@ -96,11 +109,15 @@ public:
                     double&   distance) const;
 
 private:
+    //! map our surfaces to vectors of other cells attached to that surface
     typedef std::map< Quadric*, CellVec > HoodMap;
 
+    //! a vector of surfaces and senses that define the cell
     const QASVec _boundingSurfaces;
+    //! the variable that reports to the user
     const unsigned int _userId;
 
+    //! connectivity to other cell vectors through surfaces
     HoodMap _hood;
 };
 

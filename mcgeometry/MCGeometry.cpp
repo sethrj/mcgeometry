@@ -1,6 +1,6 @@
 /*!
  * \file MCGeometry.cpp
- * \brief Geometry class
+ * \brief Topmost geometry class
  * \author Seth R. Johnson
  * 
  * The MCGeometry parent class handles all the external associations between

@@ -8,13 +8,14 @@
 
 import sys, os, glob
 
+##! Path name to the current director
 pathName = os.path.dirname(sys.argv[0])
 print "Looking for unit tests in <%s>" % pathName
 
 os.chdir(pathName)
 
+##! All of the unit tests we might like to run
 testFiles = glob.glob('*/t*')
-execFiles = [];
 
 #print "All eligible files: " + ",".join(testFiles)
 print "="*80

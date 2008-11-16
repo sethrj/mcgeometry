@@ -1,6 +1,6 @@
 /*!
  * \file Sphere.hpp
- * \brief 
+ * \brief Sphere surface
  * \author Jeremy L. Conlin
  * 
  */
@@ -19,6 +19,12 @@
 
 namespace mcGeometry {
 /*============================================================================*/
+/*!
+ * \class Sphere
+ * \brief General sphere.
+ *
+ * Positive sense is the outward normal.
+ */
 class Sphere : public Quadric {
 public:
     Sphere(std::vector<double>& C, double R)

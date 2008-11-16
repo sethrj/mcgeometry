@@ -22,6 +22,13 @@
 namespace mcGeometry {
 
 /*----------------------------------------------------------------------------*/
+/*!
+ * \class Quadric
+ * \brief The parent abstract class of all the other surfaces .
+ *
+ * This defines an interface so that all kinds of surfaces can appear as the
+ * same general object.
+ */
 class Quadric {
     //! Output a Quadric to a stream 
     friend std::ostream& operator<<( std::ostream&, const Quadric& );
@@ -121,6 +128,8 @@ inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(
 }
 
 /*----------------------------------------------------------------------------*/
+//! \brief Output a general Quadric-descended surface
+// for polymorphism, we have to call a private inherited method
 inline std::ostream& operator<<( std::ostream& os, const Quadric& q)
 {
     return q._output(os);

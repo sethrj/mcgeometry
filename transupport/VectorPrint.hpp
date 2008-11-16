@@ -19,6 +19,7 @@
 
 namespace std {
 
+//! print a vector compactly
 inline std::ostream& operator<<( std::ostream& os,
                                  const std::vector<double>& vec)
 {

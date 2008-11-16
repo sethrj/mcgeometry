@@ -1,8 +1,7 @@
 /*!
  * \file Cylinder.hpp
- * \brief 
+ * \brief Cylinder surface object.
  * \author Jeremy L. Conlin
- * 
  */
 
 #ifndef MCG_CYLINDER_HPP
@@ -19,6 +18,11 @@
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
+
+/*!
+ * \class Cylinder
+ * \brief A general cylindrical surface
+ */
 class Cylinder : public Quadric {
 public:
     Cylinder(const std::vector<double>& point, const std::vector<double>& axis,
