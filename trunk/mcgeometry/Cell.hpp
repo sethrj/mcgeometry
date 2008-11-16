@@ -1,6 +1,12 @@
+/*!
+ * \file Cell.hpp
+ * \brief 
+ * \author Jeremy L. Conlin
+ * 
+ */
 
-#ifndef CELL_HPP
-#define CELL_HPP
+#ifndef MCG_CELL_HPP
+#define MCG_CELL_HPP
 
 #include <vector>
 #include <map>
@@ -13,6 +19,7 @@
 //using std::cout;
 //using std::endl;
 
+namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
 class Cell {
 //    friend class MCGeometry;
@@ -54,7 +61,7 @@ public:
 
     //! get a list of known cell neighbors for a quadric
     //  non-const so that whatever we pass can add to it
-    //  possibly poor design here?
+    //  TODO possibly poor design here?
     //const CellVec& getNeighbors(const Quadric* surface) const {
     CellVec& getNeighbors(Quadric* surface) {
         // I think surface can't be const because findResult returns a pair
@@ -176,5 +183,6 @@ inline void Cell::intersect(
 }
 
 /*----------------------------------------------------------------------------*/
+} // end namespace mcGeometry
 #endif
 

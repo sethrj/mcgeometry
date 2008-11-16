@@ -1,11 +1,19 @@
+/*!
+ * \file Ellipsoid.hpp
+ * \brief 
+ * \author Jeremy L. Conlin
+ * 
+ */
 
 
-#ifndef ELLIPSOID_HPP
-#define ELLIPSOID_HPP
+#ifndef MCG_ELLIPSOID_HPP
+#define MCG_ELLIPSOID_HPP
 
 #include <vector>
 #include "Quadric.hpp"
 
+namespace mcGeometry {
+/*----------------------------------------------------------------------------*/
 class Ellipsoid : public Quadric {
 public:
     Ellipsoid() {   }
@@ -23,6 +31,7 @@ private:
     
 };
 
+/*----------------------------------------------------------------------------*/
+} // end namespace mcGeometry
 #endif 
-
 

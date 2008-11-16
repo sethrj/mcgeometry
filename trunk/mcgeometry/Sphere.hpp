@@ -1,6 +1,12 @@
+/*!
+ * \file Sphere.hpp
+ * \brief 
+ * \author Jeremy L. Conlin
+ * 
+ */
 
-#ifndef SPHERE_HPP
-#define SPHERE_HPP
+#ifndef MCG_SPHERE_HPP
+#define MCG_SPHERE_HPP
 
 #include <vector>
 #include <cmath>
@@ -11,17 +17,12 @@
 #include "transupport/SoftEquiv.hpp"
 #include "Quadric.hpp"
 
+namespace mcGeometry {
+/*============================================================================*/
 class Sphere : public Quadric {
 public:
     Sphere(std::vector<double>& C, double R)
         : _center(C), _radius(R)
-    { 
-        Insist(R > 0, "Sphere must have positive radius.");
-    }
-
-    //! create sphere at origin
-    Sphere(double R)
-        : _center(3,0.0), _radius(R)
     { 
         Insist(R > 0, "Sphere must have positive radius.");
     }
@@ -45,6 +46,7 @@ private:
 };
 
 
+/*----------------------------------------------------------------------------*/
 // Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
 //      (x,y,z) = center of sphere
 //      (x0,y0,z0) = position
@@ -67,6 +69,7 @@ inline bool Sphere::hasPosSense(const std::vector<double>& position) const
     return _hasPosSense(eval);
 }
 
+/*----------------------------------------------------------------------------*/
 inline Quadric::HitAndDist Sphere::intersect(
         const std::vector<double>& position, 
         const std::vector<double>& direction, bool posSense) const
@@ -113,6 +116,7 @@ inline Quadric::HitAndDist Sphere::intersect(
 //    
 }
 
+/*----------------------------------------------------------------------------*/
 //! output a stream which prints the Sphere's characteristics
 inline std::ostream& Sphere::_output( std::ostream& os ) const {
     os  << "[ SPHERE Center: " << std::setw(10) << _center
@@ -121,5 +125,7 @@ inline std::ostream& Sphere::_output( std::ostream& os ) const {
     return os;
 }
 
+/*============================================================================*/
+} // end namespace mcGeometry
 #endif 
 

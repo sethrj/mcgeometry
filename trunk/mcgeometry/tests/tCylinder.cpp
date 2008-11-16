@@ -12,9 +12,10 @@
 #include "transupport/SoftEquiv.hpp"
 // #include "transupport/VectorPrint.hpp"
 
+using namespace mcGeometry;
+
 using std::cout;
 using std::endl;
-
 
 typedef std::vector<double> doubleVec;
 

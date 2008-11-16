@@ -19,6 +19,9 @@
 #include "transupport/SoftEquiv.hpp"
 // #include "transupport/VectorPrint.hpp"
 
+using mcGeometry::Sphere;
+using mcGeometry::Quadric;
+
 using std::cout;
 using std::endl;
 
