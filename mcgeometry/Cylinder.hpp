@@ -1,7 +1,7 @@
 /*!
  * \file Cylinder.hpp
  * \brief Cylinder surface object.
- * \author Jeremy L. Conlin
+ * \author Jeremy L. Conlin and Seth R. Johnson
  */
 
 #ifndef MCG_CYLINDER_HPP
@@ -17,7 +17,7 @@
 #include "Surface.hpp"
 
 namespace mcGeometry {
-/*----------------------------------------------------------------------------*/
+/*============================================================================*/
 /*!
  * \class Cylinder
  * \brief A general cylindrical surface
@@ -54,8 +54,8 @@ public:
 
     bool hasPosSense(const std::vector<double>& position) const;
 
-    HitAndDist intersect(const std::vector<double>& Position, 
-            const std::vector<double>& Direction, bool PosSense) const;
+    HitAndDist intersect(const std::vector<double>& position, 
+            const std::vector<double>& direction, bool posSense) const;
 
 protected:
     //! output to a stream
@@ -80,6 +80,7 @@ private:
 //      U = direction vector of cylinder axis
 inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
 {
+    Require(position.size() == 3);
     double eval(0);
 
     // Perform (X-P)^2
@@ -139,7 +140,105 @@ inline std::ostream& Cylinder::_output( std::ostream& os ) const {
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
+/*============================================================================*/
+
+/*!
+ * \class CylinderNormal
+ * \brief A cylinder along one of the axes
+ */
+template<unsigned int axis>
+class CylinderNormal : public Surface {
+public:
+    //! generic cylinder constructor
+    CylinderNormal( double radius)
+        : _radius(radius) 
+    {
+        Require( _radius > 0.0 );
+    }
+
+    CylinderNormal(const CylinderNormal& oldCylinder,
+                   const UserSurfaceIdType& newId)
+        : Surface(newId),
+          _radius(oldCylinder._radius)
+    { /* * */ }
+
+
+    CylinderNormal* clone(const UserSurfaceIdType& newId) const {
+        return new CylinderNormal(*this, newId);
+    }
+
+    ~CylinderNormal() { /* * */ }
+
+    bool hasPosSense(const std::vector<double>& position) const;
+
+    HitAndDist intersect(const std::vector<double>& position, 
+                         const std::vector<double>& direction,
+                         bool posSense) const;
+
+protected:
+    //! output to a stream
+    std::ostream& _output( std::ostream& os ) const;
+
+private:
+    //! some point through which the cylinder's axis passes
+    const std::vector<double> _point;
+    //! axis about which the cylinder is centered
+    const std::vector<double> _axis;
+    //! cylinder radius
+    const double _radius;
+
+};
 /*----------------------------------------------------------------------------*/
+template<>
+inline bool CylinderNormal<0>::hasPosSense(
+                const std::vector<double>& position) const
+{
+    Require(position.size() == 3);
+    return _hasPosSense(
+            position[1] * position[1] + position[2] * position[2] 
+            - _radius * _radius
+            );
+}
+
+template<>
+inline bool CylinderNormal<1>::hasPosSense(
+                const std::vector<double>& position) const
+{
+    Require(position.size() == 3);
+    return _hasPosSense(
+            position[0] * position[0] + position[2] * position[2] 
+            - _radius * _radius
+            );
+}
+
+template<>
+inline bool CylinderNormal<2>::hasPosSense(
+                const std::vector<double>& position) const
+{
+    Require(position.size() == 3);
+    return _hasPosSense(
+            position[0] * position[0] + position[1] * position[1] 
+            - _radius * _radius
+            );
+}
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline Surface::HitAndDist CylinderNormal<axis>::intersect(
+                const std::vector<double>& position, 
+                const std::vector<double>& direction,
+                bool posSense) const
+{
+    return _calcQuadraticIntersect(0.0, 0.0, .0, posSense);
+}
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline std::ostream& CylinderNormal<axis>::_output( std::ostream& os ) const
+{
+    os  << "[ CYL  Axis: " << std::setw(10) << axis 
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}
+/*============================================================================*/
 } // end namespace mcGeometry
 #endif
 

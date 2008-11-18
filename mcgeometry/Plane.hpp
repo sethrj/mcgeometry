@@ -1,8 +1,8 @@
 /*!
  * \file Plane.hpp
  * \brief Plane surface
- * \author Jeremy L. Conlin
- * 
+ * \author Seth R. Johnson
+ * A regular Plane, and PlaneNormal to an axis, templated on that axis.
  */
 
 #ifndef MCG_PLANE_HPP
@@ -116,24 +116,29 @@ inline std::ostream& Plane::_output( std::ostream& os ) const {
 }
 /*============================================================================*/
 /*!
- * \class PlaneX
- * \brief Plane normal to the X axis
+ * \class PlaneNormal
+ * \brief Plane normal to some surface, templated on the coordinate axis
+ *
+ * 0 = X axis
+ * 1 = Y axis
+ * 2 = Z axis
  */
-class PlaneX : public Surface {
+template<unsigned int axis>
+class PlaneNormal : public Surface {
 public:
-    PlaneX( const double coord) : _coordinate(coord)
+    PlaneNormal( const double coord) : _coordinate(coord)
     { /* * */ }
 
-    PlaneX(const PlaneX& oldPlane, const UserSurfaceIdType& newId)
+    PlaneNormal(const PlaneNormal& oldPlane, const UserSurfaceIdType& newId)
         : Surface(newId),
           _coordinate(oldPlane._coordinate)
     { /* * */ }
 
-    PlaneX* clone(const UserSurfaceIdType& newId) const {
-        return new PlaneX(*this, newId);
+    PlaneNormal* clone(const UserSurfaceIdType& newId) const {
+        return new PlaneNormal<axis>(*this, newId);
     }
 
-    ~PlaneX() { /* * */} 
+    ~PlaneNormal() { /* * */} 
 
     bool hasPosSense(const std::vector<double>& position) const;
 
@@ -147,19 +152,21 @@ protected:
     std::ostream& _output( std::ostream& os ) const;
 
 private:
-    const double              _coordinate;    // Coordinate of point in plane
+    const double              _coordinate;    // Coordinate of plane along axis
 };
 /*----------------------------------------------------------------------------*/
-bool PlaneX::hasPosSense(const std::vector<double>& position) const
+template<unsigned int axis>
+bool PlaneNormal<axis>::hasPosSense(const std::vector<double>& position) const
 {
-    // 0 is index for X coordinate
-    return _hasPosSense(position[0] - _coordinate);
+    Require(position.size() == 3);
+    return _hasPosSense(position[axis] - _coordinate);
 }
 /*----------------------------------------------------------------------------*/
-Surface::HitAndDist PlaneX::intersect(
-                const std::vector<double>& position, 
-                const std::vector<double>& direction,
-                bool posSense) const
+template<unsigned int axis>
+Surface::HitAndDist PlaneNormal<axis>::intersect(
+                    const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    bool posSense) const
 {
     Require(position.size() == 3);
     Require(direction.size() == 3);
@@ -169,170 +176,50 @@ Surface::HitAndDist PlaneX::intersect(
     bool hit = false;
     double distance = 0.0;
 
-    // 0 is index for X coordinate
-    if (    ((posSense == false) && (direction[0] > 0))
-         || ((posSense == true)  && (direction[0] < 0)) )
+    if (    ((posSense == false) && (direction[axis] > 0))
+         || ((posSense == true)  && (direction[axis] < 0)) )
     {
         // Headed towards surface
         hit = true;
-        distance = (_coordinate - position[0]) / direction[0];
+        distance = (_coordinate - position[axis]) / direction[axis];
         distance = std::max(0.0, distance);
     }
 
     return std::make_pair(hit, distance);
 }
+
 /*----------------------------------------------------------------------------*/
-inline std::ostream& PlaneX::_output( std::ostream& os ) const {
+// template specialize 0, 1, and 2
+// but don't provide generic so that the compiler will fail if axis > 2
+template<>
+inline std::ostream& PlaneNormal<0>::_output( std::ostream& os ) const {
     os  << "[ PLANE X  Point:  " << std::setw(10) << _coordinate 
         << " ]";
     return os;
 }
-/*============================================================================*/
-/*!
- * \class PlaneY
- * \brief Plane normal to the Y axis
- */
-class PlaneY : public Surface {
-public:
-    PlaneY( const double coord) : _coordinate(coord)
-    { /* * */ }
 
-    PlaneY(const PlaneY& oldPlane, const UserSurfaceIdType& newId)
-        : Surface(newId),
-          _coordinate(oldPlane._coordinate)
-    { /* * */ }
-
-    PlaneY* clone(const UserSurfaceIdType& newId) const {
-        return new PlaneY(*this, newId);
-    }
-
-    ~PlaneY() { /* * */} 
-
-    bool hasPosSense(const std::vector<double>& position) const;
-
-    HitAndDist intersect(
-            const std::vector<double>& Position, 
-            const std::vector<double>& Direction,
-            bool PosSense) const;
-
-protected:
-    //! output to a stream
-    std::ostream& _output( std::ostream& os ) const;
-
-private:
-    const double              _coordinate;    // Coordinate of point in plane
-};
-/*----------------------------------------------------------------------------*/
-bool PlaneY::hasPosSense(const std::vector<double>& position) const
-{
-    // 0 is index for Y coordinate
-    return _hasPosSense(position[1] - _coordinate);
-}
-/*----------------------------------------------------------------------------*/
-Surface::HitAndDist PlaneY::intersect(
-                const std::vector<double>& position, 
-                const std::vector<double>& direction,
-                bool posSense) const
-{
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
-
-    // default to "does not hit" values
-    bool hit = false;
-    double distance = 0.0;
-
-    // 0 is index for Y coordinate
-    if (    ((posSense == false) && (direction[1] > 0))
-         || ((posSense == true)  && (direction[1] < 0)) )
-    {
-        // Headed towards surface
-        hit = true;
-        distance = (_coordinate - position[1]) / direction[1];
-        distance = std::max(0.0, distance);
-    }
-
-    return std::make_pair(hit, distance);
-}
-/*----------------------------------------------------------------------------*/
-inline std::ostream& PlaneY::_output( std::ostream& os ) const {
+template<>
+inline std::ostream& PlaneNormal<1>::_output( std::ostream& os ) const {
     os  << "[ PLANE Y  Point:  " << std::setw(10) << _coordinate 
         << " ]";
     return os;
 }
-/*============================================================================*/
-/*!
- * \class PlaneZ
- * \brief Plane normal to the Z axis
- */
-class PlaneZ : public Surface {
-public:
-    PlaneZ( const double coord) : _coordinate(coord)
-    { /* * */ }
 
-    PlaneZ(const PlaneZ& oldPlane, const UserSurfaceIdType& newId)
-        : Surface(newId),
-          _coordinate(oldPlane._coordinate)
-    { /* * */ }
-
-    PlaneZ* clone(const UserSurfaceIdType& newId) const {
-        return new PlaneZ(*this, newId);
-    }
-
-    ~PlaneZ() { /* * */} 
-
-    bool hasPosSense(const std::vector<double>& position) const;
-
-    HitAndDist intersect(
-            const std::vector<double>& Position, 
-            const std::vector<double>& Direction,
-            bool PosSense) const;
-
-protected:
-    //! output to a stream
-    std::ostream& _output( std::ostream& os ) const;
-
-private:
-    const double              _coordinate;    // Coordinate of point in plane
-};
-/*----------------------------------------------------------------------------*/
-bool PlaneZ::hasPosSense(const std::vector<double>& position) const
-{
-    // 0 is index for Z coordinate
-    return _hasPosSense(position[2] - _coordinate);
-}
-/*----------------------------------------------------------------------------*/
-Surface::HitAndDist PlaneZ::intersect(
-                const std::vector<double>& position, 
-                const std::vector<double>& direction,
-                bool posSense) const
-{
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
-
-    // default to "does not hit" values
-    bool hit = false;
-    double distance = 0.0;
-
-    // 0 is index for Z coordinate
-    if (    ((posSense == false) && (direction[2] > 0))
-         || ((posSense == true)  && (direction[2] < 0)) )
-    {
-        // Headed towards surface
-        hit = true;
-        distance = (_coordinate - position[2]) / direction[2];
-        distance = std::max(0.0, distance);
-    }
-
-    return std::make_pair(hit, distance);
-}
-/*----------------------------------------------------------------------------*/
-inline std::ostream& PlaneZ::_output( std::ostream& os ) const {
+template<>
+inline std::ostream& PlaneNormal<2>::_output( std::ostream& os ) const {
     os  << "[ PLANE Z  Point:  " << std::setw(10) << _coordinate 
         << " ]";
     return os;
 }
+/*============================================================================*/
+
+//! provide typedefs for user interaction
+typedef PlaneNormal<0> PlaneX;
+//! provide typedefs for user interaction
+typedef PlaneNormal<1> PlaneY;
+//! provide typedefs for user interaction
+typedef PlaneNormal<2> PlaneZ;
+
 /*============================================================================*/
 } // end namespace mcGeometry
 #endif 
