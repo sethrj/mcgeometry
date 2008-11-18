@@ -8,7 +8,7 @@
 
 // put our headers at top to check for dependency problems
 #include "mcgeometry/Sphere.hpp"
-#include "mcgeometry/Quadric.hpp"
+#include "mcgeometry/Surface.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -20,7 +20,7 @@
 // #include "transupport/VectorPrint.hpp"
 
 using mcGeometry::Sphere;
-using mcGeometry::Quadric;
+using mcGeometry::Surface;
 
 using std::cout;
 using std::endl;
@@ -51,7 +51,7 @@ void runTests() {
 //            << " direction: " << particleDir << endl;
 
     /********************/
-    Quadric::HitAndDist sphereResult;
+    Surface::HitAndDist sphereResult;
 
     TESTER_CHECKFORPASS(theSphere.hasPosSense(particleLoc) == false);
 
@@ -91,6 +91,13 @@ void runTests() {
     sphereResult = theSphere.intersect(particleLoc, particleDir, true);
 
     TESTER_CHECKFORPASS(sphereResult.first == false);
+    
+    /********************/
+    Surface* newSphere = theSphere.clone(182);
+
+    TESTER_CHECKFORPASS(newSphere->getUserId() == 182);
+
+    delete newSphere;
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {

@@ -1,6 +1,0 @@
-<area shape="rect" href="$_vector_math_8hpp.html" title="Does useful things to double vectors." alt="" coords="677,161,901,188">
-<area shape="rect" href="$_soft_equiv_8hpp.html" title="Just loads VectorComp and SoftEquiv (easier to remember)." alt="" coords="417,84,625,111">
-<area shape="rect" href="$_quadric_8hpp.html" title="The parent abstract class of all the other surfaces." alt="" coords="325,161,435,188">
-<area shape="rect" href="$_cell_8hpp.html" title="Contains Cell class." alt="" coords="179,84,259,111">
-<area shape="rect" href="$dbc_8hpp.html" title="Design by contract." alt="" coords="445,239,525,265">
-<area shape="rect" href="$_vector_comp_8hpp.html" title="Recursive comparisons on vectors of vectors of ... of doubles." alt="" coords="509,161,653,188">

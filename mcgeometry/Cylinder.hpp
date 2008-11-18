@@ -14,18 +14,19 @@
 #include "transupport/VectorMath.hpp"
 #include "transupport/VectorPrint.hpp"
 
-#include "Quadric.hpp"
+#include "Surface.hpp"
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
-
 /*!
  * \class Cylinder
  * \brief A general cylindrical surface
  */
-class Cylinder : public Quadric {
+class Cylinder : public Surface {
 public:
-    Cylinder(const std::vector<double>& point, const std::vector<double>& axis,
+    //! generic cylinder constructor
+    Cylinder(const std::vector<double>& point,
+             const std::vector<double>& axis,
              double radius)
         : _point(point), _axis(axis), _radius(radius) 
     {
@@ -34,11 +35,22 @@ public:
         Require( _axis.size() == 3 );
         // require unit normal 
         Require(softEquiv(tranSupport::vectorNorm(_axis), 1.0));
+        Require( _radius > 0.0 );
     }
 
-    Cylinder* clone() const { return new Cylinder(*this); }
+    Cylinder(const Cylinder& oldCylinder, const UserSurfaceIdType& newId)
+        : Surface(newId),
+          _point(oldCylinder._point),
+          _axis(oldCylinder._axis),
+          _radius(oldCylinder._radius)
+    { /* * */ }
 
-    ~Cylinder() {   }
+
+    Cylinder* clone(const UserSurfaceIdType& newId) const {
+        return new Cylinder(*this, newId);
+    }
+
+    ~Cylinder() { /* * */ }
 
     bool hasPosSense(const std::vector<double>& position) const;
 
@@ -50,8 +62,11 @@ protected:
     std::ostream& _output( std::ostream& os ) const;
 
 private:
+    //! some point through which the cylinder's axis passes
     const std::vector<double> _point;
+    //! axis about which the cylinder is centered
     const std::vector<double> _axis;
+    //! cylinder radius
     const double _radius;
 
 };
@@ -85,7 +100,7 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
 
 // This could be done more efficiently but this way is (arguably) closer to 
 // the original math.
-inline Quadric::HitAndDist Cylinder::intersect(
+inline Surface::HitAndDist Cylinder::intersect(
         const std::vector<double>& position, 
         const std::vector<double>& direction, bool posSense) const
 {

@@ -8,7 +8,7 @@
 
 // put our headers at top to check for dependency problems
 #include "mcgeometry/Cylinder.hpp"
-#include "mcgeometry/Quadric.hpp"
+#include "mcgeometry/Surface.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -49,7 +49,7 @@ void runTestA() {
     particleDir[1] = 1.0;
 
     /********************/
-    Quadric::HitAndDist theResult;
+    Surface::HitAndDist theResult;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
@@ -93,6 +93,11 @@ void runTestA() {
 
     TESTER_CHECKFORPASS(theResult.first == false);
     /********************/
+    Surface* newCyl = theCylinder.clone(182);
+
+    TESTER_CHECKFORPASS(newCyl->getUserId() == 182);
+
+    delete newCyl;
 }
 /*============================================================================*/
 // this test can use Bielajew's "ccylz" to test against to be really sure
@@ -114,7 +119,7 @@ void runTestB() {
     particleDir[1] = 1.0;
 
     /********************/
-    Quadric::HitAndDist theResult;
+    Surface::HitAndDist theResult;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 

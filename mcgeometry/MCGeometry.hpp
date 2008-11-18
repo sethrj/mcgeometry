@@ -15,7 +15,7 @@
 #include "transupport/VectorMath.hpp"
 #include "transupport/SoftEquiv.hpp"
 
-#include "Quadric.hpp"
+#include "Surface.hpp"
 #include "Cell.hpp"
 
 //#include <iostream>
@@ -28,11 +28,36 @@ namespace mcGeometry {
  * \class MCGeometry
  * \brief Umbrella class that coordinates the cells in a problem
  *
- * Various maps translate user input to Cell and Quadric pointers, and we also
- * keep track of what surfaces and senses connect to various cells.
+ * The MCGeometry parent class handles almost all the external associations
+ * between Surfaces and Cells. It maps the user's IDs to internal pointers
+ * for both surfaces and cells, and maps surface to Cell connectivity.
+ *
+ * MCGeometry has two effective points of interface. The first is to the user's
+ * ID values, which may be arbitrary integers or strings or anything. These id
+ * values would be evaluated *only* when inputing and outputing data to and
+ * from the user.
+ *
+ * The second is its internal indexing system, from 0 to N-1 (where N is the
+ * number of cells or surfaces, depending). This will be used throughout
+ * the program that links to MCGeometry, e.g. linking cross sections to cells
+ * by using this index and a vector. This allows the geometry to be completely
+ * isolated from the rest of the program, although it will translate the user
+ * IDs to an internal index.
+ *
+ * The Cell and Surface objects each store their own copy of the user ID, and
+ * to translate from a user ID to an internal index, MCGeometry stores a map
+ * for the surfaces and cells.
+ *
  */
 class MCGeometry {
 public:
+    //! user's surface IDs are unsigned ints for now
+    typedef unsigned int UserSurfaceIDType;
+    //! user's cell IDs are unsigned ints for now
+    typedef unsigned int UserCellIDType;
+
+    typedef Cell<UserCellIDType> CellT;
+
     //! ReturnStatus indicates whether it interacted with a special geometry
     enum ReturnStatus {
         MCG_NORMAL    = 0,
@@ -44,29 +69,27 @@ public:
     typedef std::vector<signed int>                 IntVec;
 
     //! user creates an arbitrary quadric surface and passes it in with ID
-    // return success
-    void addSurface(const unsigned int surfaceId,
-                    const Quadric& newQuadric);
+    // return INTERNAL index of the surface (0 to N_sur - 1)
+    unsigned int addSurface(const UserSurfaceIDType userSurfaceId,
+                            const Surface& newSurface);
 
     //! user passes in a vector of surface IDs with +/- 
-    // return success
-    void addCell(const unsigned int cellId,
-                 const IntVec surfaces);
+    // return INTERNAL index of the surface (0 to N_cell - 1) 
+    unsigned int addCell(const UserCellIDType userCellId,
+                         const IntVec surfaces);
 
-    //! do optimization after input is finished
+    //! do optimization after input is finished, check geometry for duplicate
+    //surfaces, etc.
     // void completedGeometryInput();
 
-
-
-
-    //! given a current position, location, and cell; find the new one
+    //!\brief  given a current position, location, and cell; find the new one
     // we may have to add further code to pass back a surface ID for a surface
     // tally, for example
     void intersect(         const std::vector<double>& position,
                             const std::vector<double>& direction,
-                            const unsigned int oldCellId,
+                            const unsigned int oldCellIndex,
                             std::vector<double>& newPosition,
-                            unsigned int& newCellId,
+                            unsigned int& newCellIndex,
                             double& distanceTraveled,
                             ReturnStatus& returnStatus);
 
@@ -75,7 +98,7 @@ public:
 
     //TODO: define IMP=0 cells, reflecting surfaces, etc.
 
-    //! Debug printing; will be incorporated into file IO etc.
+    //! Debug printing; will be incorporated into file IO etc. later
     void debugPrint() const;
 
     //! empty constructor
@@ -86,45 +109,116 @@ public:
     //! destructor must delete surfaces and cells
     ~MCGeometry();
 
+    //! return the number of cells we have stored
+    unsigned int getNumCells() const {
+        return _cells.size();
+    }
+
+    //! returns the number of surfaces we have stored
+    // (will not necessarily be the number of surfaces that are used)
+    unsigned int getNumSurfaces() const {
+        return _surfaces.size();
+    }
+
+    // ======= user ID to internal index translation ======= //
+
+    //! get an internal index for a cell from a user ID
+    unsigned int getCellIndexFromUserId(
+                    const UserCellIDType userCellId) const
+    {
+        // translate the user's given surface ID to a Surface pointer
+        CellRevIDMap::const_iterator findCMResult = 
+            _cellRevUserIds.find(userCellId);
+
+        if (findCMResult == _cellRevUserIds.end()) {
+            Insist(0,
+            "FATAL ERROR: cell user ID does not exist.");
+        }
+        return findCMResult->second;
+    }
+
+    //! get an internal index for a surface from a user ID
+    unsigned int getSurfaceIndexFromUserId(
+                 const UserSurfaceIDType userSurfaceId) const
+    {
+        // translate the user's given surface ID to a Surface pointer
+        SurfaceRevIDMap::const_iterator findSMResult = 
+            _surfaceRevUserIds.find(userSurfaceId);
+
+        if (findSMResult == _surfaceRevUserIds.end()) {
+            Insist(0,
+            "FATAL ERROR: surface user ID does not exist.");
+        }
+        return findSMResult->second;
+    }
+
+    //! get a user ID internal index  from a cell index
+    UserCellIDType getUserIdFromCellIndex(
+                    const unsigned int index) const
+    {
+        Require( index < getNumCells() );
+
+        return _cells[index]->getUserId();
+    }
+
+    //! get a user ID internal index  from a surface index
+    UserSurfaceIDType getUserIdFromSurfaceIndex(
+                    const unsigned int index) const
+    {
+        Require( index < getNumSurfaces() );
+
+        return _surfaces[index]->getUserId();
+    }
 
 private:
-    typedef std::pair<Quadric*, bool>             QuadricAndSense;
-    typedef std::vector<QuadricAndSense>          QASVec;
-    typedef std::vector<Cell*>                    CellVec;
+    typedef std::pair<Surface*, bool>             SurfaceAndSense;
+    typedef std::vector<SurfaceAndSense>          SASVec;
 
-    typedef std::map< unsigned int, Quadric* >    SurfaceMap;
-    typedef std::map< unsigned int, Cell* >       CellMap;
-    typedef std::map< QuadricAndSense, CellVec >  SCConnectMap;
+    typedef std::vector< Surface* >               SurfaceVec;
+    typedef std::vector< CellT* >                 CellVec;
 
+    typedef std::map< SurfaceAndSense, CellVec >  SCConnectMap;
 
-    //! map user's surface IDs to Quadric pointers
-    SurfaceMap _surfaces;
-    //! map user's cell IDs to Cell pointers
-    CellMap    _cells;
-    //! surface --> cell connectivity
+    typedef std::map< UserSurfaceIDType, unsigned int >   SurfaceRevIDMap;
+    typedef std::map< UserCellIDType, unsigned int >      CellRevIDMap;
+
+    //====== INTERNAL ASSOCIATIVE VECTORS AND MAPS ======//
+    // These use pointers and unsigned index values that handle
+    // all the internal associativity and cell/surface definition
+    // for the entire problem.
+    // They therefore need to be as efficient as possible.
+
+    //! all of the Surface surfaces in the problem
+    //  indexed by our internal representation of them
+    SurfaceVec _surfaces;
+
+    //! all of the Cell s in the problem
+    //  indexed by our internal representation of them
+    CellVec    _cells;
+
+    //! +-surface --> cell connectivity
     SCConnectMap _surfToCellConnectivity;
 
+    //====== INTERNAL ASSOCIATIVE VECTORS AND MAPS ======//
+    // These associate the user input (i.e. cell IDs and surface IDs)
+    // to our internal index values. This is used ONLY when the user inputs
+    // geometry information and wants a reprint of said information.
+    // They therefore do not need to have huge efficiency in mind.
 
-    //! probably a better way of doing this but it's quick for now
-    typedef std::map< Quadric*, unsigned int >    SurfaceUserIdMap;
-    SurfaceUserIdMap _surfaceIds;
+    //! translate user IDs to internal cell indices
+    CellRevIDMap _cellRevUserIds;
 
-    /* NOTE: using a pair as a key value should be legit, because when a pair
+    //! translate user IDs to internal surface indices
+    SurfaceRevIDMap _surfaceRevUserIds;
+
+    /* NOTE re: SCConnectMap:
+     * using a pair as a key value should be legit, because when a pair
      * searches by testing for "less than" or "greater than" it tests the first
      * member, then the second; so for all comparisons except for the surface
      * sense it tests only a memory reference (integer) and on the last
      * comparison it tests for the boolean sense. SO MAKE SURE QUADRIC AND
      * SENSE HAS QUADRIC DEFINED AS THE FIRST PART OF THE PAIR.
      */
-
-    //typedef std::pair< std::vector<Cell*>, std::vector<Cell*> > PmCellVec;
-    //std::map<Quadric*, PmCellVec> _surfToCellConnectivity;
-
-    // different (probably inferior) ways to do this might have been:
-    // std::map<Quadric*, std::vector< std::vector<Cell*> > > ???
-    // std::map<signed int, std::vector<Cell*> > ??? Maybe not since that will
-    // not be portable (if anything other than ints is used; also the
-    // conversion will not be efficient)
 
 
     //! keep track of surface neighborhood connectivity
@@ -133,15 +227,15 @@ private:
     //  and probably will be double-counted
     unsigned int _unMatchedSurfaces;
 
-    void _printQAS(const QuadricAndSense& qas) const;
+    void _printSAS(const SurfaceAndSense& qas) const;
 };
 /*----------------------------------------------------------------------------*/
 inline void MCGeometry::intersect(
                             const std::vector<double>& position,
                             const std::vector<double>& direction,
-                            const unsigned int oldCellId,
+                            const unsigned int oldCellIndex,
                             std::vector<double>& newPosition,
-                            unsigned int& newCellId,
+                            unsigned int& newCellIndex,
                             double& distanceTraveled,
                             ReturnStatus& returnStatus)
 {
@@ -151,20 +245,19 @@ inline void MCGeometry::intersect(
     Require(direction.size() == 3);
     Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
 
-    CellMap::iterator findResult = _cells.find(oldCellId);
-    Require(findResult != _cells.end());
+    Require(oldCellIndex < getNumCells());
 
     // a reference to the pointer to the old cell
-    Cell& oldCell = *(findResult->second);
+    CellT& oldCell = *(_cells[oldCellIndex]);
 
     // call intersect on the old cell to find the surface and distance that it
     // moves to
-    Quadric* hitQuadric;
-    bool     oldQuadricSense;
-    oldCell.intersect(position, direction, hitQuadric, oldQuadricSense,
+    Surface* hitSurface;
+    bool     oldSurfaceSense;
+    oldCell.intersect(position, direction, hitSurface, oldSurfaceSense,
                       distanceTraveled);
 
-    Check(hitQuadric != NULL);
+    Check(hitSurface != NULL);
     Check(distanceTraveled >= 0.0);
 
     returnStatus = MCG_NORMAL;
@@ -177,18 +270,18 @@ inline void MCGeometry::intersect(
 
 
     // ===== Loop over neighborhood cells
-    Cell::CellVec& neighborhood = oldCell.getNeighbors(hitQuadric);
+    CellT::CellVec& neighborhood = oldCell.getNeighbors(hitSurface);
 
     // loop through the old cell's hood to find if it's in one of those cells
-    for (Cell::CellVec::const_iterator it  = neighborhood.begin();
+    for (CellT::CellVec::const_iterator it  = neighborhood.begin();
                                        it != neighborhood.end(); ++it)
     {
-        // check if the point is inside (and pass hitQuadric to exclude
+        // check if the point is inside (and pass hitSurface to exclude
         // checking it)
-        if ( (*it)->isPointInside( newPosition, hitQuadric ) )
+        if ( (*it)->isPointInside( newPosition, hitSurface ) )
         {
             //we have found the new cell
-            newCellId = (*it)->getUserId();
+            newCellIndex = (*it)->getIndex();
 
 //            cout << "Found ending cell " << newCellId
 //                 << " already connected to starting cell "
@@ -203,7 +296,7 @@ inline void MCGeometry::intersect(
     // surface 2, and our cell is defined as being -2, then the cell on the
     // other side has to have orientation +2
 
-    QuadricAndSense searchQas(hitQuadric, !oldQuadricSense);
+    SurfaceAndSense searchQas(hitSurface, !oldSurfaceSense);
 
     SCConnectMap::iterator cellList
                  = _surfToCellConnectivity.find(searchQas);
@@ -211,12 +304,12 @@ inline void MCGeometry::intersect(
 
     CellVec& cellsToCheck = cellList->second;
 
-    for (Cell::CellVec::iterator pNewCell  = cellsToCheck.begin();
-                                 pNewCell != cellsToCheck.end(); ++pNewCell)
+    for (CellT::CellVec::iterator pNewCell  = cellsToCheck.begin();
+                                  pNewCell != cellsToCheck.end(); ++pNewCell)
     {
-        // check if the point is inside (and pass hitQuadric to exclude
+        // check if the point is inside (and pass hitSurface to exclude
         // checking it)
-        if ( (*pNewCell)->isPointInside( newPosition, hitQuadric ) )
+        if ( (*pNewCell)->isPointInside( newPosition, hitSurface ) )
         {
             // if this is the first cell linked to this surface, we decrement 
             // the unmatched surfaces
@@ -226,8 +319,8 @@ inline void MCGeometry::intersect(
             // add new cell to old cell's hood connectivity
             neighborhood.push_back(*pNewCell);
 
-            Cell::CellVec& newNeighborhood
-                = (*pNewCell)->getNeighbors(hitQuadric);
+            CellT::CellVec& newNeighborhood
+                = (*pNewCell)->getNeighbors(hitSurface);
 
             // if this is the first cell linked to this surface, we decrement 
             // the unmatched surfaces
@@ -238,7 +331,7 @@ inline void MCGeometry::intersect(
             newNeighborhood.push_back(&oldCell);
 
             // we have found the new cell
-            newCellId = (*pNewCell)->getUserId();
+            newCellIndex = (*pNewCell)->getIndex();
 
 //            cout << "Connected ending cell " << newCellId
 //                 << " to starting cell " << oldCellId << endl;
@@ -252,7 +345,7 @@ inline void MCGeometry::intersect(
     // ones that we already checked in the cell's hood; means more loops but
     // fewer flops in the "is inside" method calls
 
-    newCellId = 0;
+    newCellIndex = -1;
     returnStatus = MCG_LOST;
     Insist(0, "Ruh-roh, new cell not found!");
 }
@@ -260,18 +353,23 @@ inline void MCGeometry::intersect(
 inline unsigned int MCGeometry::findCell(
                                 const std::vector<double>& position) const
 {
-    // loop through all cells in problem
-    CellMap::const_iterator itCel = _cells.begin();
-    
-    while (itCel != _cells.end()) {
-        if (itCel->second->isPointInside(position))  {
-            return itCel->first;
+  //  // loop through all cells in problem
+  //  for (CellVec::const_iterator itCel = _cells.begin();
+  //                               itCel != _cells.end();  ++itCel)
+  //  {
+  //      if ((*itCel)->isPointInside(position))  {
+  //          return itCel - _cells.begin(); // maybe valid?
+  //      }
+  //  }
+    // that might be faster than this:
+    for (unsigned int i = 0; i < _cells.size(); ++i) {
+        if (_cells[i]->isPointInside(position)) {
+            return i;
         }
-
-        ++itCel;
     }
 
-    // cell not found!
+    // return a status value or something instead of failing miserably?
+    Insist(0, "Could not find cell!");
     return 0;
 }
 /*----------------------------------------------------------------------------*/

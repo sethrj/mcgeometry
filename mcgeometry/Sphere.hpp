@@ -15,7 +15,7 @@
 #include "transupport/VectorMath.hpp"
 #include "transupport/dbc.hpp"
 #include "transupport/SoftEquiv.hpp"
-#include "Quadric.hpp"
+#include "Surface.hpp"
 
 namespace mcGeometry {
 /*============================================================================*/
@@ -25,7 +25,7 @@ namespace mcGeometry {
  *
  * Positive sense is the outward normal.
  */
-class Sphere : public Quadric {
+class Sphere : public Surface {
 public:
     Sphere(std::vector<double>& C, double R)
         : _center(C), _radius(R)
@@ -33,7 +33,15 @@ public:
         Insist(R > 0, "Sphere must have positive radius.");
     }
 
-    Sphere* clone() const { return new Sphere(*this); }
+    Sphere(const Sphere& oldSphere, const UserSurfaceIdType& newId)
+        : Surface(newId),
+          _center(oldSphere._center),
+          _radius(oldSphere._radius)
+    { /* * */ }
+
+    Sphere* clone(const UserSurfaceIdType& newId) const {
+        return new Sphere(*this, newId);
+    }
 
     bool hasPosSense(const std::vector<double>& position) const;
 
@@ -76,7 +84,7 @@ inline bool Sphere::hasPosSense(const std::vector<double>& position) const
 }
 
 /*----------------------------------------------------------------------------*/
-inline Quadric::HitAndDist Sphere::intersect(
+inline Surface::HitAndDist Sphere::intersect(
         const std::vector<double>& position, 
         const std::vector<double>& direction, bool posSense) const
 {
@@ -96,7 +104,7 @@ inline Quadric::HitAndDist Sphere::intersect(
     }
 
     // find distance and whether it intercepts
-    Quadric::HitAndDist theResult =
+    Surface::HitAndDist theResult =
         _calcQuadraticIntersect(
             1,  // A
             B,  // B

@@ -10,7 +10,7 @@
 #define MCG_ELLIPSOID_HPP
 
 #include <vector>
-#include "Quadric.hpp"
+#include "Surface.hpp"
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
@@ -18,7 +18,7 @@ namespace mcGeometry {
  * \class Ellipsoid
  * \brief A general ellipsoid
  */
-class Ellipsoid : public Quadric {
+class Ellipsoid : public Surface {
 public:
     Ellipsoid() {   }
 

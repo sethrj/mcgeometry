@@ -1,10 +1,9 @@
 /*!
- * \file Quadric.hpp
+ * \file Surface.hpp
  * \brief The parent abstract class of all the other surfaces
- * \author Jeremy L. Conlin
+ * \author Jeremy L. Conlin and Seth R. Johnson
  * 
  */
-
 
 #ifndef MCG_QUADRIC_HPP
 #define MCG_QUADRIC_HPP
@@ -23,15 +22,20 @@ namespace mcGeometry {
 
 /*----------------------------------------------------------------------------*/
 /*!
- * \class Quadric
+ * \class Surface
  * \brief The parent abstract class of all the other surfaces .
  *
  * This defines an interface so that all kinds of surfaces can appear as the
  * same general object.
  */
-class Quadric {
-    //! Output a Quadric to a stream 
-    friend std::ostream& operator<<( std::ostream&, const Quadric& );
+
+// template <typename UserSurfaceIdType>
+class Surface {
+protected:
+    typedef unsigned int UserSurfaceIdType;
+private:
+    //! Output a Surface to a stream 
+    friend std::ostream& operator<<( std::ostream&, const Surface& );
 public:
     typedef std::pair<bool, double> HitAndDist;
 
@@ -44,20 +48,28 @@ public:
                                  bool PosSense) const = 0;
 
     //! create a copy of ourself
-    virtual Quadric* clone() const = 0;
+    virtual Surface* clone(const UserSurfaceIdType& newId) const = 0;
 
     //!Calculate whether a point has a positive 
-    // sense to this quadric without doing all the distance calcs
+    // sense to this surface without doing all the distance calcs
     virtual bool hasPosSense(const std::vector<double>& position) const = 0;
 
-    // NOTE: this must be public if we ever have a generic Quadric
-    virtual ~Quadric() {
-//        cout << "Oh no, I (quadric " << this << ") am dying!" << endl;
+    // NOTE: this must be public if we ever have a generic Surface
+    virtual ~Surface() {
+//        cout << "Oh no, I (surface  << this << ") am dying!" << endl;
         /* * */
     }
 
+    const UserSurfaceIdType& getUserId() const {
+        return _userId;
+    }
+
 protected:
-    Quadric() { /* * */ }
+    Surface() : _userId()
+    { /* * */ }
+
+    Surface(const UserSurfaceIdType& userId) : _userId(userId)
+    { /* * */ }
 
     bool _hasPosSense(const double eval) const;
     HitAndDist _calcQuadraticIntersect( double A, double B, double C,
@@ -65,18 +77,22 @@ protected:
 
     //! output to a stream
     virtual std::ostream& _output( std::ostream& os ) const = 0;
+
+private:
+    //! hold the user's identification of this surface
+    UserSurfaceIdType _userId;
 };
 /*----------------------------------------------------------------------------*/
 
 // Defining this function here gives us the ability to make the same decision 
-// for all Quadric surfaces in one place.
-inline bool Quadric::_hasPosSense(const double eval) const{
+// for all Surface surfaces in one place.
+inline bool Surface::_hasPosSense(const double eval) const{
     // Positive sense includes points "on" the surface (i.e. includes zero)
     // negative sense if the evaluated is strictly less than zero
     return ( eval >= 0 );
 }
 
-inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(
+inline Surface::HitAndDist Surface::_calcQuadraticIntersect(
         double A, double B, double C, bool posSense) const
 {
     bool particleHitsSurface = false;
@@ -128,11 +144,24 @@ inline Quadric::HitAndDist Quadric::_calcQuadraticIntersect(
 }
 
 /*----------------------------------------------------------------------------*/
-//! \brief Output a general Quadric-descended surface
+//! \brief Output a general Surface-descended surface
 // for polymorphism, we have to call a private inherited method
-inline std::ostream& operator<<( std::ostream& os, const Quadric& q)
+inline std::ostream& operator<<( std::ostream& os, const Surface& q)
 {
     return q._output(os);
+}
+
+//! \brief Output a Surface and its corresponding sense
+inline std::ostream& operator<<( std::ostream& os,
+                const std::pair<Surface*, bool>& surfAndSense)
+{
+    if (surfAndSense.second == true)
+        os << "+";
+    else
+        os << "-";
+    os << *(surfAndSense.first);
+
+    return os;
 }
 /*----------------------------------------------------------------------------*/
 } // end namespace mcGeometry
