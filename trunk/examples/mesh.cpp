@@ -117,8 +117,10 @@ void Mesh(int N){
 }
 
 //! MeshTiming will perform some timing tests to see how much faster the 
-//! the connected geometry is.
-void MeshTiming(int, mcGeometry::MCGeometry&){
+//! the connected geometry is.  N is the number of mesh cells in each 
+//! dimension.
+void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
+
 }
 
 
