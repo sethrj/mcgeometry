@@ -1,0 +1,17 @@
+#import os
+
+Import('env')
+Import('useLibrary')
+e = env.Clone()
+
+useLibrary(e, 'transupport')
+useLibrary(e, 'mcgeometry')
+
+Import('outputDirPath')
+
+sourceFiles = Glob('*.cpp')
+
+e.Program(outputDirPath + 'example', 'example.cpp')
+
+
+
