@@ -23,7 +23,9 @@ void MeshTiming(int, mcGeometry::MCGeometry&);
 
 int main(int argc, char* argv[]){
 
-    int N(5);
+    Require( argc == 2 );
+
+    int N( std::atoi(argv[1]) );
     Mesh(N);
 
     return 0;
@@ -109,6 +111,22 @@ void Mesh(int N){
 //      cout << endl;
     }
 
+    // Create cells defining every thing outside of mesh
+    Surfaces.resize(1); Surfaces[0] = -1;   // minX
+    Geo.addCell(ID, Surfaces); ++ID;
+    Surfaces[0] = N+1;                      // maxX
+    Geo.addCell(ID, Surfaces); ++ID;
+    Surfaces[0] *= -1; Surfaces.push_back(1); 
+    Surfaces.push_back(-1*(N+2));              // minY
+    Geo.addCell(ID, Surfaces); ++ID;
+    Surfaces[2] = 2*(N+1);                  // maxY
+    Geo.addCell(ID, Surfaces); ++ID;
+    Surfaces[2] *= -1; Surfaces.push_back(N+2);
+    Surfaces.push_back(-2*(N+3));              // minZ
+    Geo.addCell(ID, Surfaces); ++ID;
+    Surfaces[4] = 3*(N+1);                  // maxZ
+    Geo.addCell(ID, Surfaces);
+
     MeshTiming(N, Geo);
 
     std::vector<double> limits(6, 0.0);
@@ -121,6 +139,42 @@ void Mesh(int N){
 //! dimension.
 void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
 
+    mcGeometry::MCGeometry::UserCellIDType ID(0);
+    mcGeometry::MCGeometry::UserCellIDType newID(0);
+    mcGeometry::MCGeometry::ReturnStatus RS;
+
+    std::vector<double> position(3,0.0);
+    std::vector<double> newPos(3,0.0);
+    double distance;
+
+    // Create possible directions
+    std::vector<double> dir(3,0.0);
+    std::vector<std::vector<double> > directions;
+    std::vector<std::vector<double> >::iterator dirIter;
+    dir[0] = 1.0;                   // Positive x-direction
+    directions.push_back(dir);
+    dir[0] = 0.0; dir[1] = -1.0;    // Negative y-direction
+    directions.push_back(dir);
+    dir[1] = 0.0; dir[2] = -1.0;    // Negative z-direction
+    directions.push_back(dir);
+
+    for( int k = 0; k < N; ++k ){
+        position[2] = k + 0.5;
+        for( int j = 0; j < N; ++j ){
+            position[1] = j + 0.5;
+            for( int i = 0; i < N; ++i ){
+                position[0] = i + 0.5;
+                cout << "ID = " << ID << ", position: " << position << endl;
+                for( dirIter = directions.begin(); dirIter != directions.end();
+                        ++dirIter ){
+                    Geo.intersect(position, *dirIter, ID, newPos, newID, 
+                                    distance, RS);
+                }
+                ++ID;
+            }
+            cout << endl;
+        }
+    }
 }
 
 
