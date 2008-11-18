@@ -186,7 +186,7 @@ void runTests() {
 
     createGeometry(theGeom, true);
 
-    theGeom.debugPrint();
+//    theGeom.debugPrint();
 
     // ==== test a variety of locations and directions
     unsigned int numLocs = 8;
@@ -270,11 +270,11 @@ void runTests() {
                                     newCellIndex,
                                     distance,
                                     returnStatus);
-                cout << "New cell index = " << newCellIndex
-                     << "; user cell id = "
-                     << theGeom.getUserIdFromCellIndex(newCellIndex)
-                     << "; expected" << expectedEndingCells[startLoc][dir]
-                     << endl;
+//                cout << "New cell index = " << newCellIndex
+//                     << "; user cell id = "
+//                     << theGeom.getUserIdFromCellIndex(newCellIndex)
+//                     << "; expected" << expectedEndingCells[startLoc][dir]
+//                     << endl;
 
 
                 correctEndingCells = 
@@ -287,7 +287,7 @@ void runTests() {
         
     }
 
-    theGeom.debugPrint();
+//    theGeom.debugPrint();
 }
 
 /*============================================================================*/
