@@ -1,8 +1,0 @@
-<area shape="rect" href="$_cylinder_8hpp.html" title="mcgeometry/Cylinder.hpp" alt="" coords="450,80,626,107">
-<area shape="rect" href="$dbc_8hpp.html" title="Design by contract." alt="" coords="740,304,884,331">
-<area shape="rect" href="$_soft_equiv_8hpp.html" title="Just loads VectorComp and SoftEquiv (easier to remember)." alt="" coords="922,155,1100,182">
-<area shape="rect" href="$_quadric_8hpp.html" title="The parent abstract class of all the other surfaces." alt="" coords="170,155,266,182">
-<area shape="rect" href="$_unit_tester_8hpp.html" title="Unit test master class." alt="" coords="1226,80,1410,107">
-<area shape="rect" href="$_vector_math_8hpp.html" title="Does useful things to double vectors." alt="" coords="442,155,634,182">
-<area shape="rect" href="$_vector_print_8hpp.html" title="Implementation of a function that prints a vector." alt="" coords="658,155,847,182">
-<area shape="rect" href="$_vector_comp_8hpp.html" title="Recursive comparisons on vectors of vectors of ... of doubles." alt="" coords="922,230,1044,256">

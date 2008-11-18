@@ -43,7 +43,7 @@ void runTests() {
     Plane thePlane(normal, center);
 
     /* * * create cell boundaries * * */
-    Cell::QASVec cellBoundaries(2);
+    Cell<unsigned int>::SASVec cellBoundaries(2);
 
     // define it as inside sphere to the right of plane
     cellBoundaries[0] = std::make_pair(&theSphere, false);
@@ -51,7 +51,9 @@ void runTests() {
 
 
     /* * * create the cell * * */
-    Cell theCell(cellBoundaries);
+    Cell<unsigned int> theCell(cellBoundaries, 211, 1);
+    TESTER_CHECKFORPASS(theCell.getUserId() == 211);
+    TESTER_CHECKFORPASS(theCell.getIndex() == 1);
 
     /* * * CHECK VARIOUS POINTS * * */
     doubleVec particleLoc(3,0.0);
@@ -73,14 +75,14 @@ void runTests() {
 
     particleDir[0] = -1.0;
 
-    Quadric* hitQuadric;
+    Surface* hitSurface;
     bool     quadricSense;
     double   distance;
 
-    theCell.intersect(particleLoc, particleDir, hitQuadric, quadricSense,
+    theCell.intersect(particleLoc, particleDir, hitSurface, quadricSense,
                       distance);
 
-    TESTER_CHECKFORPASS( hitQuadric   == &thePlane );
+    TESTER_CHECKFORPASS( hitSurface   == &thePlane );
     TESTER_CHECKFORPASS( quadricSense == true );
     TESTER_CHECKFORPASS( softEquiv(distance, 0.5) );
     
@@ -91,10 +93,10 @@ void runTests() {
 //    cout << "Position: " << particleLoc
 //         << " Direction: " << particleDir << endl;
 
-    theCell.intersect(particleLoc, particleDir, hitQuadric, quadricSense,
+    theCell.intersect(particleLoc, particleDir, hitSurface, quadricSense,
                       distance);
 
-    TESTER_CHECKFORPASS( hitQuadric   == &theSphere );
+    TESTER_CHECKFORPASS( hitSurface   == &theSphere );
     TESTER_CHECKFORPASS( quadricSense == false );
     TESTER_CHECKFORPASS( softEquiv(distance, 0.5) );
 }

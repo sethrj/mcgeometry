@@ -1,18 +1,20 @@
 /*!
  * \file MCGeometry.cpp
- * \brief Topmost geometry class
+ * \brief MCGeometry class
  * \author Seth R. Johnson
  * 
- * The MCGeometry parent class handles all the external associations between
- * Surfaces and Cells. It maps the user's IDs to internal pointers for both
- * surfaces and cells.
+ * The cpp file should hold methods that are *not* speed-critical. (It may be
+ * a trivial difference but we can find out later.) For example, the Intersect
+ * method should remain in the header because that is run on every particle
+ * every event, but the geometry creation and output is only called outside of
+ * the main problem.
  */
 
 #include <utility>
 #include <map>
 #include "transupport/dbc.hpp"
 #include "MCGeometry.hpp"
-#include "Quadric.hpp"
+#include "Surface.hpp"
 #include "Cell.hpp"
 
 #include <iostream>
@@ -22,41 +24,47 @@ using std::endl;
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
 
-void MCGeometry::addSurface( const unsigned int surfaceId,
-                                    const Quadric& inQuadric)
+unsigned int MCGeometry::addSurface( const MCGeometry::UserSurfaceIDType
+                                                             userSurfaceId,
+                                     const Surface& inSurface)
 {
-    Insist(surfaceId > 0, "Things will break if surfaceId = 0 is allowed.");
-
-    // (the return value from "insert" has a weird type)
-    typedef std::pair<SurfaceMap::iterator, bool> ReturnedPair;
+    // this is ONLY if we are using MCNP-type input definitions
+    Insist(userSurfaceId > 0, "Things will break if surfaceId = 0 is allowed.");
 
     // "clone" calls a routine in the quadric which allocates new memory
     // WE ARE NOW RESPONSIBLE FOR THIS MEMORY (and must delete it when
     // appropriate)
-    Quadric* newQuadric = inQuadric.clone();
+    Surface* newSurface = inSurface.clone(userSurfaceId);
 
-    ReturnedPair result =
-        _surfaces.insert( std::make_pair(surfaceId, newQuadric) );
+    _surfaces.push_back(newSurface);
+    unsigned int newSurfaceIndex = _surfaces.size() - 1;
 
-    // check return value to make sure surfaceId was not already taken
+    // add the reverse mapping and 
+    // verify that this surface has not been added already (i.e. the
+    // UserSurfaceIDType is unique)
+    std::pair<SurfaceRevIDMap::iterator, bool> result
+        = _surfaceRevUserIds.insert(
+                std::make_pair(userSurfaceId, newSurfaceIndex));
+
+//    cout << "Added surface with ID " << userSurfaceId
+//         << "that has index " << newSurfaceIndex << endl;
+
     Insist(result.second == true,
-            "Tried to add a surface with an ID that was already there.");
+             "Tried to add a surface with an ID that was already there.");
 
+    Check(_surfaceRevUserIds.size() == _surfaces.size());
 
-    // **** temporary code? ****
-    _surfaceIds.insert( std::make_pair(newQuadric, surfaceId) );
-
+    return newSurfaceIndex;
 }
 
 /*----------------------------------------------------------------------------*/
-void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
+unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
+                                                             userCellId,
+                                 const IntVec surfaceIds)
 {
-    typedef std::pair<CellMap::iterator, bool>      CMReturnedPair;
-    typedef std::pair<SCConnectMap::iterator, bool> SCCMReturnedPair;
-
     //---- convert surface ID to pairs of unsigned ints (surfaceIds) and bools
     //                                                  (surface sense) -----//
-    QASVec boundingSurfaces;
+    SASVec boundingSurfaces;
 
     // bounding surfaces should have same length as input list of surface IDs
     // so from the start just reserve that many spaces in memory
@@ -68,7 +76,7 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
     for (IntVec::const_iterator it = surfaceIds.begin();
                                 it != surfaceIds.end(); ++it) {
         unsigned int userSurfaceId; //an integer that only the user deals with
-        QuadricAndSense newSurface;
+        SurfaceAndSense newSurface;
 
         if (*it > 0) // user inputs a positive value (positive sense surface)
         {
@@ -81,46 +89,45 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
             newSurface.second = false;
         }
 
-        // translate the user's given surface ID to a Quadric pointer
-        SurfaceMap::iterator findSMResult = 
-            _surfaces.find(userSurfaceId);
-
-        if (findSMResult == _surfaces.end()) {
-            Insist(0,
-            "FATAL ERROR: this cell references a surface that does not exist.");
-        }
-        // the value from the find result is the pointer to the Quadric
-        newSurface.first = findSMResult->second;
+        // the value from the find result is the internal index
+        newSurface.first = _surfaces[getSurfaceIndexFromUserId(userSurfaceId)];
 
         // add the surface to the vector of bounding surfaces
         boundingSurfaces.push_back(newSurface);
 
         // this counts as another unmatched surface
         _unMatchedSurfaces++;
-//        cout << "Added surface " << userSurfaceId << " to cell " << cellId
+//        cout << "Added surface " << userSurfaceId << " to cell " << userCellId
 //             << " (unmatched surface count: " << _unMatchedSurfaces << ")"
 //             << endl;
     }
 
     Check(surfaceIds.size() == boundingSurfaces.size());
 
-    // TODO: make sure surfaces inside each cell are unique (no duplications or
-    // having both plus and minus)
+    //====== add cell to the internal cell vector
+    unsigned int newCellIndex = _cells.size();
 
-    //====== add cell to the map
-    Cell* newCell = new Cell(boundingSurfaces, cellId);
-    CMReturnedPair result =
-        _cells.insert( std::make_pair(cellId, newCell) );
+    CellT* newCell = new CellT(boundingSurfaces, userCellId, newCellIndex);
+    _cells.push_back(newCell);
 
-    // check return value to make sure surfaceId was not already taken
+//    cout << "Added cell with ID " << userCellId
+//         << "that has index " << newCellIndex << endl;
+
+    // add the reverse mapping and 
+    // verify that this surface has not been added already (i.e. the
+    // UserSurfaceIDType is unique)
+    std::pair<CellRevIDMap::iterator, bool> result
+        = _cellRevUserIds.insert(
+                std::make_pair(userCellId, newCellIndex));
+
     Insist(result.second == true,
             "Tried to add a cell with an ID that was already there.");
 
     //====== loop back through the surfaces and add the connectivity
-    for (QASVec::iterator bsIt = boundingSurfaces.begin();
+    for (SASVec::iterator bsIt = boundingSurfaces.begin();
                           bsIt != boundingSurfaces.end(); ++bsIt)
     {
-        QuadricAndSense &newQandS = *bsIt;
+        SurfaceAndSense &newQandS = *bsIt;
 
         // using the "associative array" capability of maps lets us access a
         // key, and it will either automatically initialize an empty vector or
@@ -128,141 +135,130 @@ void MCGeometry::addCell(const unsigned int cellId, const IntVec surfaceIds)
         // see C++ Standard Library pp. 182-183
         _surfToCellConnectivity[newQandS].push_back(newCell);
     }
+
+    return newCellIndex;
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::debugPrint() const
 {
-    //-------------- PRINT SURFACES ----------------//
+    //-------------- PRINT USER SURFACE IDs ----------------//
     cout << "SURFACES: " << endl;
-    SurfaceMap::const_iterator itSur = _surfaces.begin();
-    
-    while (itSur != _surfaces.end()) {
-        cout << " SURFACE " << itSur->first << ": "
-             << *(itSur->second) << endl;
-        ++itSur;
+    for (SurfaceVec::const_iterator surfIt  = _surfaces.begin();
+                                    surfIt != _surfaces.end(); ++surfIt)
+    {
+        cout << " SURFACE " << (*surfIt)->getUserId() << ": "
+             << *(*surfIt) << endl;
     }
 
     //-------------- PRINT CELLS TO SURFACES ----------------//
     cout << "CELLS: " << endl;
-    CellMap::const_iterator celIt = _cells.begin();
     
-    while (celIt != _cells.end()) {
-        cout << " CELL " << celIt->first << ": ";
+    for (CellVec::const_iterator cellIt = _cells.begin();
+                                 cellIt != _cells.end(); ++cellIt)
+    {
+        cout << " CELL " << (*cellIt)->getUserId() << ": ";
 
         // query cell for surface pointers
-        const QASVec& boundingSurfaces = celIt->second->getBoundingSurfaces();
+        const CellT::SASVec& boundingSurfaces =
+                        (*cellIt)->getBoundingSurfaces();
 
-        QASVec::const_iterator bsIt = boundingSurfaces.begin();
-
-        while (bsIt != boundingSurfaces.end()) {
-
-            _printQAS(*bsIt);
+        for (CellT::SASVec::const_iterator bsIt  = boundingSurfaces.begin(); 
+                                        bsIt != boundingSurfaces.end(); ++bsIt)
+        {
+            _printSAS(*bsIt);
             cout << " ";
-
-            ++bsIt;
         }
 
         cout << endl;
-        ++celIt;
     }
 
-    cout << "SURFACES TO CELLS: " << endl;
     //-------------- PRINT SURFACES TO CELLS ----------------//
-    SCConnectMap::const_iterator surfToCellIt = _surfToCellConnectivity.begin();
-    
-    while (surfToCellIt != _surfToCellConnectivity.end()) {
+    cout << "SURFACES TO CELLS: " << endl;
+
+    for (SCConnectMap::const_iterator
+            surfToCellIt = _surfToCellConnectivity.begin();
+            surfToCellIt != _surfToCellConnectivity.end();
+            ++surfToCellIt)
+    {
         // print the surface and orientation
         cout << " ";
 
-        _printQAS(surfToCellIt->first);
+        _printSAS(surfToCellIt->first);
 
         cout << ": ";
         
         // print the cells
         const CellVec& theCells = surfToCellIt->second;
 
-        CellVec::const_iterator cIt = theCells.begin();
-        while (cIt != theCells.end()) {
+        for (CellVec::const_iterator cIt = theCells.begin();
+                                     cIt != theCells.end(); ++cIt)
+        {
             cout << (*cIt)->getUserId() << " ";
-
-            ++cIt;
         }
 
         cout << endl;
-        ++surfToCellIt;
     }
 
     cout << "NEIGHBORHOOD CONNECTIVITY: " << endl;
     //-------------- PRINT CELLS TO CELLS ----------------//
-    celIt = _cells.begin();
-    
-    while (celIt != _cells.end()) {
-        cout << " CELL " << celIt->first << ": ";
+    for (CellVec::const_iterator cellIt = _cells.begin();
+                                 cellIt != _cells.end(); ++cellIt)
+    {
+        cout << " CELL " << (*cellIt)->getUserId() << ": ";
 
         // query cell for surface pointers
-        const QASVec& boundingSurfaces = celIt->second->getBoundingSurfaces();
+        const SASVec& boundingSurfaces = (*cellIt)->getBoundingSurfaces();
 
-        QASVec::const_iterator bsIt = boundingSurfaces.begin();
-
-        while (bsIt != boundingSurfaces.end()) {
-
-            _printQAS(*bsIt);
+        for (SASVec::const_iterator bsIt = boundingSurfaces.begin();
+                                    bsIt != boundingSurfaces.end(); bsIt++)
+        {
+            _printSAS(*bsIt);
             cout << ":{";
 
             const CellVec& otherCells =
-                celIt->second->getNeighbors(bsIt->first);
+                (*cellIt)->getNeighbors(bsIt->first);
 
-            CellVec::const_iterator outCelIt = otherCells.begin();
-
-            while (outCelIt != otherCells.end()) {
+            for (CellVec::const_iterator outCelIt = otherCells.begin(); 
+                                         outCelIt != otherCells.end();
+                                         ++outCelIt)
+            {
                 cout << (*outCelIt)->getUserId() << " ";
-
-                ++outCelIt;
             }
             cout << "} ";
-            ++bsIt;
         }
 
         cout << endl;
-        ++celIt;
     }  
 }
 
 /*----------------------------------------------------------------------------*/
-void MCGeometry::_printQAS(const QuadricAndSense& qas) const
+// TODO: make ostream<<(std::pair<Surface*, bool>)
+void MCGeometry::_printSAS(const SurfaceAndSense& qas) const
 {
     if (qas.second == true)
         cout << "+";
     else
         cout << "-";
 
-    SurfaceUserIdMap::const_iterator findResult = _surfaceIds.find(qas.first);
-    Require(findResult != _surfaceIds.end());
-    // print the "value" corresponding to the key (i.e. unsigned int)
-    cout << findResult->second;
+    cout << qas.first->getUserId();
 }
 /*----------------------------------------------------------------------------*/
+// clean up after ourselves
 MCGeometry::~MCGeometry()
 {
-    // clean up after ourselves
-    
-
-    SurfaceMap::iterator itSur = _surfaces.begin();
-    
-    while (itSur != _surfaces.end()) {
-        // delete the surface to which the iterator points
-        delete itSur->second;
-
-        ++itSur;
+    // map iterators act as a pointer to (key, value) pair
+    for (SurfaceVec::iterator surfIt = _surfaces.begin();
+                              surfIt != _surfaces.end(); ++surfIt)
+    {
+        // dereferenced iterator is a pointer to the surface we need to delete
+        delete (*surfIt);
     }
     
-    CellMap::iterator celIt = _cells.begin();
-    
-    while (celIt != _cells.end()) {
-        // delete the cell to which the iterator points
-        delete celIt->second;
-
-        ++celIt;
+    for (CellVec::iterator cellIt = _cells.begin();
+                           cellIt != _cells.end(); ++cellIt)
+    {
+        // dereferenced iterator is a pointer to the cell we need to delete
+        delete (*cellIt);
     }
 }
 

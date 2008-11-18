@@ -25,7 +25,7 @@ using std::endl;
 typedef std::vector<double> doubleVec;
 typedef std::vector<signed int> intVec;
 
-void createGeometry( MCGeometry& theGeom) {
+void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     /* * * create sphere * * */
     doubleVec center(3,0.0);
     double      sphRadius = 3.0;
@@ -53,53 +53,65 @@ void createGeometry( MCGeometry& theGeom) {
     Plane plane4(normal, center);
 
     //========== ADD SURFACES
-    theGeom.addSurface(5, theSphere);
+    unsigned int surfaceIndex;
 
-    theGeom.addSurface(1, plane1);
-    theGeom.addSurface(2, plane2);
-    theGeom.addSurface(3, plane3);
-    theGeom.addSurface(4, plane4);
+    surfaceIndex = theGeom.addSurface(5, theSphere);
+    
+    if (doCheck)
+    TESTER_CHECKFORPASS(surfaceIndex == 0);
 
+    surfaceIndex = theGeom.addSurface(1, plane1);
+    surfaceIndex = theGeom.addSurface(2, plane2);
+    surfaceIndex = theGeom.addSurface(3, plane3);
+    surfaceIndex = theGeom.addSurface(4, plane4);
+    
+    if (doCheck)
+    TESTER_CHECKFORPASS(surfaceIndex == 4);
 
     //========== ADD CELLS
     intVec theSurfaces(4,0);
+    unsigned int cellIndex;
 
     theSurfaces[0] = -5;
     theSurfaces[1] = -1;
     theSurfaces[2] =  3;
     theSurfaces[3] =  4;
 
-    theGeom.addCell(10, theSurfaces);
+    cellIndex = theGeom.addCell(10, theSurfaces);
+    if (doCheck)
+    TESTER_CHECKFORPASS(cellIndex == 0);
 
     theSurfaces[0] = -5;
     theSurfaces[1] = -1;
     theSurfaces[2] =  2;
     theSurfaces[3] = -4;
 
-    theGeom.addCell(20, theSurfaces);
+    cellIndex = theGeom.addCell(20, theSurfaces);
 
     theSurfaces[0] = -5;
     theSurfaces[1] = -2;
     theSurfaces[2] =  3;
     theSurfaces[3] = -4;
 
-    theGeom.addCell(30, theSurfaces);
+    cellIndex = theGeom.addCell(30, theSurfaces);
 
     theSurfaces.resize(2);
     theSurfaces[0] = -5;
     theSurfaces[1] =  1;
 
-    theGeom.addCell(40, theSurfaces);
+    cellIndex = theGeom.addCell(40, theSurfaces);
 
     theSurfaces[0] = -5;
     theSurfaces[1] = -3;
 
-    theGeom.addCell(50, theSurfaces);
+    cellIndex = theGeom.addCell(50, theSurfaces);
 
     theSurfaces.resize(1);
     theSurfaces[0] = 5;
 
-    theGeom.addCell(60, theSurfaces);
+    cellIndex = theGeom.addCell(60, theSurfaces);
+    if (doCheck) 
+    TESTER_CHECKFORPASS(cellIndex == 5);
 
 }
 /*============================================================================*/
@@ -172,9 +184,9 @@ void runTests() {
 
     MCGeometry theGeom;
 
-    createGeometry(theGeom);
+    createGeometry(theGeom, true);
 
-//    theGeom.debugPrint();
+    theGeom.debugPrint();
 
     // ==== test a variety of locations and directions
     unsigned int numLocs = 8;
@@ -202,15 +214,26 @@ void runTests() {
             index++;
         }
     }
+    
+    // ==== cell translation
+    unsigned int userCellIds[] = {10, 20, 30, 40, 50, 60};
+    bool correctCellTranslation = true;
+
+    for (unsigned int i = 0; i < 6; i++) {
+        correctCellTranslation = 
+            correctCellTranslation &&
+            (theGeom.getUserIdFromCellIndex(i) == userCellIds[i]);
+    }
+    TESTER_CHECKFORPASS(correctCellTranslation);
 
     // ==== starting cells
-    unsigned int expectedStartingCells[] = {50, 50, 30, 10, 20, 10, 40, 40};
+    unsigned int expectedStartingCellIndex[] = {4, 4, 2, 0, 1, 0, 3, 3};
     bool correctStartingCells = true;
 
     for (unsigned int i = 0; i < numLocs; i++) {
         correctStartingCells = 
             correctStartingCells &&
-            (theGeom.findCell(locations[i]) == expectedStartingCells[i]);
+            (theGeom.findCell(locations[i]) == expectedStartingCellIndex[i]);
     }
     TESTER_CHECKFORPASS(correctStartingCells);
 
@@ -228,7 +251,7 @@ void runTests() {
     bool correctEndingCells = true;
 
     doubleVec    newPosition;
-    unsigned int newCellId;
+    unsigned int newCellIndex;
     double       distance;
     MCGeometry::ReturnStatus returnStatus;
 
@@ -242,22 +265,29 @@ void runTests() {
             for (unsigned int dir = 0; dir < 4; dir++) {
                 theGeom.intersect(  locations[startLoc],
                                     directions[dir],
-                                    expectedStartingCells[startLoc],
+                                    expectedStartingCellIndex[startLoc],
                                     newPosition,
-                                    newCellId,
+                                    newCellIndex,
                                     distance,
                                     returnStatus);
+                cout << "New cell index = " << newCellIndex
+                     << "; user cell id = "
+                     << theGeom.getUserIdFromCellIndex(newCellIndex)
+                     << "; expected" << expectedEndingCells[startLoc][dir]
+                     << endl;
+
 
                 correctEndingCells = 
                     correctEndingCells &&
-                    (newCellId == expectedEndingCells[startLoc][dir]);
+                    (theGeom.getUserIdFromCellIndex(newCellIndex)
+                            == expectedEndingCells[startLoc][dir]);
             }
         }
         TESTER_CHECKFORPASS(correctEndingCells);
         
     }
 
-//    theGeom.debugPrint();
+    theGeom.debugPrint();
 }
 
 /*============================================================================*/

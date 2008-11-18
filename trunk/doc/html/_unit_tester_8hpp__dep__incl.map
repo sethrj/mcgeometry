@@ -1,8 +1,0 @@
-<area shape="rect" href="$t_cell_8cpp.html" title="Unit tests for Cell." alt="" coords="5,84,91,111">
-<area shape="rect" href="$t_cylinder_8cpp.html" title="Unit tests for Cylinder." alt="" coords="115,84,232,111">
-<area shape="rect" href="$t_m_c_geometry_8cpp.html" title="Unit tests for MCGeometry." alt="" coords="256,84,405,111">
-<area shape="rect" href="$t_plane_8cpp.html" title="Test the Plane geometry capabilities." alt="" coords="429,84,525,111">
-<area shape="rect" href="$t_sphere_8cpp.html" title="Test the Sphere geometry capability." alt="" coords="549,84,659,111">
-<area shape="rect" href="$_unit_tester_8cpp.html" title="Unit test master class." alt="" coords="683,84,808,111">
-<area shape="rect" href="$t_vector_comp_8cpp.html" title="Unit tests for soft equivalence." alt="" coords="832,84,979,111">
-<area shape="rect" href="$t_vector_math_8cpp.html" title="Unit tests for vector math." alt="" coords="1003,84,1141,111">
