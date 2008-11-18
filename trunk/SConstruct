@@ -68,7 +68,7 @@ Export('outputDirPath')
 Export('useLibrary')
 
 # Tell all the inside directories to compile
-projectNames = ['transupport', 'mcgeometry']
+projectNames = ['transupport', 'mcgeometry', 'examples']
 
 for name in projectNames:
 	SConscript(name + '/SConscript', variant_dir=(buildDir + name))
