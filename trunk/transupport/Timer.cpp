@@ -135,24 +135,24 @@ void SuperTimer::printTimers() {
     TimerMap::iterator it;
 
     cout << "----------------------------------------"
-          << "------------------------------" << endl;
-    cout << "TIMING DATA:                        Name";
+         << "-----------------------------------" << endl;
+    cout << "TIMING DATA:                             Name";
     cout.width(30);
     cout << "Time" << endl;
     cout << "----------------------------------------"
-          << "------------------------------" << endl;
+         << "-----------------------------------" << endl;
 
     for (it = theTimers.begin(); it != theTimers.end(); it++) {
         string     timerName    = it->first;
         Timer *curTimer        = it->second;
         
-        cout.width(40);
+        cout.width(50);
         cout << timerName;
-        cout.width(30);
+        cout.width(25);
         cout << *curTimer << endl;
     }
     cout << "----------------------------------------"
-          << "------------------------------" << endl;
+         << "-----------------------------------" << endl;
 }
 
 /*----------------------------------------------------------------------------*/

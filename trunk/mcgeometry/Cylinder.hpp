@@ -150,7 +150,7 @@ template<unsigned int axis>
 class CylinderNormal : public Surface {
 public:
     //! generic cylinder constructor
-    CylinderNormal( double radius)
+    CylinderNormal( double radius )
         : _radius(radius) 
     {
         Require( _radius > 0.0 );
@@ -228,7 +228,7 @@ inline Surface::HitAndDist CylinderNormal<axis>::intersect(
                 const std::vector<double>& direction,
                 bool posSense) const
 {
-    return _calcQuadraticIntersect(0.0, 0.0, .0, posSense);
+    return _calcQuadraticIntersect(0.0, 0.0, 0.0, posSense);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>

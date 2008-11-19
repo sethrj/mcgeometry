@@ -13,6 +13,7 @@
 #include <utility>
 #include <map>
 #include "transupport/dbc.hpp"
+#include "transupport/VectorPrint.hpp"
 #include "MCGeometry.hpp"
 #include "Surface.hpp"
 #include "Cell.hpp"
@@ -137,6 +138,65 @@ unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
     }
 
     return newCellIndex;
+}
+/*----------------------------------------------------------------------------*/
+void MCGeometry::completedGeometryInput()
+{
+    // resize all vectors so that no space is wasted
+
+    // prevent new cells/surfaces from being added?
+
+    // make sure SCConnectMap is not empty for anything?
+
+    cout << "This doesn't do anything yet." << endl;
+}
+/*----------------------------------------------------------------------------*/
+void MCGeometry::_completedConnectivity()
+{
+    cout << "Connectivity is complete." << endl;
+}
+/*----------------------------------------------------------------------------*/
+void MCGeometry::_failGeometry(const std::string failureMessage,
+                               const unsigned int currentCellIndex,
+                               const std::vector<double>& position,
+                               const std::vector<double>& direction)
+{
+    Require(currentCellIndex < getNumCells());
+
+    cout << "ERROR IN GEOMETRY: " << failureMessage << endl;
+    
+    cout << "Current cell index [" << currentCellIndex
+         << "] user ID [" << _cells[currentCellIndex]->getUserId() << "]"
+         << endl;
+    cout << "Known cell connectivity: ";
+
+    const SASVec& boundingSurfaces
+            = _cells[currentCellIndex]->getBoundingSurfaces();
+
+    for (SASVec::const_iterator bsIt = boundingSurfaces.begin();
+                                bsIt != boundingSurfaces.end(); bsIt++)
+    {
+        _printSAS(*bsIt);
+        cout << ":[";
+
+        const CellVec& otherCells =
+            _cells[currentCellIndex]->getNeighbors(bsIt->first);
+
+        for (CellVec::const_iterator outCelIt = otherCells.begin(); 
+                                     outCelIt != otherCells.end();
+                                     ++outCelIt)
+        {
+            cout << (*outCelIt)->getUserId() << " ";
+        }
+        cout << "] ";
+    }
+
+
+    cout << "Was checking position " << position << " and direction "
+         << direction << endl;
+
+
+    Insist(0, "Geometry failure.");
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::debugPrint() const
