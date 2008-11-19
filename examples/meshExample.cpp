@@ -19,14 +19,16 @@ using std::cout;
 using std::endl;
 
 void CreateMesh(int, mcGeometry::MCGeometry&);
+void MeshTiming(int, mcGeometry::MCGeometry&, bool);
 void SimulateMC(int, mcGeometry::MCGeometry&, std::vector<double>& );
-void MeshTiming(int, mcGeometry::MCGeometry&);
 
 int main(int argc, char* argv[]){
 
-    Require( argc == 2 );
+    Insist( argc == 2, "Please input number of divisions along each axis." );
 
     int N( std::atoi(argv[1]) );
+
+    Insist( N > 0, "Number of divisions should be positive." );
 
     cout << "\n===============================\n"
          << "Example of creating/using a mesh-like geometry."
@@ -36,21 +38,31 @@ int main(int argc, char* argv[]){
     mcGeometry::MCGeometry Geo;
 
     
+    cout << "Creating the mesh..." << endl;
     TIMER_START("Create the mesh");
     CreateMesh(N, Geo);
     TIMER_STOP("Create the mesh");
 
 //    Geo.debugPrint();
 
+    cout << "Running forward sweep..." << endl;
     TIMER_START("Run without neighborhood (first sweep)");
-    MeshTiming(N, Geo);
+    MeshTiming(N, Geo, false);
     TIMER_STOP("Run without neighborhood (first sweep)");
 
 //    Geo.debugPrint();
 
-    TIMER_START("Run with neighborhood (second sweep)");
-    MeshTiming(N, Geo);
-    TIMER_STOP("Run with neighborhood (second sweep)");
+    cout << "Running full sweep..." << endl;
+    TIMER_START("Run with most neighborhood (second sweep)");
+    MeshTiming(N, Geo, true);
+    TIMER_STOP("Run with most neighborhood (second sweep)");
+
+//    Geo.debugPrint();
+
+    cout << "Running full sweep again..." << endl;
+    TIMER_START("Run with full neighborhood (third sweep)");
+    MeshTiming(N, Geo, true);
+    TIMER_STOP("Run with full neighborhood (third sweep)");
 
     std::vector<double> limits(6, 0.0);
     limits[1] = N; limits[3] = N; limits[3] = N;
@@ -96,7 +108,7 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
     mcGeometry::PlaneZ maxZ(N);
     Geo.addSurface(3*(N+1), maxZ);
 
-    cout << "Global binding box defined by following surfaces:\n"
+    cout << "Global bounding box defined by following surfaces:\n"
          << minX << "\n"<< minY << "\n"<< minZ << "\n"
          << maxX << "\n"<< maxY << "\n"<< maxZ << endl;
 
@@ -153,11 +165,13 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
     Surfaces.resize(3);
     Surfaces[0] = minXId;
     Surfaces[1] = -maxXId;
-    Surfaces[2] = maxYId;
-    Geo.addCell(ID, Surfaces); ++ID;
 
     Surfaces[2] = -minYId;
     Geo.addCell(ID, Surfaces); ++ID;
+
+    Surfaces[2] = maxYId;
+    Geo.addCell(ID, Surfaces); ++ID;
+
 
     
     Surfaces.resize(5);
@@ -165,19 +179,19 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
     Surfaces[1] = -maxXId;
     Surfaces[2] = minYId;
     Surfaces[3] = -maxYId;
-    Surfaces[4] = maxZId;
-    Geo.addCell(ID, Surfaces); ++ID;
 
     Surfaces[4] = -minZId;
     Geo.addCell(ID, Surfaces); ++ID;
 
+    Surfaces[4] = maxZId;
+    Geo.addCell(ID, Surfaces); ++ID;
 
 }
 
 //! MeshTiming will perform some timing tests to see how much faster the 
 //! the connected geometry is.  N is the number of mesh cells in each 
 //! dimension.
-void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
+void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
 
     mcGeometry::MCGeometry::UserCellIDType ID(0);
     mcGeometry::MCGeometry::UserCellIDType newID(0);
@@ -187,17 +201,31 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
     std::vector<double> newPos(3,0.0);
     double distance;
 
+
     // Create possible directions
     std::vector<double> dir(3,0.0);
     std::vector<std::vector<double> > directions;
-    std::vector<std::vector<double> >::iterator dirIter;
     dir[0] = 1.0;                   // Positive x-direction
     directions.push_back(dir);
-    dir[0] = 0.0; dir[1] = -1.0;    // Negative y-direction
+    dir[0] = 0.0; dir[1] = 1.0;    // Positive y-direction
     directions.push_back(dir);
-    dir[1] = 0.0; dir[2] = -1.0;    // Negative z-direction
+    dir[1] = 0.0; dir[2] = 1.0;    // Positive z-direction
     directions.push_back(dir);
 
+    if (fullDirections == true) {
+        dir.assign(3,0.0);
+
+        // add the other half of the unit sphere
+        dir[0] = -1.0;                   // Negative x-direction
+        directions.push_back(dir);
+        dir[0] = 0.0; dir[1] = -1.0;    // Negative y-direction
+        directions.push_back(dir);
+        dir[1] = 0.0; dir[2] = -1.0;    // Negative z-direction
+        directions.push_back(dir);
+    }
+
+
+    std::vector<std::vector<double> >::iterator dirIter;
     for( int k = 0; k < N; ++k ){
         position[2] = k + 0.5;
         for( int j = 0; j < N; ++j ){
@@ -206,7 +234,8 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
                 position[0] = i + 0.5;
 //                cout << "ID = " << ID << ", position: " << position << endl;
                 for( dirIter = directions.begin(); dirIter != directions.end();
-                        ++dirIter ){
+                        ++dirIter )
+                {
                     Geo.intersect(position, *dirIter, ID, newPos, newID, 
                                     distance, RS);
                 }

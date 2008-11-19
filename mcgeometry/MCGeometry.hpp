@@ -11,6 +11,7 @@
 #include <map>
 #include <vector>
 #include <utility>
+#include <string>
 
 #include "transupport/VectorMath.hpp"
 #include "transupport/SoftEquiv.hpp"
@@ -80,7 +81,8 @@ public:
 
     //! do optimization after input is finished, check geometry for duplicate
     //surfaces, etc.
-    // void completedGeometryInput();
+    void completedGeometryInput();
+
 
     //!\brief  given a current position, location, and cell; find the new one
     // we may have to add further code to pass back a surface ID for a surface
@@ -227,7 +229,17 @@ private:
     //  and probably will be double-counted
     unsigned int _unMatchedSurfaces;
 
+    //! print a surface and its corresponding sense
     void _printSAS(const SurfaceAndSense& qas) const;
+
+    //! do optimization whenever the last surface is linked
+    void _completedConnectivity();
+
+    //! print geometry failure message
+    void _failGeometry(            const std::string failureMessage,
+                                   const unsigned int currentCellIndex,
+                                   const std::vector<double>& position,
+                                   const std::vector<double>& direction);
 };
 /*----------------------------------------------------------------------------*/
 inline void MCGeometry::intersect(
@@ -283,9 +295,9 @@ inline void MCGeometry::intersect(
             //we have found the new cell
             newCellIndex = (*it)->getIndex();
 
-//            cout << "Found ending cell " << newCellId
-//                 << " already connected to starting cell "
-//                 << oldCellId << " through hood" << endl;
+//            cout << "Found ending cell index " << newCellIndex
+//                 << " already connected to starting cell index "
+//                 << oldCellIndex << " through hood" << endl;
 
             return;
         }
@@ -300,7 +312,11 @@ inline void MCGeometry::intersect(
 
     SCConnectMap::iterator cellList
                  = _surfToCellConnectivity.find(searchQas);
-    Check(cellList != _surfToCellConnectivity.end());
+
+    if (cellList == _surfToCellConnectivity.end()) {
+        _failGeometry("Surface connectivity not found for surface",
+                        newCellIndex, position, direction);
+    }
 
     CellVec& cellsToCheck = cellList->second;
 
@@ -333,10 +349,11 @@ inline void MCGeometry::intersect(
             // we have found the new cell
             newCellIndex = (*pNewCell)->getIndex();
 
-//            cout << "Connected ending cell " << newCellId
-//                 << " to starting cell " << oldCellId << endl;
-//            if (_unMatchedSurfaces == 0)
-//                cout << "CONNECTIVITY COMPLETE." << endl;
+//            cout << "Connected ending cell index " << newCellIndex
+//                 << " to starting cell index " << oldCellIndex << endl;
+
+            if (_unMatchedSurfaces == 0)
+                _completedConnectivity();
             return;
         }
     }
@@ -347,7 +364,9 @@ inline void MCGeometry::intersect(
 
     newCellIndex = -1;
     returnStatus = MCG_LOST;
-    Insist(0, "Ruh-roh, new cell not found!");
+
+    _failGeometry("Ruh-roh, new cell not found!",
+                    newCellIndex, position, direction);
 }
 /*----------------------------------------------------------------------------*/
 inline unsigned int MCGeometry::findCell(
