@@ -13,11 +13,12 @@
 #include <iostream>
 #include <vector>
 #include "transupport/VectorPrint.hpp"
+#include "transupport/Timer.hpp"
 
 using std::cout;
 using std::endl;
 
-void Mesh(int);
+void CreateMesh(int, mcGeometry::MCGeometry&);
 void SimulateMC(int, mcGeometry::MCGeometry&, std::vector<double>& );
 void MeshTiming(int, mcGeometry::MCGeometry&);
 
@@ -26,43 +27,73 @@ int main(int argc, char* argv[]){
     Require( argc == 2 );
 
     int N( std::atoi(argv[1]) );
-    Mesh(N);
 
+    cout << "\n===============================\n"
+         << "Example of creating/using a mesh-like geometry."
+         << "\n===============================" << endl;
+      
+
+    mcGeometry::MCGeometry Geo;
+
+    
+    TIMER_START("Create the mesh");
+    CreateMesh(N, Geo);
+    TIMER_STOP("Create the mesh");
+
+//    Geo.debugPrint();
+
+    TIMER_START("Run without neighborhood (first sweep)");
+    MeshTiming(N, Geo);
+    TIMER_STOP("Run without neighborhood (first sweep)");
+
+//    Geo.debugPrint();
+
+    TIMER_START("Run with neighborhood (second sweep)");
+    MeshTiming(N, Geo);
+    TIMER_STOP("Run with neighborhood (second sweep)");
+
+    std::vector<double> limits(6, 0.0);
+    limits[1] = N; limits[3] = N; limits[3] = N;
+//  SimulateMC(100000, Geo, limits);
+    
+    TIMER_PRINT();
     return 0;
 }
 
 //! Mesh will create and use a retangular mesh using N planes spaced 1.0 units
 // apart
-void Mesh(int N){
-    cout << "\n===============================\n"
-         << "Example of creating/using a mesh-like geometry."
-         << "\n===============================" << endl;
-
-    mcGeometry::MCGeometry Geo;
-      
+void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
     // Normal vectors to planes perpendicular to axes
     std::vector<double> xNorm(3, 0.0);  xNorm[0] = 1.0;
     std::vector<double> yNorm(3, 0.0);  yNorm[1] = 1.0;
     std::vector<double> zNorm(3, 0.0);  zNorm[2] = 1.0;
 
+
+    const unsigned int minXId = 1;
+    const unsigned int minYId = N+2;
+    const unsigned int minZId = 2*N+3;
+
+    const unsigned int maxXId = N+1;
+    const unsigned int maxYId = 2*N+2;
+    const unsigned int maxZId = 3*N+3;
     // Create global bounding planes
     // Could have done this with PlaneNormal but doing it with general plane
     // as an example
-    std::vector<double> Point(3,0.0);
-    mcGeometry::Plane minX(xNorm, Point);
-    Geo.addSurface(1, minX);
-    mcGeometry::Plane minY(yNorm, Point);
-    Geo.addSurface(N+2, minY);
-    mcGeometry::Plane minZ(zNorm, Point);
-    Geo.addSurface(2*N+3, minZ);
+    mcGeometry::PlaneX minX(0);
+    Geo.addSurface(minXId, minX);
+    mcGeometry::PlaneY minY(0);
+    Geo.addSurface(minYId, minY);
+    mcGeometry::PlaneZ minZ(0);
+    Geo.addSurface(minZId, minZ);
 
     // Point is now corner opposite from origin
-    Point[0] = N; Point[1] = N; Point[2] = N;   
-    mcGeometry::Plane maxX(xNorm, Point);
+    mcGeometry::PlaneX maxX(N);
     Geo.addSurface(N+1, maxX);
-    mcGeometry::Plane maxY(yNorm, Point);
+    
+    mcGeometry::PlaneY maxY(N);
     Geo.addSurface(2*(N+1), maxY);
-    mcGeometry::Plane maxZ(zNorm, Point);
+
+    mcGeometry::PlaneZ maxZ(N);
     Geo.addSurface(3*(N+1), maxZ);
 
     cout << "Global binding box defined by following surfaces:\n"
@@ -75,12 +106,12 @@ void Mesh(int N){
 
     // Create interior mesh
     for( int n = 2; n <= N; ++n){
-        mcGeometry::PlaneNormal<0> PX(n);
+        mcGeometry::PlaneX PX(n - 1.0);
         Geo.addSurface(n, PX);
-        mcGeometry::PlaneNormal<1> PY(n);
-        Geo.addSurface(n+yn, PX);
-        mcGeometry::PlaneNormal<2> PZ(n);
-        Geo.addSurface(n+zn, PX);
+        mcGeometry::PlaneY PY(n - 1.0);
+        Geo.addSurface(n+yn, PY);
+        mcGeometry::PlaneZ PZ(n - 1.0);
+        Geo.addSurface(n+zn, PZ);
     }
 
     // Turn interior mesh into cells
@@ -112,26 +143,35 @@ void Mesh(int N){
     }
 
     // Create cells defining every thing outside of mesh
-    Surfaces.resize(1); Surfaces[0] = -1;   // minX
+    Surfaces.resize(1);
+    Surfaces[0] = -minXId;
     Geo.addCell(ID, Surfaces); ++ID;
-    Surfaces[0] = N+1;                      // maxX
-    Geo.addCell(ID, Surfaces); ++ID;
-    Surfaces[0] *= -1; Surfaces.push_back(1); 
-    Surfaces.push_back(-1*(N+2));              // minY
-    Geo.addCell(ID, Surfaces); ++ID;
-    Surfaces[2] = 2*(N+1);                  // maxY
-    Geo.addCell(ID, Surfaces); ++ID;
-    Surfaces[2] *= -1; Surfaces.push_back(N+2);
-    Surfaces.push_back(-2*(N+3));              // minZ
-    Geo.addCell(ID, Surfaces); ++ID;
-    Surfaces[4] = 3*(N+1);                  // maxZ
-    Geo.addCell(ID, Surfaces);
 
-    MeshTiming(N, Geo);
+    Surfaces[0] = maxXId;
+    Geo.addCell(ID, Surfaces); ++ID;
 
-    std::vector<double> limits(6, 0.0);
-    limits[1] = N; limits[3] = N; limits[3] = N;
-//  SimulateMC(100000, Geo, limits);
+    Surfaces.resize(3);
+    Surfaces[0] = minXId;
+    Surfaces[1] = -maxXId;
+    Surfaces[2] = maxYId;
+    Geo.addCell(ID, Surfaces); ++ID;
+
+    Surfaces[2] = -minYId;
+    Geo.addCell(ID, Surfaces); ++ID;
+
+    
+    Surfaces.resize(5);
+    Surfaces[0] = minXId;
+    Surfaces[1] = -maxXId;
+    Surfaces[2] = minYId;
+    Surfaces[3] = -maxYId;
+    Surfaces[4] = maxZId;
+    Geo.addCell(ID, Surfaces); ++ID;
+
+    Surfaces[4] = -minZId;
+    Geo.addCell(ID, Surfaces); ++ID;
+
+
 }
 
 //! MeshTiming will perform some timing tests to see how much faster the 
@@ -164,7 +204,7 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
             position[1] = j + 0.5;
             for( int i = 0; i < N; ++i ){
                 position[0] = i + 0.5;
-                cout << "ID = " << ID << ", position: " << position << endl;
+//                cout << "ID = " << ID << ", position: " << position << endl;
                 for( dirIter = directions.begin(); dirIter != directions.end();
                         ++dirIter ){
                     Geo.intersect(position, *dirIter, ID, newPos, newID, 
@@ -172,7 +212,7 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo){
                 }
                 ++ID;
             }
-            cout << endl;
+//            cout << endl;
         }
     }
 }
