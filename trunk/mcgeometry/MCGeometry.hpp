@@ -282,10 +282,10 @@ inline void MCGeometry::intersect(
 
 
     // ===== Loop over neighborhood cells
-    CellT::CellVec& neighborhood = oldCell.getNeighbors(hitSurface);
+    CellT::CellContainer& neighborhood = oldCell.getNeighbors(hitSurface);
 
     // loop through the old cell's hood to find if it's in one of those cells
-    for (CellT::CellVec::const_iterator it  = neighborhood.begin();
+    for (CellT::CellContainer::const_iterator it  = neighborhood.begin();
                                        it != neighborhood.end(); ++it)
     {
         // check if the point is inside (and pass hitSurface to exclude
@@ -320,7 +320,7 @@ inline void MCGeometry::intersect(
 
     CellVec& cellsToCheck = cellList->second;
 
-    for (CellT::CellVec::iterator pNewCell  = cellsToCheck.begin();
+    for (CellVec::iterator pNewCell  = cellsToCheck.begin();
                                   pNewCell != cellsToCheck.end(); ++pNewCell)
     {
         // check if the point is inside (and pass hitSurface to exclude
@@ -335,7 +335,7 @@ inline void MCGeometry::intersect(
             // add new cell to old cell's hood connectivity
             neighborhood.push_back(*pNewCell);
 
-            CellT::CellVec& newNeighborhood
+            CellT::CellContainer& newNeighborhood
                 = (*pNewCell)->getNeighbors(hitSurface);
 
             // if this is the first cell linked to this surface, we decrement 

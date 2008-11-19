@@ -65,7 +65,7 @@ unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
 {
     //---- convert surface ID to pairs of unsigned ints (surfaceIds) and bools
     //                                                  (surface sense) -----//
-    SASVec boundingSurfaces;
+    CellT::SASVec boundingSurfaces;
 
     // bounding surfaces should have same length as input list of surface IDs
     // so from the start just reserve that many spaces in memory
@@ -125,7 +125,7 @@ unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
             "Tried to add a cell with an ID that was already there.");
 
     //====== loop back through the surfaces and add the connectivity
-    for (SASVec::iterator bsIt = boundingSurfaces.begin();
+    for (CellT::SASVec::iterator bsIt = boundingSurfaces.begin();
                           bsIt != boundingSurfaces.end(); ++bsIt)
     {
         SurfaceAndSense &newQandS = *bsIt;
@@ -179,10 +179,11 @@ void MCGeometry::_failGeometry(const std::string failureMessage,
         _printSAS(*bsIt);
         cout << ":[";
 
-        const CellVec& otherCells =
+        const CellT::CellContainer& otherCells =
             _cells[currentCellIndex]->getNeighbors(bsIt->first);
 
-        for (CellVec::const_iterator outCelIt = otherCells.begin(); 
+        for (CellT::CellContainer::const_iterator
+                                     outCelIt = otherCells.begin(); 
                                      outCelIt != otherCells.end();
                                      ++outCelIt)
         {
@@ -267,20 +268,22 @@ void MCGeometry::debugPrint() const
         cout << " CELL " << (*cellIt)->getUserId() << ": ";
 
         // query cell for surface pointers
-        const SASVec& boundingSurfaces = (*cellIt)->getBoundingSurfaces();
+        const CellT::SASVec& boundingSurfaces
+                    = (*cellIt)->getBoundingSurfaces();
 
-        for (SASVec::const_iterator bsIt = boundingSurfaces.begin();
+        for (CellT::SASVec::const_iterator bsIt = boundingSurfaces.begin();
                                     bsIt != boundingSurfaces.end(); bsIt++)
         {
             _printSAS(*bsIt);
             cout << ":{";
 
-            const CellVec& otherCells =
+            const CellT::CellContainer& otherCells =
                 (*cellIt)->getNeighbors(bsIt->first);
 
-            for (CellVec::const_iterator outCelIt = otherCells.begin(); 
-                                         outCelIt != otherCells.end();
-                                         ++outCelIt)
+            for (CellT::CellContainer::const_iterator
+                                        outCelIt = otherCells.begin(); 
+                                        outCelIt != otherCells.end();
+                                        ++outCelIt)
             {
                 cout << (*outCelIt)->getUserId() << " ";
             }

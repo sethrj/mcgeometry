@@ -1,0 +1,50 @@
+Timing data for mesh example (Revision 36) changing only UserIdType inside Cell
+
+================================= N = 40 =================================
+
+Lists:
+
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                   Create the mesh                199.669ms
+          Run with full neighborhood (third sweep)                 97.377ms
+         Run with most neighborhood (second sweep)                114.060ms
+            Run without neighborhood (first sweep)               7170.491ms
+---------------------------------------------------------------------------
+
+Vectors:
+
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                   Create the mesh                325.324ms
+          Run with full neighborhood (third sweep)                 94.589ms
+         Run with most neighborhood (second sweep)                 95.588ms
+            Run without neighborhood (first sweep)               9668.052ms
+---------------------------------------------------------------------------
+
+
+================================= N = 50 =================================
+
+Lists: 
+
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                   Create the mesh                388.188ms
+          Run with full neighborhood (third sweep)                191.319ms
+         Run with most neighborhood (second sweep)                228.272ms
+            Run without neighborhood (first sweep)              24391.833ms
+---------------------------------------------------------------------------
+
+Vectors:
+
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                   Create the mesh                641.984ms
+          Run with full neighborhood (third sweep)                189.551ms
+         Run with most neighborhood (second sweep)                190.607ms
+            Run without neighborhood (first sweep)              30695.502ms
+---------------------------------------------------------------------------

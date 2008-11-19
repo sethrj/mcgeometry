@@ -8,6 +8,7 @@
 #define MCG_CELL_HPP
 
 #include <vector>
+#include <list>
 #include <map>
 #include <utility>
 #include <limits>
@@ -34,10 +35,13 @@ public:
     //! Stores a pointer to a Surface as well as the "sense" of that quadric
     //  as viewed from this cell
     typedef std::pair<Surface*, bool>          SurfaceAndSense;
+
     //! A vector of Surface/sense pairs (e.g. for bounding surfaces)
     typedef std::vector<SurfaceAndSense>       SASVec;
-    //! A vector of pointers to Cells for connectivity
-    typedef std::vector< Cell<UserIdType> * >  CellVec;
+
+    //! A container of pointers to Cells for neighborhood connectivity
+//    typedef std::vector< Cell<UserIdType> * >  CellContainer;
+    typedef std::list< Cell<UserIdType> * >  CellContainer;
 
     //! constructor requires an immutable bounding surface
     Cell(   const SASVec& boundingSurfaces,
@@ -55,7 +59,7 @@ public:
 
         while (bsIt != _boundingSurfaces.end()) {
             ReturnedPair result = 
-                _hood.insert(std::make_pair(bsIt->first, CellVec()));
+                _hood.insert(std::make_pair(bsIt->first, CellContainer()));
 
             Insist(result.second == true, "Duplicate surface in this cell.");
             ++bsIt;
@@ -77,8 +81,8 @@ public:
     //! get a list of known cell neighbors for a quadric
     //  non-const so that whatever we pass can add to it
     //  TODO possibly poor design here?
-    //const CellVec& getNeighbors(const Surface* surface) const {
-    CellVec& getNeighbors(Surface* surface) {
+    //const CellContainer& getNeighbors(const Surface* surface) const {
+    CellContainer& getNeighbors(Surface* surface) {
         // I think surface can't be const because findResult returns a pair
         // that has a non-const Surface* in it
         typename HoodMap::iterator findResult = _hood.find(surface);
@@ -117,7 +121,7 @@ public:
 
 private:
     //! map our surfaces to vectors of other cells attached to that surface
-    typedef std::map< Surface*, CellVec > HoodMap;
+    typedef std::map< Surface*, CellContainer > HoodMap;
 
     //! a vector of surfaces and senses that define the cell
     const SASVec _boundingSurfaces;

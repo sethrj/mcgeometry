@@ -43,11 +43,11 @@ void runTests() {
     Plane thePlane(normal, center);
 
     /* * * create cell boundaries * * */
-    Cell<unsigned int>::SASVec cellBoundaries(2);
+    Cell<unsigned int>::SASVec cellBoundaries;
 
     // define it as inside sphere to the right of plane
-    cellBoundaries[0] = std::make_pair(&theSphere, false);
-    cellBoundaries[1] = std::make_pair(&thePlane,  true);
+    cellBoundaries.push_back(std::make_pair(&theSphere, false));
+    cellBoundaries.push_back(std::make_pair(&thePlane,  true));
 
 
     /* * * create the cell * * */
