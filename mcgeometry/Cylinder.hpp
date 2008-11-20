@@ -110,26 +110,27 @@ inline Surface::HitAndDist Cylinder::intersect(
     Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
 
     double A(0.0);   // 1-(direction._axis)^2
-    for( int i = 0; i < 3; ++i ) {
+    for( int i = 0; i < 3; ++i ){
         A += direction[i]*_axis[i];
     }
     A = 1-A*A;
 
-    double B(0.0);                  // direction.{(position-_point)-
-    double diff(0.0);               //_axis.[(position-_point)._axis]}
-    for( int i = 0; i < 3; ++i ) {   
-        diff = position[i] - _point[i];
-        B += direction[i]*(diff - pow(_axis[i],2)*diff);
-    }
+    double B(0.0);
+    double b(0.0);      // Temporary variable
+    std::vector<double> bvec(3,0.0);
+    std::vector<double> diff(position);
+    tranSupport::vectorMinusEq(diff, _point);
+    b = tranSupport::vectorDot(diff, _axis);
+    for( int i = 0; i < 3; ++i ) bvec[i] = _axis[i]*b;
+    tranSupport::vectorMinusEq(diff, bvec);
+    B = tranSupport::vectorDot(diff, direction);
 
-    double C(0.0);                  // (position - _point)^2 - 
-    diff = 0.0;
-    for( int i = 0; i < 3; ++i ){   // [(position-_point)._axis]^2-_radius^2
-        C += position[i]*_point[i];
-        diff += pow( (position[i]*_point[i]*_axis[i]) , 2);
-    }
-
-    C -= (diff + _radius * _radius );
+    double C(0.0);
+    double c(0.0);
+    diff = std::vector<double>(position);
+    tranSupport::vectorMinusEq(diff, _point);
+    c = tranSupport::vectorDot(diff, _axis);
+    C = tranSupport::vectorDot(diff, diff) - c*c - _radius*_radius;
 
     return _calcQuadraticIntersect(A, B, C, posSense);
 }
@@ -195,7 +196,8 @@ inline bool CylinderNormal<0>::hasPosSense(
 {
     Require(position.size() == 3);
     return _hasPosSense(
-            position[1] * position[1] + position[2] * position[2] 
+            position[1] * position[1] + 
+            position[2] * position[2] 
             - _radius * _radius
             );
 }
