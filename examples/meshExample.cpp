@@ -30,9 +30,9 @@ int main(int argc, char* argv[]){
 
     Insist( N > 0, "Number of divisions should be positive." );
 
-    cout << "\n===============================\n"
-         << "Example of creating/using a mesh-like geometry."
-         << "\n===============================" << endl;
+    cout << "===============================" << endl
+         << "Example of creating/using a mesh-like geometry." << endl
+         << "===============================" << endl;
       
 
     mcGeometry::MCGeometry Geo;

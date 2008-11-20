@@ -56,7 +56,7 @@ public:
 
     // NOTE: this must be public if we ever have a generic Surface
     virtual ~Surface() {
-//        cout << "Oh no, I (surface  << this << ") am dying!" << endl;
+//        cout << "Oh no, I (surface " << this << ") am dying!" << endl;
         /* * */
     }
 

@@ -44,7 +44,7 @@ public:
       }
 
       // if the reference number is zero, allow epsilon
-      if (ref == 0) {
+      if (ref == 0.0) {
          return (fabs(target) <= eps);
       }
 

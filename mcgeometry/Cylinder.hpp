@@ -46,7 +46,7 @@ public:
     { /* * */ }
 
 
-    Cylinder* clone(const UserSurfaceIdType& newId) const {
+    Surface* clone(const UserSurfaceIdType& newId) const {
         return new Cylinder(*this, newId);
     }
 
@@ -163,7 +163,7 @@ public:
     { /* * */ }
 
 
-    CylinderNormal* clone(const UserSurfaceIdType& newId) const {
+    Surface* clone(const UserSurfaceIdType& newId) const {
         return new CylinderNormal(*this, newId);
     }
 
