@@ -59,7 +59,7 @@ void runTestA() {
          << "distance: " << theResult.second << endl;
 
     TESTER_CHECKFORPASS(theResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(theResult.second, 4.0));
+    TESTER_CHECKFORPASS(softEquiv(theResult.second, 3.0));
 
     /********************/
     particleLoc[0] = -1;
@@ -123,7 +123,7 @@ void runTestB() {
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
 
     TESTER_CHECKFORPASS(theResult.first == true);
     TESTER_CHECKFORPASS(softEquiv(theResult.second, 2.598076211353316));
@@ -137,9 +137,9 @@ void runTestB() {
     particleDir[1] = 0.707106781186547;
     particleDir[2] = 0.0;
 
-    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == true);
+    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
 
 //    cout << "Did hit: "  << theResult.first << endl
 //         << "distance: " << theResult.second << endl;
@@ -153,7 +153,7 @@ void runTestB() {
     particleDir[1] = -0.707106781186547;
     particleDir[2] = 0.0;
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
 
     TESTER_CHECKFORPASS(theResult.first == true);
     TESTER_CHECKFORPASS(softEquiv(theResult.second, 1.414213562373095));
@@ -165,9 +165,9 @@ void runTestB() {
     particleDir[1] = 0.0;
     particleDir[2] = 1.0;
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
 
-    TESTER_CHECKFORPASS(theResult.first == true);
+    TESTER_CHECKFORPASS(theResult.first == false);
 
     /********************/
     // make sure it can check "outside" correctly
@@ -175,7 +175,7 @@ void runTestB() {
     particleLoc[1] = -3;
     particleLoc[2] = 0.0;
 
-    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
+    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == true);
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {
