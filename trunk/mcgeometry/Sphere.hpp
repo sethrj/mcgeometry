@@ -39,7 +39,7 @@ public:
           _radius(oldSphere._radius)
     { /* * */ }
 
-    Sphere* clone(const UserSurfaceIdType& newId) const {
+    Surface* clone(const UserSurfaceIdType& newId) const {
         return new Sphere(*this, newId);
     }
 

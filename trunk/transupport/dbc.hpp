@@ -19,9 +19,12 @@
 namespace tranSupport {
 /*----------------------------------------------------------------------------*/
 
-//! Subclass of logic_error so that we can specifically catch our own errors
+/*! \class tranError
+ *  \brief An error for us to throw at will
+ *  We subclass std::logic_error so that we can do catch(tranError) which will 
+ *  only catch errors that *we* throw.
+ */
 class tranError : public std::logic_error {
-
 public:
    //! \brief basic constructor called by throwError
    tranError(std::string const &msg) : std::logic_error(msg)

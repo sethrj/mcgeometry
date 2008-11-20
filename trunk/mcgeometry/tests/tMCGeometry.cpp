@@ -112,7 +112,6 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     cellIndex = theGeom.addCell(60, theSurfaces);
     if (doCheck) 
     TESTER_CHECKFORPASS(cellIndex == 5);
-
 }
 /*============================================================================*/
 void testGeometryErrorChecking()
@@ -185,7 +184,6 @@ void runTests() {
     MCGeometry theGeom;
 
     createGeometry(theGeom, true);
-
 //    theGeom.debugPrint();
 
     // ==== test a variety of locations and directions

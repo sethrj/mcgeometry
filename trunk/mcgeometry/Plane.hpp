@@ -43,7 +43,7 @@ public:
           _coordinate(oldPlane._coordinate)
     { /* * */ }
 
-    Plane* clone(const UserSurfaceIdType& newId) const {
+    Surface* clone(const UserSurfaceIdType& newId) const {
         return new Plane(*this, newId);
     }
 
@@ -65,7 +65,7 @@ private:
 
 /*----------------------------------------------------------------------------*/
 //! calculate distance to intersection
-Surface::HitAndDist Plane::intersect(
+inline Surface::HitAndDist Plane::intersect(
         const std::vector<double>& position, 
         const std::vector<double>& direction,
         bool posSense) const
@@ -99,7 +99,7 @@ Surface::HitAndDist Plane::intersect(
 // Equation: n.p - n.p0     n = normal vector to plane
 //      p = position
 //      p0 = point on plane
-bool Plane::hasPosSense(const std::vector<double>& position) const{
+inline bool Plane::hasPosSense(const std::vector<double>& position) const{
     double eval(0);
     for( int i = 0; i < 3; ++i ){
         eval += _normal[i]*position[i] - _normal[i]*_coordinate[i];
@@ -134,7 +134,7 @@ public:
           _coordinate(oldPlane._coordinate)
     { /* * */ }
 
-    PlaneNormal* clone(const UserSurfaceIdType& newId) const {
+    Surface* clone(const UserSurfaceIdType& newId) const {
         return new PlaneNormal<axis>(*this, newId);
     }
 
@@ -156,14 +156,14 @@ private:
 };
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-bool PlaneNormal<axis>::hasPosSense(const std::vector<double>& position) const
+inline bool PlaneNormal<axis>::hasPosSense(const std::vector<double>& position) const
 {
     Require(position.size() == 3);
     return _hasPosSense(position[axis] - _coordinate);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-Surface::HitAndDist PlaneNormal<axis>::intersect(
+inline Surface::HitAndDist PlaneNormal<axis>::intersect(
                     const std::vector<double>& position, 
                     const std::vector<double>& direction,
                     bool posSense) const
