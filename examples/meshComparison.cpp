@@ -24,8 +24,9 @@ using std::cout;
 using std::endl;
 
 void CreateMesh(int, mcGeometry::MCGeometry&);
-void SimulateMCComb(int, int, mcGeometry::MCGeometry&);
-void SimulateMCDet(int, int);
+void SimulateMCComb(int, int, mcGeometry::MCGeometry&, std::vector<double>&, 
+            std::vector<double>&);
+void SimulateMCDet(int, int, std::vector<double>&, std::vector<double>&);
 double randDouble();
 void randDirection(std::vector<double>&);
 void randPosition(double, std::vector<double>&);
@@ -51,12 +52,16 @@ int main(int argc, char* argv[]){
     CreateMesh(N, Geo);
     TIMER_STOP("Creating the combinatorial mesh.");
 
+    std::vector<double> combPLMean;
+    std::vector<double> combPLSD;
     TIMER_START("Transport in combinatorial mesh.");
-    SimulateMCComb(numParticles, N, Geo);
+    SimulateMCComb(numParticles, N, Geo, combPLMean, combPLSD);
     TIMER_STOP("Transport in combinatorial mesh.");
 
+    std::vector<double> detPLMean;
+    std::vector<double> detPLSD;
     TIMER_START("Transport in deterministic mesh.");
-    SimulateMCDet(numParticles, N);
+    SimulateMCDet(numParticles, N, detPLMean, detPLSD);
     TIMER_STOP("Transport in deterministic mesh.");
 
     TIMER_PRINT();
@@ -176,7 +181,8 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
 
 //! SimulateMCDet will simulate a Monte Carlo transport through a deterministic
 //! mesh.
-void SimulateMCDet(int N, int size){
+void SimulateMCDet(int N, int size, std::vector<double>& meanPL, 
+            std::vector<double>& sdPL){
 
     cout << "Deterministic Geometry." << endl;
 
@@ -236,11 +242,14 @@ void SimulateMCDet(int N, int size){
 //! particle never changes direction even at a collision.
 //! size: The size of the mesh
 //! N: Number of 'particles' to track
-void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo){
+void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo, 
+            std::vector<double>& meanPL, std::vector<double>& sdPL){
 
     cout << "Cominatorial Geometry." << endl;
 
     double numCells = size*size*size;    // Number of cells in mesh
+    meanPL.resize(numCells);
+    sdPL.resize(numCells);
 
     std::vector<double> position(3,0.0);
     std::vector<double> new_position(3,0.0);
@@ -274,13 +283,22 @@ void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo){
                 position[0] += direction[0]*dColl;
                 position[1] += direction[1]*dColl;
                 position[2] += direction[2]*dColl;
+
+                // Score pathlentth tally
+                meanPL[cell] += dColl;
+                sdPL[cell] += dColl*dColl;
             }
             else{       // Move to boundary
                 position = new_position;
                 cell = new_cell;
+
+                // Score pathlength tally
+                meanPL[cell] += dSurf;
+                sdPL[cell] += dSurf*dSurf;
             }
         }
     }
+
 }
 
 //! distanceToPlane will calculate the distance of a point to a plane 
