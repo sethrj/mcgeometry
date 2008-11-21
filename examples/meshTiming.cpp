@@ -20,7 +20,6 @@ using std::endl;
 
 void CreateMesh(int, mcGeometry::MCGeometry&);
 void MeshTiming(int, mcGeometry::MCGeometry&, bool);
-void SimulateMC(int, mcGeometry::MCGeometry&, std::vector<double>& );
 
 int main(int argc, char* argv[]){
 
@@ -63,10 +62,6 @@ int main(int argc, char* argv[]){
     TIMER_START("Run with full neighborhood (third sweep)");
     MeshTiming(N, Geo, true);
     TIMER_STOP("Run with full neighborhood (third sweep)");
-
-    std::vector<double> limits(6, 0.0);
-    limits[1] = N; limits[3] = N; limits[3] = N;
-//  SimulateMC(100000, Geo, limits);
     
     TIMER_PRINT();
     return 0;
@@ -247,14 +242,3 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
 }
 
 
-//! SimulateMC will simulate a Monte Carlo particle transport (without actually
-//! any particles).  limits contains the min and max coordinates for each 
-//! dimension.
-void SimulateMC(int N, mcGeometry::MCGeometry& Geo, 
-        std::vector<double>& limits ){
-
-    Require(limits.size() == 6);
-
-    for( int n = 0; n <= N; ++n ){
-    }
-}
