@@ -1,6 +1,6 @@
 /*!
- * \file example.cpp
- * \brief Example of using MCGeometry
+ * \file meshTiming.cpp
+ * \brief  Measure timing data for a simply connected geometry
  * \author Jeremy Lloyd Conlin
  */
 

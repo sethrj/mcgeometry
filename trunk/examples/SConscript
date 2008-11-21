@@ -11,6 +11,7 @@ Import('outputDirPath')
 
 sourceFiles = Glob('*.cpp')
 
+env.Append(CPPPATH = 'extra/')
 e.Program(outputDirPath + 'meshTiming', 'meshTiming.cpp')
 
 
