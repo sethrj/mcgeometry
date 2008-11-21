@@ -5,8 +5,8 @@
  * 
  */
 
-#ifndef MCG_QUADRIC_HPP
-#define MCG_QUADRIC_HPP
+#ifndef MCG_SURFACE_HPP
+#define MCG_SURFACE_HPP
 
 #include <vector>
 #include <utility>
@@ -37,15 +37,15 @@ private:
     //! Output a Surface to a stream 
     friend std::ostream& operator<<( std::ostream&, const Surface& );
 public:
-    typedef std::pair<bool, double> HitAndDist;
-
-    // Intersect will determine if the particle at Postion and Direction
-    // will intersect with the surface.  It returns a std::pair HitAndDist
-    // It assumes that the PosSense defines whether the particles thinks it
-    // has a positive sense with respect to the surface
-    virtual HitAndDist intersect(const std::vector<double>& position, 
-                                 const std::vector<double>& direction,
-                                 bool PosSense) const = 0;
+    //! Determine 
+    // See if going from a position in a direction with a surface sense 
+    // intersects the surface; pass back whether it hits and what the distance
+    // is
+    virtual void intersect(const std::vector<double>& position, 
+                           const std::vector<double>& direction,
+                           const bool PosSense,
+                           bool& hit,
+                           double& distance) const = 0;
 
     //! create a copy of ourself
     virtual Surface* clone(const UserSurfaceIdType& newId) const = 0;
@@ -56,7 +56,6 @@ public:
 
     // NOTE: this must be public if we ever have a generic Surface
     virtual ~Surface() {
-//        cout << "Oh no, I (surface " << this << ") am dying!" << endl;
         /* * */
     }
 
@@ -72,8 +71,12 @@ protected:
     { /* * */ }
 
     bool _hasPosSense(const double eval) const;
-    HitAndDist _calcQuadraticIntersect( double A, double B, double C,
-            bool posSense ) const;
+
+    void _calcQuadraticIntersect(
+                            const double A, const double B, const double C,
+                            const bool posSense,
+                            bool& particleHitsSurface,
+                            double& distanceToIntercept ) const;
 
     //! output to a stream
     virtual std::ostream& _output( std::ostream& os ) const = 0;
@@ -90,57 +93,6 @@ inline bool Surface::_hasPosSense(const double eval) const{
     // Positive sense includes points "on" the surface (i.e. includes zero)
     // negative sense if the evaluated is strictly less than zero
     return ( eval >= 0 );
-}
-
-inline Surface::HitAndDist Surface::_calcQuadraticIntersect(
-        double A, double B, double C, bool posSense) const
-{
-    bool particleHitsSurface = false;
-    double distanceToIntercept = -1.0;
-
-    double Q = B*B - A*C;
-
-    if (Q < 0) {
-        particleHitsSurface = false;
-        distanceToIntercept = 0.0;
-    } 
-    else {
-        if (not posSense) { //inside the surface (negative orientation)
-            if (B <= 0) {   // headed away from the surface
-                if (A > 0) {    // surface is curving upward
-                    particleHitsSurface = true;
-                    distanceToIntercept = (std::sqrt(Q) - B)/A;
-                } 
-                else {  // surface curving away and headed in, never hits it
-                    particleHitsSurface = false;
-                    distanceToIntercept = 0.0;
-                }
-            } 
-            else {  // particle is heading toward the surface
-                particleHitsSurface = true;
-                distanceToIntercept = std::max(0.0, -C/(std::sqrt(Q) + B));
-            }
-        } 
-        else {  // particle is outside
-            if (B >= 0) {   // particle headed away
-                if (A >= 0) {
-                    particleHitsSurface = false;
-                    distanceToIntercept = 0.0;
-                } 
-                else {
-                    particleHitsSurface = true;
-                    distanceToIntercept = -(std::sqrt(Q) + B)/A;
-                }
-            } 
-            else {
-                particleHitsSurface = true;
-                distanceToIntercept = std::max(0.0, C/(std::sqrt(Q) - B));
-            }
-        }
-    }
-    Ensure( distanceToIntercept >= 0.0 );
-
-    return std::make_pair(particleHitsSurface, distanceToIntercept);
 }
 
 /*----------------------------------------------------------------------------*/

@@ -51,8 +51,11 @@ public:
 
     bool hasPosSense(const std::vector<double>& position) const;
 
-    HitAndDist intersect(const std::vector<double>& Position, 
-            const std::vector<double>& Direction, bool PosSense) const;
+    void intersect( const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    const bool PosSense,
+                    bool& hit,
+                    double& distance) const;
 
 protected:
     //! output to a stream
@@ -65,18 +68,19 @@ private:
 
 /*----------------------------------------------------------------------------*/
 //! calculate distance to intersection
-inline Surface::HitAndDist Plane::intersect(
-        const std::vector<double>& position, 
-        const std::vector<double>& direction,
-        bool posSense) const
+inline void Plane::intersect(
+                const std::vector<double>& position, 
+                const std::vector<double>& direction,
+                const bool posSense,
+                bool& hit, double& distance) const
 {
     Require(position.size() == 3);
     Require(direction.size() == 3);
     Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
 
     // default to "does not hit" values
-    bool hit = false;
-    double distance = 0.0;
+    hit = false;
+    distance = 0.0;
 
     double cosine = tranSupport::vectorDot(_normal, direction);
 
@@ -90,8 +94,6 @@ inline Surface::HitAndDist Plane::intersect(
         }
         distance = std::max(0.0, distance/cosine);
     }
-
-    return std::make_pair(hit, distance);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -142,10 +144,11 @@ public:
 
     bool hasPosSense(const std::vector<double>& position) const;
 
-    HitAndDist intersect(
-            const std::vector<double>& Position, 
-            const std::vector<double>& Direction,
-            bool PosSense) const;
+    void intersect( const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    const bool posSense,
+                    bool& hit,
+                    double& distance) const;
 
 protected:
     //! output to a stream
@@ -163,18 +166,19 @@ inline bool PlaneNormal<axis>::hasPosSense(const std::vector<double>& position) 
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-inline Surface::HitAndDist PlaneNormal<axis>::intersect(
+inline void PlaneNormal<axis>::intersect(
                     const std::vector<double>& position, 
                     const std::vector<double>& direction,
-                    bool posSense) const
+                    const bool posSense,
+                    bool& hit, double& distance) const
 {
     Require(position.size() == 3);
     Require(direction.size() == 3);
     Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
 
     // default to "does not hit" values
-    bool hit = false;
-    double distance = 0.0;
+    hit = false;
+    distance = 0.0;
 
     if (    ((posSense == false) && (direction[axis] > 0))
          || ((posSense == true)  && (direction[axis] < 0)) )
@@ -184,8 +188,6 @@ inline Surface::HitAndDist PlaneNormal<axis>::intersect(
         distance = (_coordinate - position[axis]) / direction[axis];
         distance = std::max(0.0, distance);
     }
-
-    return std::make_pair(hit, distance);
 }
 
 /*----------------------------------------------------------------------------*/

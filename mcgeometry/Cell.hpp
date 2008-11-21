@@ -1,6 +1,6 @@
 /*!
  * \file   Cell.hpp
- * \brief  Contains Cell class
+ * \brief  Contains interface for Cell class
  * \author Seth R. Johnson
  */
 
@@ -11,8 +11,6 @@
 #include <list>
 #include <map>
 #include <utility>
-#include <limits>
-#include "Surface.hpp"
 #include "transupport/dbc.hpp"
 
 //#include <iostream>
@@ -21,6 +19,9 @@
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
+
+class Surface;
+    
 /*!
  * \class Cell
  * \brief Cell object defined by bounding surface+senses
@@ -46,25 +47,7 @@ public:
     //! constructor requires an immutable bounding surface
     Cell(   const SASVec& boundingSurfaces,
             const UserIdType userId,
-            const unsigned int internalIndex ) 
-        : _boundingSurfaces(boundingSurfaces),
-          _userId(userId),
-          _internalIndex(internalIndex)
-    {
-        typedef std::pair<typename HoodMap::iterator, bool> ReturnedPair;
-        Require(_boundingSurfaces.size() > 0);
-
-        // initialize hood map
-        SASVec::const_iterator bsIt = _boundingSurfaces.begin();
-
-        while (bsIt != _boundingSurfaces.end()) {
-            ReturnedPair result = 
-                _hood.insert(std::make_pair(bsIt->first, CellContainer()));
-
-            Insist(result.second == true, "Duplicate surface in this cell.");
-            ++bsIt;
-        }
-    }
+            const unsigned int internalIndex );
 
     //! destructor doesn't have to do anything
     ~Cell() {
@@ -135,87 +118,6 @@ private:
     //! connectivity to other cell vectors through surfaces
     HoodMap _hood;
 };
-
-/*----------------------------------------------------------------------------*/
-template <typename UserIdType>
-inline bool Cell<UserIdType>::isPointInside(const std::vector<double>& position,
-                                            const Surface* surfaceToSkip) const
-{
-    // loop over all surfaces
-    for (SASVec::const_iterator it = _boundingSurfaces.begin();
-                                      it != _boundingSurfaces.end(); ++it)
-    {
-        // it->first is the pointer to the Surface object
-        // it->second is the surface sense
-        
-        // if we need to check it
-        if (it->first != surfaceToSkip)
-        {
-           if ( it->first->hasPosSense(position) != it->second ) {
-               // if the surface reports that the sense of the point is 
-               // NOT the same sense as we know this cell is defined, then
-               // it is not inside.
-               return false;
-           }
-        }
-    }
-    // we only get to this point if the point has the correct sense wrt every
-    // surface that we checked
-    return true;
-}
-/*----------------------------------------------------------------------------*/
-template <typename UserIdType>
-inline void Cell<UserIdType>::intersect(
-                    const std::vector<double>& position,
-                    const std::vector<double>& direction,
-                    Surface*& hitSurface,
-                    bool&     quadricSense,
-                    double&   distance) const
-{
-    //since we only *pass* these variables to the lower level and don't actually
-    //base anything on their properties in this function; let the lower level
-    //handle the input checking instead of being redundant by including it here
-    //and at MCGeometry
-//    Require(position.size() == 3);
-//    Require(direction.size() == 3);
-
-    hitSurface   = NULL;
-    quadricSense = false;
-    distance     = std::numeric_limits<double>::infinity();
-
-    // loop over all surfaces
-    for (SASVec::const_iterator it =  _boundingSurfaces.begin();
-                                it != _boundingSurfaces.end(); ++it)
-    {
-        // call "intersect" on the quadric, also passing our sense 
-        // of the quadric (it->second)
-        Surface::HitAndDist theResult = 
-            it->first->intersect(position, direction, it->second);
-
-        // if this check fails, then two surfaces apparently have exactly the
-        // same distance from the particle; i.e. the particle ran into a corner?
-        // what happens then?
-//        Check(theResult.second != distance);
-
-//        cout << "Test for " << typeid(*(it->first)).name()
-//             << ": hit=" << theResult.first << " dist=" << theResult.second
-//             << endl;
-
-        if (theResult.first // if it hits, and if it's a smaller distance
-                && (theResult.second < distance))
-        {
-            distance     = theResult.second;
-            hitSurface   = it->first;
-            quadricSense = it->second;
-        }
-    }
-
-    // really do this? yes, if intersect is only called if isInsideCell is a
-    // certainty
-    Ensure(hitSurface != NULL);
-    Ensure(distance   != std::numeric_limits<double>::infinity());
-}
-
 /*----------------------------------------------------------------------------*/
 } // end namespace mcGeometry
 #endif

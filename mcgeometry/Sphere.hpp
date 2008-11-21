@@ -45,8 +45,11 @@ public:
 
     bool hasPosSense(const std::vector<double>& position) const;
 
-    HitAndDist intersect(const std::vector<double>& position, 
-            const std::vector<double>& direction, bool posSense) const;
+    void intersect( const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    const bool PosSense,
+                    bool& hit,
+                    double& distance) const;
 
     ~Sphere() { /* * */ };
 
@@ -84,9 +87,10 @@ inline bool Sphere::hasPosSense(const std::vector<double>& position) const
 }
 
 /*----------------------------------------------------------------------------*/
-inline Surface::HitAndDist Sphere::intersect(
+inline void Sphere::intersect(
         const std::vector<double>& position, 
-        const std::vector<double>& direction, bool posSense) const
+        const std::vector<double>& direction, const bool posSense,
+        bool& hit, double& distance) const
 {
     Require(position.size() == 3);
     Require(direction.size() == 3);
@@ -104,30 +108,13 @@ inline Surface::HitAndDist Sphere::intersect(
     }
 
     // find distance and whether it intercepts
-    Surface::HitAndDist theResult =
-        _calcQuadraticIntersect(
+    _calcQuadraticIntersect(
             1,  // A
             B,  // B
-            selfDot - _radius * _radius, //C
-            posSense);
-
-    return theResult;
-
-    // THIS CODE, SADLY, DOES NOT WORK :
-//
-//    // Compute relative coordinates
-//    std::vector<double> xr(position);
-//
-//    tranSupport::vectorMinusEq(xr, _center);
-//
-//    // Compute quadratic coefficients
-//    double A = 1.0;
-//    double B = tranSupport::vectorDot(direction, xr);
-//    double C = _radius*_radius - tranSupport::vectorDot(xr, xr);
-//
-//    // Call quadratic solver and return result
-//    return calcQuadraticIntersect(A, B, C, posSense);
-//    
+            (selfDot - _radius * _radius), //C
+            posSense,
+            hit, distance
+            );
 }
 
 /*----------------------------------------------------------------------------*/

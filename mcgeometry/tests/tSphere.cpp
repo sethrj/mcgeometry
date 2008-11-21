@@ -51,17 +51,19 @@ void runTests() {
 //            << " direction: " << particleDir << endl;
 
     /********************/
-    Surface::HitAndDist sphereResult;
+    bool    didHit;
+    double  distance;
 
     TESTER_CHECKFORPASS(theSphere.hasPosSense(particleLoc) == false);
 
-    sphereResult = theSphere.intersect(particleLoc, particleDir, false);
+    theSphere.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-//    cout << "Did hit: " << sphereResult.first << endl
-//        << "distance: " << sphereResult.second << endl;
+//    cout << "Did hit: " << didHit << endl
+//        << "distance: " << distance << endl;
 
-    TESTER_CHECKFORPASS(sphereResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(sphereResult.second, 1.936491673103709));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 1.936491673103709));
 
     /********************/
     particleLoc[0] = -1;
@@ -77,10 +79,11 @@ void runTests() {
 
     TESTER_CHECKFORPASS(theSphere.hasPosSense(particleLoc) == true);
 
-    sphereResult = theSphere.intersect(particleLoc, particleDir, true);
+    theSphere.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(sphereResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(sphereResult.second, 0.318544705827648));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 0.318544705827648));
 
     /********************/
 
@@ -88,9 +91,10 @@ void runTests() {
     particleDir[1] = -0.707106781186547;
     particleDir[2] = 0.0;
 
-    sphereResult = theSphere.intersect(particleLoc, particleDir, true);
+    theSphere.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(sphereResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
     
     /********************/
     Surface* newSphere = theSphere.clone(182);

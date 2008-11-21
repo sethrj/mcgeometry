@@ -261,7 +261,7 @@ void runTests() {
 
         for (unsigned int startLoc = 0; startLoc < numLocs; startLoc++) {
             for (unsigned int dir = 0; dir < 4; dir++) {
-                theGeom.intersect(  locations[startLoc],
+                theGeom.findNewCell(locations[startLoc],
                                     directions[dir],
                                     expectedStartingCellIndex[startLoc],
                                     newPosition,

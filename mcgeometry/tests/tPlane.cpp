@@ -50,13 +50,16 @@ void testPlane() {
     particleDir[1] = 1.0;
 
     /********************/
-    Surface::HitAndDist planeResult;
+    bool    didHit;
+    double  distance;
+
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, true);
+    thePlane.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
     particleLoc[0] = -1;
@@ -69,13 +72,14 @@ void testPlane() {
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == false);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, false);
+    thePlane.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-//    cout << "Did hit: "  << planeResult.first << endl
-//         << "distance: " << planeResult.second << endl;
+//    cout << "Did hit: "  << didHit << endl
+//         << "distance: " << distance << endl;
 
-    TESTER_CHECKFORPASS(planeResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(planeResult.second, 2.828427124746190));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 2.828427124746190));
 
     /* *******************\
      * move particle 
@@ -86,10 +90,11 @@ void testPlane() {
     particleDir[2] = 0.0;
 
     /********************/
-    planeResult  = thePlane.intersect(particleLoc, particleDir, false);
+    thePlane.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(planeResult.second, 8.944271909999159));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 8.944271909999159));
     /********************/
     Surface* newPlane = thePlane.clone(123);
 
@@ -111,13 +116,16 @@ void testPlaneX() {
     particleDir[1] = -1.0;
 
     /********************/
-    Surface::HitAndDist planeResult;
+    bool    didHit;
+    double  distance;
+
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == false);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, false);
+    thePlane.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
     particleLoc[0] = 1.5;
@@ -130,10 +138,11 @@ void testPlaneX() {
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, true);
+    thePlane.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(planeResult.second, 0.559016994374947));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 0.559016994374947));
 
     /********************/
     Surface* newPlane = thePlane.clone(123);
@@ -155,13 +164,16 @@ void testPlaneY() {
     particleDir[2] = -1.0;
 
     /********************/
-    Surface::HitAndDist planeResult;
+    bool    didHit;
+    double  distance;
+
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == false);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, false);
+    thePlane.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
     particleLoc[1] = 1.5;
@@ -174,10 +186,11 @@ void testPlaneY() {
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, true);
+    thePlane.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(planeResult.second, 0.559016994374947));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 0.559016994374947));
 
     /********************/
     Surface* newPlane = thePlane.clone(123);
@@ -199,13 +212,16 @@ void testPlaneZ() {
     particleDir[0] = -1.0;
 
     /********************/
-    Surface::HitAndDist planeResult;
+    bool    didHit;
+    double  distance;
+
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == false);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, false);
+    thePlane.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
     particleLoc[2] = 1.5;
@@ -218,10 +234,11 @@ void testPlaneZ() {
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
 
-    planeResult  = thePlane.intersect(particleLoc, particleDir, true);
+    thePlane.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(planeResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(planeResult.second, 0.559016994374947));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 0.559016994374947));
 
     /********************/
     Surface* newPlane = thePlane.clone(123);

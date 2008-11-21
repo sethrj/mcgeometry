@@ -24,8 +24,11 @@ public:
 
     ~Ellipsoid();
 
-    HitAndDist intersect(const std::vector<double>& Position, 
-            const std::vector<double>& Direction, bool PosSense) const;
+    void intersect( const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    const bool PosSense,
+                    bool& hit,
+                    double& distance) const;
 
 protected:
     //! output to a stream
