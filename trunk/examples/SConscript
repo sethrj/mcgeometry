@@ -1,4 +1,4 @@
-#import os
+import re
 
 Import('env')
 Import('useLibrary')
@@ -9,10 +9,10 @@ useLibrary(e, 'mcgeometry')
 
 Import('outputDirPath')
 
-sourceFiles = Glob('*.cpp')
+sourceFiles = Glob('*.cpp', strings=True)
 
 env.Append(CPPPATH = 'extra/')
-e.Program(outputDirPath + 'meshTiming', 'meshTiming.cpp')
-
-
+for file in sourceFiles:
+    execName = re.sub(r'\.cpp$','',file)
+    e.Program(outputDirPath + execName, file)
 
