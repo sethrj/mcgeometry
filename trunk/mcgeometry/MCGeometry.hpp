@@ -13,17 +13,14 @@
 #include <utility>
 #include <string>
 
-#include "transupport/VectorMath.hpp"
-#include "transupport/SoftEquiv.hpp"
-
-#include "Surface.hpp"
 #include "Cell.hpp"
-
-//#include <iostream>
-//using std::cout;
-//using std::endl;
+//#include "Surface.hpp"
+//#include "Cell.hpp"
 
 namespace mcGeometry {
+//forward declaration of surface
+class Surface;
+
 /*----------------------------------------------------------------------------*/
 /*!
  * \class MCGeometry
@@ -87,7 +84,7 @@ public:
     //!\brief  given a current position, location, and cell; find the new one
     // we may have to add further code to pass back a surface ID for a surface
     // tally, for example
-    void intersect(         const std::vector<double>& position,
+    void findNewCell(       const std::vector<double>& position,
                             const std::vector<double>& direction,
                             const unsigned int oldCellIndex,
                             std::vector<double>& newPosition,
@@ -156,21 +153,11 @@ public:
 
     //! get a user ID internal index  from a cell index
     UserCellIDType getUserIdFromCellIndex(
-                    const unsigned int index) const
-    {
-        Require( index < getNumCells() );
-
-        return _cells[index]->getUserId();
-    }
+                    const unsigned int index) const;
 
     //! get a user ID internal index  from a surface index
     UserSurfaceIDType getUserIdFromSurfaceIndex(
-                    const unsigned int index) const
-    {
-        Require( index < getNumSurfaces() );
-
-        return _surfaces[index]->getUserId();
-    }
+                    const unsigned int index) const;
 
 private:
     typedef std::pair<Surface*, bool>             SurfaceAndSense;
@@ -201,7 +188,7 @@ private:
     //! +-surface --> cell connectivity
     SCConnectMap _surfToCellConnectivity;
 
-    //====== INTERNAL ASSOCIATIVE VECTORS AND MAPS ======//
+    //======     USER ASSOCIATIVE MAPS     ======//
     // These associate the user input (i.e. cell IDs and surface IDs)
     // to our internal index values. This is used ONLY when the user inputs
     // geometry information and wants a reprint of said information.
@@ -222,7 +209,6 @@ private:
      * SENSE HAS QUADRIC DEFINED AS THE FIRST PART OF THE PAIR.
      */
 
-
     //! keep track of surface neighborhood connectivity
     //  when this reaches zero, connectivity is complete
     //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
@@ -239,158 +225,8 @@ private:
     void _failGeometry(            const std::string failureMessage,
                                    const unsigned int currentCellIndex,
                                    const std::vector<double>& position,
-                                   const std::vector<double>& direction);
+                                   const std::vector<double>& direction) const;
 };
-/*----------------------------------------------------------------------------*/
-inline void MCGeometry::intersect(
-                            const std::vector<double>& position,
-                            const std::vector<double>& direction,
-                            const unsigned int oldCellIndex,
-                            std::vector<double>& newPosition,
-                            unsigned int& newCellIndex,
-                            double& distanceTraveled,
-                            ReturnStatus& returnStatus)
-{
-//    cout << "unmatched surface count: " << _unMatchedSurfaces << endl;
-
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
-
-    Require(oldCellIndex < getNumCells());
-
-    // a reference to the pointer to the old cell
-    CellT& oldCell = *(_cells[oldCellIndex]);
-
-    // call intersect on the old cell to find the surface and distance that it
-    // moves to
-    Surface* hitSurface;
-    bool     oldSurfaceSense;
-    oldCell.intersect(position, direction, hitSurface, oldSurfaceSense,
-                      distanceTraveled);
-
-    Check(hitSurface != NULL);
-    Check(distanceTraveled >= 0.0);
-
-    returnStatus = MCG_NORMAL;
-
-    // ===== calculate transported position on the boundary of our new cell
-    newPosition.resize(3);
-    for (int i = 0; i < 3; i++) {
-        newPosition[i] = position[i] + distanceTraveled * direction[i];
-    }
-
-
-    // ===== Loop over neighborhood cells
-    CellT::CellContainer& neighborhood = oldCell.getNeighbors(hitSurface);
-
-    // loop through the old cell's hood to find if it's in one of those cells
-    for (CellT::CellContainer::const_iterator it  = neighborhood.begin();
-                                       it != neighborhood.end(); ++it)
-    {
-        // check if the point is inside (and pass hitSurface to exclude
-        // checking it)
-        if ( (*it)->isPointInside( newPosition, hitSurface ) )
-        {
-            //we have found the new cell
-            newCellIndex = (*it)->getIndex();
-
-//            cout << "Found ending cell index " << newCellIndex
-//                 << " already connected to starting cell index "
-//                 << oldCellIndex << " through hood" << endl;
-
-            return;
-        }
-    }
-
-    // ===== Loop through all cells that have the same surface as the one we
-    // intersected, and the opposite surface sense (i.e. if in our cell we hit
-    // surface 2, and our cell is defined as being -2, then the cell on the
-    // other side has to have orientation +2
-
-    SurfaceAndSense searchQas(hitSurface, !oldSurfaceSense);
-
-    SCConnectMap::iterator cellList
-                 = _surfToCellConnectivity.find(searchQas);
-
-    if (cellList == _surfToCellConnectivity.end()) {
-        _failGeometry("Surface connectivity not found for surface",
-                        newCellIndex, position, direction);
-    }
-
-    CellVec& cellsToCheck = cellList->second;
-
-    for (CellVec::iterator pNewCell  = cellsToCheck.begin();
-                                  pNewCell != cellsToCheck.end(); ++pNewCell)
-    {
-        // check if the point is inside (and pass hitSurface to exclude
-        // checking it)
-        if ( (*pNewCell)->isPointInside( newPosition, hitSurface ) )
-        {
-            // if this is the first cell linked to this surface, we decrement 
-            // the unmatched surfaces
-            if (neighborhood.size() == 0)
-                _unMatchedSurfaces--;
-
-            // add new cell to old cell's hood connectivity
-            neighborhood.push_back(*pNewCell);
-
-            CellT::CellContainer& newNeighborhood
-                = (*pNewCell)->getNeighbors(hitSurface);
-
-            // if this is the first cell linked to this surface, we decrement 
-            // the unmatched surfaces
-            if (newNeighborhood.size() == 0)
-                _unMatchedSurfaces--;
-
-            // add old cell to new cell's hood connectivity
-            newNeighborhood.push_back(&oldCell);
-
-            // we have found the new cell
-            newCellIndex = (*pNewCell)->getIndex();
-
-//            cout << "Connected ending cell index " << newCellIndex
-//                 << " to starting cell index " << oldCellIndex << endl;
-
-            if (_unMatchedSurfaces == 0)
-                _completedConnectivity();
-            return;
-        }
-    }
-
-    // TODO: when looping through the other cells in the problem, exclude the
-    // ones that we already checked in the cell's hood; means more loops but
-    // fewer flops in the "is inside" method calls
-
-    newCellIndex = -1;
-    returnStatus = MCG_LOST;
-
-    _failGeometry("Ruh-roh, new cell not found!",
-                    newCellIndex, position, direction);
-}
-/*----------------------------------------------------------------------------*/
-inline unsigned int MCGeometry::findCell(
-                                const std::vector<double>& position) const
-{
-  //  // loop through all cells in problem
-  //  for (CellVec::const_iterator itCel = _cells.begin();
-  //                               itCel != _cells.end();  ++itCel)
-  //  {
-  //      if ((*itCel)->isPointInside(position))  {
-  //          return itCel - _cells.begin(); // maybe valid?
-  //      }
-  //  }
-    // that might be faster than this:
-    for (unsigned int i = 0; i < _cells.size(); ++i) {
-        if (_cells[i]->isPointInside(position)) {
-            return i;
-        }
-    }
-
-    // return a status value or something instead of failing miserably?
-    Insist(0, "Could not find cell!");
-    return 0;
-}
 /*----------------------------------------------------------------------------*/
 } // end namespace mcGeometry
 #endif

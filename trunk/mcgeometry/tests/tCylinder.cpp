@@ -49,17 +49,20 @@ void runTestA() {
     particleDir[1] = 1.0;
 
     /********************/
-    Surface::HitAndDist theResult;
+    bool    didHit;
+    double  distance;
+
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theCylinder.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    cout << "Did hit: "  << theResult.first << endl
-         << "distance: " << theResult.second << endl;
+    cout << "Did hit: "  << didHit << endl
+         << "distance: " << distance << endl;
 
-    TESTER_CHECKFORPASS(theResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(theResult.second, 3.0));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 3.0));
 
     /********************/
     particleLoc[0] = -1;
@@ -72,13 +75,14 @@ void runTestA() {
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == true);
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theCylinder.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    cout << "Did hit: "  << theResult.first << endl
-         << "distance: " << theResult.second << endl;
+    cout << "Did hit: "  << didHit << endl
+         << "distance: " << distance << endl;
 
-    TESTER_CHECKFORPASS(theResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(theResult.second, 0.0593405544489074));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 0.0593405544489074));
 
     /********************/
 
@@ -86,12 +90,13 @@ void runTestA() {
     particleDir[1] = -0.707106781186547;
     particleDir[2] = 0.0;
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, true);
+    theCylinder.intersect(particleLoc, particleDir, true,
+        didHit, distance);
 
-    cout << "Did hit: "  << theResult.first << endl
-         << "distance: " << theResult.second << endl;
+    cout << "Did hit: "  << didHit << endl
+         << "distance: " << distance << endl;
 
-    TESTER_CHECKFORPASS(theResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
     /********************/
     Surface* newCyl = theCylinder.clone(182);
 
@@ -119,14 +124,16 @@ void runTestB() {
     particleDir[1] = 1.0;
 
     /********************/
-    Surface::HitAndDist theResult;
+    bool    didHit;
+    double  distance;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
+    theCylinder.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(theResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(theResult.second, 2.598076211353316));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 2.598076211353316));
 
     /********************/
     particleLoc[0] = -1;
@@ -139,13 +146,14 @@ void runTestB() {
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
+    theCylinder.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-//    cout << "Did hit: "  << theResult.first << endl
-//         << "distance: " << theResult.second << endl;
+//    cout << "Did hit: "  << didHit << endl
+//         << "distance: " << distance << endl;
 
-    TESTER_CHECKFORPASS(theResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(theResult.second, 5.036796290982293));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 5.036796290982293));
 
     /********************/
 
@@ -153,10 +161,11 @@ void runTestB() {
     particleDir[1] = -0.707106781186547;
     particleDir[2] = 0.0;
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
+    theCylinder.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(theResult.first == true);
-    TESTER_CHECKFORPASS(softEquiv(theResult.second, 1.414213562373095));
+    TESTER_CHECKFORPASS(didHit == true);
+    TESTER_CHECKFORPASS(softEquiv(distance, 1.414213562373095));
 
     /********************/
     // make sure that it thinks a particle going along its axis never hits it
@@ -165,9 +174,10 @@ void runTestB() {
     particleDir[1] = 0.0;
     particleDir[2] = 1.0;
 
-    theResult  = theCylinder.intersect(particleLoc, particleDir, false);
+    theCylinder.intersect(particleLoc, particleDir, false,
+        didHit, distance);
 
-    TESTER_CHECKFORPASS(theResult.first == false);
+    TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
     // make sure it can check "outside" correctly

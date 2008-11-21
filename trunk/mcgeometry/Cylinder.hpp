@@ -54,8 +54,11 @@ public:
 
     bool hasPosSense(const std::vector<double>& position) const;
 
-    HitAndDist intersect(const std::vector<double>& position, 
-            const std::vector<double>& direction, bool posSense) const;
+    void intersect( const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    const bool PosSense,
+                    bool& hit,
+                    double& distance) const;
 
 protected:
     //! output to a stream
@@ -101,9 +104,11 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
 
 // This could be done more efficiently but this way is (arguably) closer to 
 // the original math.
-inline Surface::HitAndDist Cylinder::intersect(
+inline void Cylinder::intersect(
         const std::vector<double>& position, 
-        const std::vector<double>& direction, bool posSense) const
+        const std::vector<double>& direction,
+        const bool posSense,
+        bool& hit, double& distance) const
 {
     Require(position.size() == 3);
     Require(direction.size() == 3);
@@ -132,7 +137,7 @@ inline Surface::HitAndDist Cylinder::intersect(
     c = tranSupport::vectorDot(diff, _axis);
     C = tranSupport::vectorDot(diff, diff) - c*c - _radius*_radius;
 
-    return _calcQuadraticIntersect(A, B, C, posSense);
+    _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
 }
 
 inline std::ostream& Cylinder::_output( std::ostream& os ) const {
@@ -172,9 +177,11 @@ public:
 
     bool hasPosSense(const std::vector<double>& position) const;
 
-    HitAndDist intersect(const std::vector<double>& position, 
-                         const std::vector<double>& direction,
-                         bool posSense) const;
+    void intersect( const std::vector<double>& position, 
+                    const std::vector<double>& direction,
+                    const bool PosSense,
+                    bool& hit,
+                    double& distance) const;
 
 protected:
     //! output to a stream
@@ -225,12 +232,13 @@ inline bool CylinderNormal<2>::hasPosSense(
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-inline Surface::HitAndDist CylinderNormal<axis>::intersect(
+inline void CylinderNormal<axis>::intersect(
                 const std::vector<double>& position, 
                 const std::vector<double>& direction,
-                bool posSense) const
+                const bool posSense,
+                bool& hit, double& distance) const
 {
-    return _calcQuadraticIntersect(0.0, 0.0, 0.0, posSense);
+    return _calcQuadraticIntersect(0.0, 0.0, 0.0, posSense, hit, distance);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>

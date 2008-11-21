@@ -236,7 +236,7 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
                 for( dirIter = directions.begin(); dirIter != directions.end();
                         ++dirIter )
                 {
-                    Geo.intersect(position, *dirIter, ID, newPos, newID, 
+                    Geo.findNewCell(position, *dirIter, ID, newPos, newID, 
                                     distance, RS);
                 }
                 ++ID;
