@@ -11,7 +11,7 @@ Import('outputDirPath')
 
 sourceFiles = Glob('*.cpp')
 
-e.Program(outputDirPath + 'meshExample', 'meshExample.cpp')
+e.Program(outputDirPath + 'meshTiming', 'meshTiming.cpp')
 
 
 
