@@ -9,10 +9,5 @@ useLibrary(e, 'mcgeometry')
 
 Import('outputDirPath')
 
-sourceFiles = Glob('*.cpp', strings=True)
-
-env.Append(CPPPATH = 'extra/')
-for file in sourceFiles:
-    execName = re.sub(r'\.cpp$','',file)
-    e.Program(outputDirPath + execName, file)
-
+e.Program(outputDirPath + 'meshTiming', 'meshTiming.cpp')
+e.Program(outputDirPath + 'meshComparison', ['meshComparison.cpp','extra/mtrand.cc'])

@@ -1,6 +1,6 @@
 /*!
- * \file example.cpp
- * \brief Example of using MCGeometry
+ * \file meshComparison.cpp
+ * \brief Compare our combinatorial geometry to a evenly spaced mesh
  * \author Jeremy Lloyd Conlin
  */
 
@@ -20,6 +20,8 @@
 #include "transupport/constants.hpp"
 #include "transupport/Timer.hpp"
 
+#include "extra/mtrand.h"
+
 using std::cout;
 using std::endl;
 
@@ -34,12 +36,13 @@ double distanceToPlane(double, double);
 
 int main(int argc, char* argv[]){
 
-    Insist( argc == 3, "Please input number of divisions along each axis." );
+    Insist( argc == 3, "Syntax: meshComparsion numCells numparticles." );
 
     int N( std::atoi(argv[1]) );
     int numParticles(   std::atoi(argv[2]) );
 
     Insist( N > 0, "Number of divisions should be positive." );
+    Insist( numParticles > 0, "Number of particles should be positive." );
 
     cout << "\n=====================================================" 
          << "\nComparing combinatorial mesh with deterministic mesh." 
@@ -54,12 +57,17 @@ int main(int argc, char* argv[]){
 
     std::vector<double> combPLMean;
     std::vector<double> combPLSD;
+
+    cout << "Combinatorial Geometry." << endl;
+
     TIMER_START("Transport in combinatorial mesh.");
     SimulateMCComb(numParticles, N, Geo, combPLMean, combPLSD);
     TIMER_STOP("Transport in combinatorial mesh.");
 
     std::vector<double> detPLMean;
     std::vector<double> detPLSD;
+
+    cout << "Deterministic Geometry." << endl;
     TIMER_START("Transport in deterministic mesh.");
     SimulateMCDet(numParticles, N, detPLMean, detPLSD);
     TIMER_STOP("Transport in deterministic mesh.");
@@ -163,8 +171,6 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
     Surfaces[2] = maxYId;
     Geo.addCell(ID, Surfaces); ++ID;
 
-
-    
     Surfaces.resize(5);
     Surfaces[0] = minXId;
     Surfaces[1] = -maxXId;
@@ -183,8 +189,6 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
 //! mesh.
 void SimulateMCDet(int N, int size, std::vector<double>& meanPL, 
             std::vector<double>& sdPL){
-
-    cout << "Deterministic Geometry." << endl;
 
     std::vector<double> position(3,0.0);
     std::vector<double> new_position(3,0.0);
@@ -245,8 +249,6 @@ void SimulateMCDet(int N, int size, std::vector<double>& meanPL,
 void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo, 
             std::vector<double>& meanPL, std::vector<double>& sdPL){
 
-    cout << "Cominatorial Geometry." << endl;
-
     double numCells = size*size*size;    // Number of cells in mesh
     meanPL.resize(numCells);
     sdPL.resize(numCells);
@@ -284,9 +286,9 @@ void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo,
                 position[1] += direction[1]*dColl;
                 position[2] += direction[2]*dColl;
 
-                // Score pathlentth tally
+                // Score pathlength tally
                 meanPL[cell] += dColl;
-                sdPL[cell] += dColl*dColl;
+                sdPg[cell] += dColl*dColl;
             }
             else{       // Move to boundary
                 position = new_position;
@@ -306,7 +308,7 @@ void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo,
 // Distance to plane is: t = n.(a-p)/(n.d) n is normal vector, a is point on 
 // plane, p is position d is direction vector.  Since all of our n's have only 
 // one non-zero term the dot products are just the product of two numbers
-double distanceToPlane(double x, double v){
+inline double distanceToPlane(double x, double v){
     double p;
     if( v > 0 ) p = std::floor(x + 1);  // Moving in positive direction
     else p = std::floor(x);
@@ -315,7 +317,7 @@ double distanceToPlane(double x, double v){
 }
 
 //! Pick a random direction on the unit sphere
-void randDirection(std::vector<double>& v){
+inline void randDirection(std::vector<double>& v){
     double phi = 2*tranSupport::constants::PI*randDouble();
     
     v[0] = 2*randDouble() - 1;
@@ -331,8 +333,11 @@ inline void randPosition( double size, std::vector<double>& position){
     }
 }
 
+
+mtRand::MTRand randGen;
+
 inline double randDouble(){
-    return std::rand()/(double(RAND_MAX) + 1);
+    return randGen();
 }
 
 
