@@ -9,5 +9,7 @@ useLibrary(e, 'mcgeometry')
 
 Import('outputDirPath')
 
-e.Program(outputDirPath + 'meshTiming', 'meshTiming.cpp')
-e.Program(outputDirPath + 'meshComparison', ['meshComparison.cpp','extra/mtrand.cc'])
+e.Program(outputDirPath + 'meshTiming', \
+			 ['meshTiming.cpp','generateMeshGeom.cpp'])
+e.Program(outputDirPath + 'meshComparison', \
+			 ['meshComparison.cpp','generateMeshGeom.cpp','extra/mtrand.cc'])

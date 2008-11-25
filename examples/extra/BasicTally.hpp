@@ -70,7 +70,7 @@ public:
     //! Overload the += operator to add a new data point
     BasicTally<T>& operator+= (const T &newDataPoint) {
         addValue(newDataPoint);
-//      flush();
+        Check(curVal == 0);
         return *this;
     }
     
