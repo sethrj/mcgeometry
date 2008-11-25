@@ -16,9 +16,11 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
+#include <strstream>
 #include "transupport/VectorPrint.hpp"
 #include "transupport/constants.hpp"
 #include "transupport/Timer.hpp"
+#include "extra/BasicTally.hpp"
 
 #include "extra/mtrand.h"
 
@@ -26,23 +28,30 @@ using std::cout;
 using std::endl;
 
 void CreateMesh(int, mcGeometry::MCGeometry&);
-void SimulateMCComb(int, int, mcGeometry::MCGeometry&, std::vector<double>&, 
-            std::vector<double>&);
-void SimulateMCDet(int, int, std::vector<double>&, std::vector<double>&);
+void SimulateMCComb(int, int, mcGeometry::MCGeometry&, 
+        std::vector<monteCarlo::BasicTally<double> >&);
+void SimulateMCDet(int, int, std::vector<monteCarlo::BasicTally<double> >&);
 double randDouble();
 void randDirection(std::vector<double>&);
 void randPosition(double, std::vector<double>&);
 double distanceToPlane(double, double);
+void printPLTallies(int, const std::vector<monteCarlo::BasicTally<double> >&, 
+        const std::vector<monteCarlo::BasicTally<double> >&);
+void diffTallies(int, const std::vector<monteCarlo::BasicTally<double> >&, 
+        const std::vector<monteCarlo::BasicTally<double> >& );
 
 int main(int argc, char* argv[]){
 
-    Insist( argc == 3, "Syntax: meshComparsion numCells numparticles." );
+    Insist( argc == 4, "Syntax: meshComparsion numCells numparticles printFlag." );
 
     int N( std::atoi(argv[1]) );
     int numParticles(   std::atoi(argv[2]) );
+    int printFlag( std::atoi(argv[3]) );
 
     Insist( N > 0, "Number of divisions should be positive." );
     Insist( numParticles > 0, "Number of particles should be positive." );
+    Insist( printFlag > -1, "printFlag must be either 0 or 1.");
+    Insist( printFlag < 2, "printFlag must be either 0 or 1.");
 
     cout << "\n=====================================================" 
          << "\nComparing combinatorial mesh with deterministic mesh." 
@@ -55,22 +64,25 @@ int main(int argc, char* argv[]){
     CreateMesh(N, Geo);
     TIMER_STOP("Creating the combinatorial mesh.");
 
-    std::vector<double> combPLMean;
-    std::vector<double> combPLSD;
+    std::vector<monteCarlo::BasicTally<double> > combPL;
 
     cout << "Combinatorial Geometry." << endl;
 
     TIMER_START("Transport in combinatorial mesh.");
-    SimulateMCComb(numParticles, N, Geo, combPLMean, combPLSD);
+    SimulateMCComb(numParticles, N, Geo, combPL);
     TIMER_STOP("Transport in combinatorial mesh.");
 
-    std::vector<double> detPLMean;
-    std::vector<double> detPLSD;
+    std::vector<monteCarlo::BasicTally<double> > detPL;
 
     cout << "Deterministic Geometry." << endl;
     TIMER_START("Transport in deterministic mesh.");
-    SimulateMCDet(numParticles, N, detPLMean, detPLSD);
+    SimulateMCDet(numParticles, N, detPL);
     TIMER_STOP("Transport in deterministic mesh.");
+
+    if( printFlag == 1) printPLTallies(N, combPL, detPL);
+    
+    cout << "Difference between pathlength tallies." << endl;
+    diffTallies(N, combPL, detPL);
 
     TIMER_PRINT();
 
@@ -187,8 +199,10 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
 
 //! SimulateMCDet will simulate a Monte Carlo transport through a deterministic
 //! mesh.
-void SimulateMCDet(int N, int size, std::vector<double>& meanPL, 
-            std::vector<double>& sdPL){
+void SimulateMCDet(int N, int size, std::vector<monteCarlo::BasicTally<double> >& PLTally){
+
+    double numCells = size*size*size;    // Number of cells in mesh
+    PLTally.resize(numCells);
 
     std::vector<double> position(3,0.0);
     std::vector<double> new_position(3,0.0);
@@ -203,7 +217,6 @@ void SimulateMCDet(int N, int size, std::vector<double>& meanPL,
     double xT;    // Total cross section
     unsigned int cellNumber;
 
-
     // Track particles
     for( int n = 0; n < N; ++n ){
         // Pick random position inside box
@@ -211,8 +224,8 @@ void SimulateMCDet(int N, int size, std::vector<double>& meanPL,
         // Pick random direction
         randDirection(direction);
         
-        while( fabs(position[0]) < N && fabs(position[1]) < N && 
-            fabs(position[2]) < N ){
+        while( fabs(position[0]) < size && fabs(position[1]) < size && 
+            fabs(position[2]) < size ){
 
             // Find distance to 'planes'
             dX = distanceToPlane(position[0], direction[0]); 
@@ -220,24 +233,41 @@ void SimulateMCDet(int N, int size, std::vector<double>& meanPL,
             dZ = distanceToPlane(position[2], direction[2]); 
 
             dSurf= dX;
-            if( dY < dSurf) dSurf= dY;
-            if( dZ < dSurf) dSurf= dZ;
+            if( dY < dSurf || dSurf == 0.0 ) dSurf= dY;
+            if( dZ < dSurf || dSurf == 0.0 ) dSurf= dZ;
 
+            cellNumber = std::floor(position[0]) + (size)*std::floor(position[1])
+                         + (size*size)*std::floor(position[2]);
             // Sample distance to collision
-            cellNumber = std::floor(position[0]) + (N+1)*std::floor(position[1])
-                         + 2*(N+1)*std::floor(position[2]);
             if( cellNumber%2 ) xT = 0.5;
             else xT = 0.01;
 
             dColl = (-1.0/xT)*std::log(randDouble());
 
             // Determine minimum distance
-            d = std::min(dColl, dSurf);
+            if( (dColl < dSurf) || dSurf == 0.0 )   d = dColl;
+            else d = dSurf;
+//          cout << "dColl = " << dColl
+//               << ", dSurf = " << dSurf
+//               << ", d = " << d << endl;
+                 
             position[0] += direction[0]*d;
             position[1] += direction[1]*d;
             position[2] += direction[2]*d;
 
+            // Score pathlength tally
+            if( cellNumber > numCells ){
+                cout << "cellNumber: " << cellNumber << ", numCells = " 
+                     << numCells << ", n = " << n 
+                     << "\n\tposition: " << position << endl;
+            }
+            PLTally[cellNumber] += d;
+
         }
+    }
+    std::vector<monteCarlo::BasicTally<double> >::iterator talIter;
+    for( talIter = PLTally.begin(); talIter != PLTally.end(); ++talIter ){
+        talIter->setNumTrials(N);
     }
 }
 
@@ -247,11 +277,10 @@ void SimulateMCDet(int N, int size, std::vector<double>& meanPL,
 //! size: The size of the mesh
 //! N: Number of 'particles' to track
 void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo, 
-            std::vector<double>& meanPL, std::vector<double>& sdPL){
+            std::vector<monteCarlo::BasicTally<double> >& PLTally){
 
     double numCells = size*size*size;    // Number of cells in mesh
-    meanPL.resize(numCells);
-    sdPL.resize(numCells);
+    PLTally.resize(numCells);
 
     std::vector<double> position(3,0.0);
     std::vector<double> new_position(3,0.0);
@@ -282,23 +311,28 @@ void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo,
                         dSurf, returnStatus);
 
             if( dColl < dSurf ){    // Collision
+                // Score pathlength tally
+                PLTally[cell] += dColl;
+                PLTally[cell].setNumTrials(N);
+
                 position[0] += direction[0]*dColl;
                 position[1] += direction[1]*dColl;
                 position[2] += direction[2]*dColl;
-
-                // Score pathlength tally
-                meanPL[cell] += dColl;
-                sdPg[cell] += dColl*dColl;
             }
             else{       // Move to boundary
+                // Score pathlength tally
+                PLTally[cell] += dSurf;
+                PLTally[cell].setNumTrials(N);
+
                 position = new_position;
                 cell = new_cell;
-
-                // Score pathlength tally
-                meanPL[cell] += dSurf;
-                sdPL[cell] += dSurf*dSurf;
             }
+
         }
+    }
+    std::vector<monteCarlo::BasicTally<double> >::iterator talIter;
+    for( talIter = PLTally.begin(); talIter != PLTally.end(); ++talIter ){
+        talIter->setNumTrials(N);
     }
 
 }
@@ -310,10 +344,15 @@ void SimulateMCComb(int N, int size, mcGeometry::MCGeometry& Geo,
 // one non-zero term the dot products are just the product of two numbers
 inline double distanceToPlane(double x, double v){
     double p;
-    if( v > 0 ) p = std::floor(x + 1);  // Moving in positive direction
-    else p = std::floor(x);
+    if( v > 0 ){    // Moving in positive direction
+        p = std::floor(x + 1);  
+        return (p-x)/v;
+    }
+    else{
+        p = std::floor(x);
+        return (x-p)/fabs(v);
+    }
 
-    return (x-p)/v;
 }
 
 //! Pick a random direction on the unit sphere
@@ -340,4 +379,80 @@ inline double randDouble(){
     return randGen();
 }
 
+void printPLTallies(int N, const std::vector<monteCarlo::BasicTally<double> >& comb, 
+        const std::vector<monteCarlo::BasicTally<double> >& det){
 
+    Insist(comb.size() == det.size(), "PathLength tallies mush be same size.");
+
+    cout << "\nCombinatorial Tallies \t\t\t Deterministic Tallies" << endl;
+
+    cout << "Means:" << endl;
+    int n = 0;
+    for( int k = 0; k < N; ++k ){
+        for( int j = 0; j < N; ++j ){
+            std::ostringstream combRow;
+            std::ostringstream detRow;
+            combRow << "[ ";
+            detRow << "[ ";
+            for( int i = 0; i < N; ++i, ++n ){
+//              cout << "n = " << n << endl;
+                combRow << comb[n].getMean() << ", ";
+                detRow << det[n].getMean() << ", ";
+            }
+            combRow << "]";
+            detRow << "]";
+            cout << combRow.str() << "\t\t" << detRow.str() << endl;
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    cout << "Standard Deviations:" << endl;
+    n = 0;
+    for( int k = 0; k < N; ++k ){
+        for( int j = 0; j < N; ++j ){
+            std::ostringstream combRow;
+            std::ostringstream detRow;
+            combRow << "[ ";
+            detRow << "[ ";
+            for( int i = 0; i < N; ++i, ++n ){
+//              cout << "n = " << n << endl;
+                combRow << comb[n].getStdev() << ", ";
+                detRow << det[n].getStdev() << ", ";
+            }
+            combRow << "]";
+            detRow << "]";
+            cout << combRow.str() << "\t\t" << detRow.str() << endl;
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+}
+
+//! diffTallies will show the difference between the two tallies so it is 
+//! easier to compare them.
+void diffTallies(int N, const std::vector<monteCarlo::BasicTally<double> >& A, 
+        const std::vector<monteCarlo::BasicTally<double> >& B){
+
+    cout << "\n\tTally Means\t\t \t\t\t \tTally Std Dev\t\t" << endl;
+
+    int n = 0;
+    for( int k = 0; k < N; ++k ){
+        for( int j = 0; j < N; ++j ){
+            std::ostringstream mean;
+            std::ostringstream stdev;
+            mean << "[ ";
+            stdev << "[ ";
+            for( int i = 0; i < N; ++i, ++n ){
+                mean << (A[n].getMean() - B[n].getMean()) << ", ";
+                stdev << std::max(A[n].getStdev(), B[n].getStdev() ) << ", ";
+            }
+            mean << "]";
+            stdev << "]";
+            cout << mean.str() << "\t\t" << stdev.str() << endl;
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
