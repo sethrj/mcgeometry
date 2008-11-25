@@ -26,6 +26,31 @@ namespace mcGeometry {
 /*============================================================================*\
  * subroutines that the user calls while running their monte carlo code
 \*============================================================================*/
+void MCGeometry::findDistance(
+                            const std::vector<double>& position,
+                            const std::vector<double>& direction,
+                            const unsigned int oldCellIndex,
+                            double& distanceTraveled)
+{
+    Require(position.size() == 3);
+    Require(direction.size() == 3);
+    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
+    Require(oldCellIndex < getNumCells());
+
+    Surface* hitSurface;
+    bool oldSurfaceSense;
+
+    // call intersect on the old cell to find the surface and distance that it
+    // moves to
+    _cells[oldCellIndex]->intersect(
+                                position, direction,
+                                hitSurface, oldSurfaceSense,
+                                distanceTraveled);
+
+    Check(hitSurface != NULL);
+    Ensure(distanceTraveled >= 0.0);
+}
+/*----------------------------------------------------------------------------*/
 void MCGeometry::findNewCell(
                             const std::vector<double>& position,
                             const std::vector<double>& direction,
@@ -481,6 +506,13 @@ void MCGeometry::_printSAS(const SurfaceAndSense& qas) const
         cout << "-";
 
     cout << qas.first->getUserId();
+}
+/*----------------------------------------------------------------------------*/
+// creation
+MCGeometry::MCGeometry() :
+    _unMatchedSurfaces(0)
+{
+    /* * */
 }
 /*----------------------------------------------------------------------------*/
 // clean up after ourselves

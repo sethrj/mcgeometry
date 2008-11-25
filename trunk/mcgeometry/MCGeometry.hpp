@@ -14,8 +14,7 @@
 #include <string>
 
 #include "Cell.hpp"
-//#include "Surface.hpp"
-//#include "Cell.hpp"
+#include "Surface.hpp"
 
 namespace mcGeometry {
 //forward declaration of surface
@@ -80,10 +79,19 @@ public:
     //surfaces, etc.
     void completedGeometryInput();
 
+    //!\brief Find the distance to the next geometry interaction.
+    // Given a current position, location, and cell
+    void findDistance(      const std::vector<double>& position,
+                            const std::vector<double>& direction,
+                            const unsigned int oldCellIndex,
+                            double& distanceTraveled);
 
     //!\brief  given a current position, location, and cell; find the new one
     // we may have to add further code to pass back a surface ID for a surface
     // tally, for example
+
+    //!\brief Calculate distance to next cell *and* do the next-cell calculation
+    // in one go.
     void findNewCell(       const std::vector<double>& position,
                             const std::vector<double>& direction,
                             const unsigned int oldCellIndex,
@@ -99,14 +107,6 @@ public:
 
     //! Debug printing; will be incorporated into file IO etc. later
     void debugPrint() const;
-
-    //! empty constructor
-    MCGeometry() :
-        _unMatchedSurfaces(0)
-    { /* * */ }
-    
-    //! destructor must delete surfaces and cells
-    ~MCGeometry();
 
     //! return the number of cells we have stored
     unsigned int getNumCells() const {
@@ -158,6 +158,12 @@ public:
     //! get a user ID internal index  from a surface index
     UserSurfaceIDType getUserIdFromSurfaceIndex(
                     const unsigned int index) const;
+
+    //! constructor
+    MCGeometry();
+    
+    //! destructor must delete surfaces and cells
+    ~MCGeometry();
 
 private:
     typedef std::pair<Surface*, bool>             SurfaceAndSense;

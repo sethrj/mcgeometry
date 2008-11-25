@@ -6,9 +6,9 @@
 
 /*----------------------------------------------------------------------------*/
 
+#include "generateMeshGeom.hpp"
+
 #include "mcgeometry/MCGeometry.hpp"
-#include "mcgeometry/Plane.hpp"
-#include "mcgeometry/Sphere.hpp"
 
 #include <iostream>
 #include <vector>
@@ -16,7 +16,7 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
-#include <strstream>
+#include <sstream>
 #include "transupport/VectorPrint.hpp"
 #include "transupport/constants.hpp"
 #include "transupport/Timer.hpp"
@@ -27,7 +27,6 @@
 using std::cout;
 using std::endl;
 
-void CreateMesh(int, mcGeometry::MCGeometry&);
 void SimulateMCComb(int, int, mcGeometry::MCGeometry&, 
         std::vector<monteCarlo::BasicTally<double> >&);
 void SimulateMCDet(int, int, std::vector<monteCarlo::BasicTally<double> >&);
@@ -89,114 +88,6 @@ int main(int argc, char* argv[]){
     return 0;
 }
       
-
-//! Mesh will create and use a retangular mesh using N planes spaced 1.0 units
-// apart
-void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
-    // Normal vectors to planes perpendicular to axes
-    std::vector<double> xNorm(3, 0.0);  xNorm[0] = 1.0;
-    std::vector<double> yNorm(3, 0.0);  yNorm[1] = 1.0;
-    std::vector<double> zNorm(3, 0.0);  zNorm[2] = 1.0;
-
-
-    const unsigned int minXId = 1;
-    const unsigned int minYId = N+2;
-    const unsigned int minZId = 2*N+3;
-
-    const unsigned int maxXId = N+1;
-    const unsigned int maxYId = 2*N+2;
-    const unsigned int maxZId = 3*N+3;
-    // Create global bounding planes
-    // Could have done this with PlaneNormal but doing it with general plane
-    // as an example
-    mcGeometry::PlaneX minX(0);
-    Geo.addSurface(minXId, minX);
-    mcGeometry::PlaneY minY(0);
-    Geo.addSurface(minYId, minY);
-    mcGeometry::PlaneZ minZ(0);
-    Geo.addSurface(minZId, minZ);
-
-    // Point is now corner opposite from origin
-    mcGeometry::PlaneX maxX(N);
-    Geo.addSurface(N+1, maxX);
-    
-    mcGeometry::PlaneY maxY(N);
-    Geo.addSurface(2*(N+1), maxY);
-
-    mcGeometry::PlaneZ maxZ(N);
-    Geo.addSurface(3*(N+1), maxZ);
-
-    cout << "Global bounding box defined by following surfaces:\n"
-         << minX << "\n"<< minY << "\n"<< minZ << "\n"
-         << maxX << "\n"<< maxY << "\n"<< maxZ << endl;
-
-    // yn and zn are defined so they don't have to be recalculated many times
-    unsigned int yn = N+1;
-    unsigned int zn = 2*(yn);
-
-    // Create interior mesh
-    for( int n = 2; n <= N; ++n){
-        mcGeometry::PlaneX PX(n - 1.0);
-        Geo.addSurface(n, PX);
-        mcGeometry::PlaneY PY(n - 1.0);
-        Geo.addSurface(n+yn, PY);
-        mcGeometry::PlaneZ PZ(n - 1.0);
-        Geo.addSurface(n+zn, PZ);
-    }
-
-    // Turn interior mesh into cells
-    unsigned int ID = 0;
-    std::vector<int> Surfaces(6, 0);
-
-    cout << endl;
-    for( int k = 0; k < N; ++k ){
-        for( int j = 0; j < N; ++j ){
-            for( int i = 0; i < N; ++i ){
-                Surfaces[0] = i+1;
-                Surfaces[1] = -1*(i+2);
-                Surfaces[2] = (N+1) + (j+1);
-                Surfaces[3] = -1*( (N+1) + (j+2) );
-                Surfaces[4] = 2*(N+1) + (k+1);
-                Surfaces[5] = -1*( 2*(N+1) + (k+2) );
-
-                Geo.addCell(ID, Surfaces);
-                ++ID;
-            }
-        }
-    }
-
-    // Create cells defining every thing outside of mesh
-    Surfaces.resize(1);
-    Surfaces[0] = -minXId;
-    Geo.addCell(ID, Surfaces); ++ID;
-
-    Surfaces[0] = maxXId;
-    Geo.addCell(ID, Surfaces); ++ID;
-
-    Surfaces.resize(3);
-    Surfaces[0] = minXId;
-    Surfaces[1] = -maxXId;
-
-    Surfaces[2] = -minYId;
-    Geo.addCell(ID, Surfaces); ++ID;
-
-    Surfaces[2] = maxYId;
-    Geo.addCell(ID, Surfaces); ++ID;
-
-    Surfaces.resize(5);
-    Surfaces[0] = minXId;
-    Surfaces[1] = -maxXId;
-    Surfaces[2] = minYId;
-    Surfaces[3] = -maxYId;
-
-    Surfaces[4] = -minZId;
-    Geo.addCell(ID, Surfaces); ++ID;
-
-    Surfaces[4] = maxZId;
-    Geo.addCell(ID, Surfaces); ++ID;
-
-}
-
 //! SimulateMCDet will simulate a Monte Carlo transport through a deterministic
 //! mesh.
 void SimulateMCDet(int N, int size, std::vector<monteCarlo::BasicTally<double> >& PLTally){
