@@ -41,6 +41,10 @@
 namespace monteCarlo {
 
 /*----------------------------------------------------------------------------*/
+/*
+ * \class BasicTally
+ * \brief Simple tally that reports mean, stdev, estimated deviation of the mean
+ */
 template <typename T>
 class BasicTally {
 public:
@@ -59,6 +63,11 @@ public:
     void flush() {
         addValue(curVal);
         curVal = 0.0;
+    }
+
+    //! Make sure that there is nothing in the accumulating buffer
+    bool checkFlushed() {
+        return curVal == 0.0;
     }
 
     //! Add a number
