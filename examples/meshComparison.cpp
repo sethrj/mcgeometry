@@ -115,8 +115,12 @@ void SimulateMCDet(int N, int size, std::vector<monteCarlo::BasicTally<double> >
         // Pick random direction
         randDirection(direction);
         
-        while( fabs(position[0]) < size && fabs(position[1]) < size && 
-            fabs(position[2]) < size ){
+        int j = 0;
+        while( position[0] < size && position[1] < size && position[2] < size
+            && position[0] > 0.0 && position[1] > 0.0 && position[2] > 0.0 ){
+
+            cellNumber = std::floor(position[0]) + (size)*std::floor(position[1])
+                         + (size*size)*std::floor(position[2]);
 
             // Find distance to 'planes'
             dX = distanceToPlane(position[0], direction[0]); 
@@ -127,8 +131,6 @@ void SimulateMCDet(int N, int size, std::vector<monteCarlo::BasicTally<double> >
             if( dY < dSurf || dSurf == 0.0 ) dSurf= dY;
             if( dZ < dSurf || dSurf == 0.0 ) dSurf= dZ;
 
-            cellNumber = std::floor(position[0]) + (size)*std::floor(position[1])
-                         + (size*size)*std::floor(position[2]);
             // Sample distance to collision
             if( cellNumber%2 ) xT = 0.5;
             else xT = 0.01;
@@ -154,6 +156,7 @@ void SimulateMCDet(int N, int size, std::vector<monteCarlo::BasicTally<double> >
             }
             PLTally[cellNumber] += d;
 
+            ++j;
         }
     }
     std::vector<monteCarlo::BasicTally<double> >::iterator talIter;
@@ -308,8 +311,8 @@ void printPLTallies(int N, const std::vector<monteCarlo::BasicTally<double> >& c
             detRow << "[ ";
             for( int i = 0; i < N; ++i, ++n ){
 //              cout << "n = " << n << endl;
-                combRow << comb[n].getStdev() << ", ";
-                detRow << det[n].getStdev() << ", ";
+                combRow << comb[n].getMeanStdev() << ", ";
+                detRow << det[n].getMeanStdev() << ", ";
             }
             combRow << "]";
             detRow << "]";
@@ -337,7 +340,8 @@ void diffTallies(int N, const std::vector<monteCarlo::BasicTally<double> >& A,
             stdev << "[ ";
             for( int i = 0; i < N; ++i, ++n ){
                 mean << (A[n].getMean() - B[n].getMean()) << ", ";
-                stdev << std::max(A[n].getStdev(), B[n].getStdev() ) << ", ";
+                stdev << std::max(A[n].getMeanStdev(), B[n].getMeanStdev() ) 
+                      << ", ";
             }
             mean << "]";
             stdev << "]";
