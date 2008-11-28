@@ -37,6 +37,13 @@ private:
     //! Output a Surface to a stream 
     friend std::ostream& operator<<( std::ostream&, const Surface& );
 public:
+
+    //! 
+    enum SurfaceFlags {
+        NONE       = 0,
+        REFLECTING = 1
+    };
+
     //! Determine 
     // See if going from a position in a direction with a surface sense 
     // intersects the surface; pass back whether it hits and what the distance
@@ -64,10 +71,10 @@ public:
     }
 
 protected:
-    Surface() : _userId()
+    Surface() : _userId(), _flags(NONE)
     { /* * */ }
 
-    Surface(const UserSurfaceIdType& userId) : _userId(userId)
+    Surface(const UserSurfaceIdType& userId) : _userId(userId), _flags(NONE)
     { /* * */ }
 
     bool _hasPosSense(const double eval) const;
@@ -84,6 +91,7 @@ protected:
 private:
     //! hold the user's identification of this surface
     UserSurfaceIdType _userId;
+    SurfaceFlags      _flags;
 };
 /*----------------------------------------------------------------------------*/
 

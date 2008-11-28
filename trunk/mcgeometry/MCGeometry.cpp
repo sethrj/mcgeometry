@@ -81,7 +81,7 @@ void MCGeometry::findNewCell(
     Check(hitSurface != NULL);
     Check(distanceTraveled >= 0.0);
 
-    returnStatus = MCG_NORMAL;
+    returnStatus = NORMAL;
 
     // ===== calculate transported position on the boundary of our new cell
     newPosition.resize(3);
@@ -108,6 +108,8 @@ void MCGeometry::findNewCell(
 //                 << " already connected to starting cell index "
 //                 << oldCellIndex << " through hood" << endl;
 
+            if ( (*it)->isDeadCell() )
+                returnStatus = DEADCELL;
             return;
         }
     }
@@ -124,13 +126,13 @@ void MCGeometry::findNewCell(
 
     if (cellList == _surfToCellConnectivity.end()) {
         _failGeometry("Surface connectivity not found for surface",
-                        newCellIndex, position, direction);
+                        oldCellIndex, position, direction);
     }
 
     CellVec& cellsToCheck = cellList->second;
 
     for (CellVec::iterator pNewCell  = cellsToCheck.begin();
-                                  pNewCell != cellsToCheck.end(); ++pNewCell)
+                           pNewCell != cellsToCheck.end(); ++pNewCell)
     {
         // check if the point is inside (and pass hitSurface to exclude
         // checking it)
@@ -163,6 +165,9 @@ void MCGeometry::findNewCell(
 
             if (_unMatchedSurfaces == 0)
                 _completedConnectivity();
+
+            if ( (*pNewCell)->isDeadCell() )
+                returnStatus = DEADCELL;
             return;
         }
     }
@@ -172,10 +177,10 @@ void MCGeometry::findNewCell(
     // fewer flops in the "is inside" method calls
 
     newCellIndex = -1;
-    returnStatus = MCG_LOST;
+    returnStatus = LOST;
 
     _failGeometry("Ruh-roh, new cell not found!",
-                    newCellIndex, position, direction);
+                    oldCellIndex, position, direction);
 }
 /*----------------------------------------------------------------------------*/
 unsigned int MCGeometry::findCell(
@@ -240,9 +245,9 @@ unsigned int MCGeometry::addSurface( const MCGeometry::UserSurfaceIDType
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
-                                                             userCellId,
-                                 const IntVec surfaceIds)
+unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType userCellId,
+                                 const IntVec surfaceIds,
+                                 const CellT::CellFlags flags)
 {
     //---- convert surface ID to pairs of unsigned ints (surfaceIds) and bools
     //                                                  (surface sense) -----//
@@ -289,13 +294,14 @@ unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
     //====== add cell to the internal cell vector
     unsigned int newCellIndex = _cells.size();
 
-    CellT* newCell = new CellT(boundingSurfaces, userCellId, newCellIndex);
+    CellT* newCell = new CellT(boundingSurfaces, userCellId, newCellIndex,
+                               flags);
     _cells.push_back(newCell);
 
 //    cout << "Added cell with ID " << userCellId
 //         << "that has index " << newCellIndex << endl;
 
-    // add the reverse mapping and 
+    // add the reverse mapping to go from User ID to index and 
     // verify that this surface has not been added already (i.e. the
     // UserSurfaceIDType is unique)
     std::pair<CellRevIDMap::iterator, bool> result
@@ -306,10 +312,16 @@ unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType
             "Tried to add a cell with an ID that was already there.");
 
     //====== loop back through the surfaces and add the connectivity
-    for (CellT::SASVec::iterator bsIt = boundingSurfaces.begin();
-                          bsIt != boundingSurfaces.end(); ++bsIt)
+    for (CellT::SASVec::const_iterator bsIt = boundingSurfaces.begin();
+                                       bsIt != boundingSurfaces.end(); ++bsIt)
     {
-        SurfaceAndSense &newQandS = *bsIt;
+        SurfaceAndSense newQandS = *bsIt;
+
+        if (flags & CellT::NEGATED) {
+            // cell is inside out, so reverse the sense of the surface
+            // with respect to how it connects to other cells
+            newQandS.second = !(newQandS.second);
+        }
 
         // using the "associative array" capability of maps lets us access a
         // key, and it will either automatically initialize an empty vector or
@@ -356,7 +368,7 @@ MCGeometry::UserSurfaceIDType MCGeometry::getUserIdFromSurfaceIndex(
 \*============================================================================*/
 void MCGeometry::_completedConnectivity()
 {
-    cout << "Connectivity is complete." << endl;
+    cout << "<<CONNECTIVITY IS COMPLETE>>" << endl;
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::_failGeometry(const std::string failureMessage,
@@ -364,12 +376,13 @@ void MCGeometry::_failGeometry(const std::string failureMessage,
                                const std::vector<double>& position,
                                const std::vector<double>& direction) const
 {
-    Require(currentCellIndex < getNumCells());
-
     cout << "ERROR IN GEOMETRY: " << failureMessage << endl;
     
-    cout << "Current cell index [" << currentCellIndex
-         << "] user ID [" << _cells[currentCellIndex]->getUserId() << "]"
+    cout << "Current cell index [" << currentCellIndex << "] ";
+
+    Require(currentCellIndex < getNumCells());
+
+    cout << "user ID [" << _cells[currentCellIndex]->getUserId() << "]"
          << endl;
     cout << "Known cell connectivity: ";
 
@@ -433,6 +446,12 @@ void MCGeometry::debugPrint() const
             _printSAS(*bsIt);
             cout << " ";
         }
+
+        if ( (*cellIt)->isNegated() )
+            cout << " <NEGATED>";
+
+        if ( (*cellIt)->isDeadCell() )
+            cout << " <DEADCELL>";
 
         cout << endl;
     }

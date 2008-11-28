@@ -23,6 +23,7 @@ using std::cout;
 using std::endl;
 
 typedef std::vector<double> doubleVec;
+typedef Cell<unsigned int> CellT;
 
 /*============================================================================*/
 void runTests() {   
@@ -43,7 +44,7 @@ void runTests() {
     Plane thePlane(normal, center);
 
     /* * * create cell boundaries * * */
-    Cell<unsigned int>::SASVec cellBoundaries;
+    CellT::SASVec cellBoundaries;
 
     // define it as inside sphere to the right of plane
     cellBoundaries.push_back(std::make_pair(&theSphere, false));
@@ -51,9 +52,10 @@ void runTests() {
 
 
     /* * * create the cell * * */
-    Cell<unsigned int> theCell(cellBoundaries, 211, 1);
+    CellT theCell(cellBoundaries, 211, 1);
     TESTER_CHECKFORPASS(theCell.getUserId() == 211);
     TESTER_CHECKFORPASS(theCell.getIndex() == 1);
+    TESTER_CHECKFORPASS(theCell.isDeadCell() == false);
 
     /* * * CHECK VARIOUS POINTS * * */
     doubleVec particleLoc(3,0.0);
@@ -99,6 +101,35 @@ void runTests() {
     TESTER_CHECKFORPASS( hitSurface   == &theSphere );
     TESTER_CHECKFORPASS( quadricSense == false );
     TESTER_CHECKFORPASS( softEquiv(distance, 0.5) );
+
+    // =================================================================== //
+    /* * * check stuff with negated cells * * */
+    CellT::CellFlags invFlags =
+        static_cast<CellT::CellFlags>(CellT::NEGATED | CellT::DEADCELL);
+
+    // define it as not ( inside sphere to the left of plane)
+    cellBoundaries.resize(0);
+    cellBoundaries.push_back(std::make_pair(&theSphere, false));
+    cellBoundaries.push_back(std::make_pair(&thePlane,  false));
+
+    /* * * create the cell * * */
+    CellT invCell(cellBoundaries, 1337, 3, invFlags);
+    TESTER_CHECKFORPASS(invCell.getUserId() == 1337);
+    TESTER_CHECKFORPASS(invCell.getIndex() == 3);
+    TESTER_CHECKFORPASS(invCell.isDeadCell() == true);
+
+    particleLoc.assign(3,0.0);
+    particleLoc[0] = 2.5;
+    TESTER_CHECKFORPASS(invCell.isPointInside(particleLoc) == true);
+
+    particleLoc[0] = 1.5;
+    TESTER_CHECKFORPASS(invCell.isPointInside(particleLoc) == true);
+
+    particleLoc[0] = 0.5;
+    TESTER_CHECKFORPASS(invCell.isPointInside(particleLoc) == false);
+
+    particleLoc[0] = -2.5;
+    TESTER_CHECKFORPASS(invCell.isPointInside(particleLoc) == true);
 }
 
 /*============================================================================*/
