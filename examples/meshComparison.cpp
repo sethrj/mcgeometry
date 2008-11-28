@@ -32,6 +32,8 @@ typedef std::vector<monteCarlo::BasicTally<double> > TallyVec;
 void    SimulateMCComb(const int, const int, mcGeometry::MCGeometry&, TallyVec&);
 void    SimulateMCDet(int, int, TallyVec&);
 double  randDouble();
+bool isInside(const int size, const std::vector<double>& position,
+                     const std::vector<double>& direction);
 void source(const int size, std::vector<double>& position,
                     std::vector<double>& direction);
 void    randDirection(std::vector<double>&);
@@ -42,9 +44,10 @@ double  distanceToPlane(double, double);
 void    printPLTallies(int, const TallyVec&, const TallyVec&);
 void    diffTallies(int, const TallyVec&, const TallyVec& );
 
-int main(int argc, char* argv[]){
+void runProgram(int argc, char* argv[]){
 
-    Insist( argc == 4, "Syntax: meshComparsion numCells numparticles printFlag." );
+    Insist( argc == 4,
+            "Syntax: meshComparsion numCells numparticles printFlag." );
 
     int numCells( std::atoi(argv[1]) );
     int numParticles( std::atoi(argv[2]) );
@@ -57,7 +60,7 @@ int main(int argc, char* argv[]){
 
     cout << "\n=====================================================" 
          << "\nComparing combinatorial mesh with deterministic mesh." 
-         << "\nSize of mesh: " << numCells << "x" << numCells << "x" << numCells 
+         << "\nSize of mesh: " << numCells << "x" << numCells << "x"<<numCells 
          << "\nTracking " << numParticles << " particles"
          << "\n=====================================================" << endl;
 
@@ -87,10 +90,24 @@ int main(int argc, char* argv[]){
     diffTallies(numCells, combPL, detPL);
 
     TIMER_PRINT();
+}
 
+int main(int argc, char* argv[]){
+    try {
+        runProgram(argc, argv);
+    }
+    catch (tranSupport::tranError &theErr) {
+        cout<< "***********************************************************\n"
+            << "Failure in meshComparison: " << endl
+            << theErr.what() << endl;
+
+        TIMER_PRINT();
+        return 1;
+    }
     return 0;
 }
-      
+
+
 //! SimulateMCDet will simulate a Monte Carlo transport through a deterministic
 //! mesh.
 void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
@@ -118,10 +135,11 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
         source(size, position, direction);
         
         int j = 0;
-        while( position[0] < size && position[1] < size && position[2] < size
-            && position[0] > 0.0 && position[1] > 0.0 && position[2] > 0.0 ){
+        while( isInside(size, position, direction) ){
 
             cellNumber = getCell(position, size);
+            Check(cellNumber < numCells);
+            Check(cellNumber >= 0);
 
             // Find distance to 'planes'
             dX = distanceToPlane(position[0], direction[0]); 
@@ -129,15 +147,18 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
             dZ = distanceToPlane(position[2], direction[2]); 
 
             dSurf= dX;
-            if( dY < dSurf || dSurf == 0.0 ) dSurf= dY;
-            if( dZ < dSurf || dSurf == 0.0 ) dSurf= dZ;
+            if( dY < dSurf ) dSurf= dY;
+            if( dZ < dSurf ) dSurf= dZ;
+
+            Check(dSurf >= 0.0);
 
             // Sample distance to collision
             xT = getXsn(cellNumber);
             dColl = (-1.0/xT)*std::log(randDouble());
 
+            Check(dColl >= 0.0);
             // Determine minimum distance
-            if( (dColl < dSurf) || dSurf == 0.0 ) {
+            if( dColl < dSurf ) {
                 d = dColl;
                 PLTally[cellNumber].accumulateValue(d);
             }
@@ -162,7 +183,19 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
             }
 
             ++j;
+            if (j > 10000) {
+                cout << "Position: "  << position
+                     << " Direction: " << direction << endl;
+
+                cout << "dx: " << distanceToPlane(position[0], direction[0]);
+                cout << " dy: " << distanceToPlane(position[1], direction[1]);
+                cout << " dz: " << distanceToPlane(position[2], direction[2]);
+                cout << endl;
+                Insist(0, "too many loops");
+            }
+            
         }
+//        PLTally[cellNumber].flush();
     }
     TallyVec::iterator talIter;
     for( talIter = PLTally.begin(); talIter != PLTally.end(); ++talIter ){
@@ -244,23 +277,45 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
 inline double distanceToPlane(double x, double v){
     double p;
     if( v > 0 ){    // Moving in positive direction
-        p = std::floor(x + 1);  
+        p = std::floor(x * 1.000000000000001 + 1.0);  
         return (p-x)/v;
     }
     else{
-        p = std::floor(x);
+        p = std::floor(x * 0.999999999999999);
         return (x-p)/fabs(v);
     }
+}
 
+inline bool isInside(const int size, const std::vector<double>& position,
+                     const std::vector<double>& direction)
+{
+    for (unsigned int i = 0; i < 3; i++) {
+        if (position[i] <= 0.0 && direction[i] < 0)
+            return false;
+        if (position[i] >= size && direction[i] > 0)
+            return false;
+    }
+    return true;
 }
 
 inline void source(const int size, std::vector<double>& position,
                     std::vector<double>& direction)
 {
-        // Pick random position inside box
-        randPosition(size, position);
-        // Pick random direction
-        randDirection(direction);
+    // source along one face in normal direction, should result in each 
+    // cell having 1/(size^2) tally result
+
+//    position[0] = randDouble() * size;
+//    position[1] = randDouble() * size;
+//    position[2] = 0.0;
+//
+//    direction[0]= 0;
+//    direction[1]= 0;
+//    direction[2]= 1;
+
+    // Pick random position inside box
+    randPosition(size, position);
+    // Pick random direction
+    randDirection(direction);
 }
 
 //! Pick a random direction on the unit sphere
@@ -354,7 +409,7 @@ void printPLTallies(int numCells, const TallyVec& comb, const TallyVec& det)
 void diffTallies(int numCells, const TallyVec& A, const TallyVec& B)
 {
 
-    cout << "\n\tTally Means\t\t \t\t\t \tTally Std Dev\t\t" << endl;
+    cout << "abs(diff) / max(stdev of mean)" << endl;
 
     int n = 0;
     for( int k = 0; k < numCells; ++k ){

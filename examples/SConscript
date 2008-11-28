@@ -9,7 +9,12 @@ useLibrary(e, 'mcgeometry')
 
 Import('outputDirPath')
 
-e.Program(outputDirPath + 'meshTiming', \
+# 'prog' is a list of files that get built with the 'examples' target
+prog = []
+
+prog += e.Program(outputDirPath + 'meshTiming', \
 			 ['meshTiming.cpp','generateMeshGeom.cpp'])
-e.Program(outputDirPath + 'meshComparison', \
+prog += e.Program(outputDirPath + 'meshComparison', \
 			 ['meshComparison.cpp','generateMeshGeom.cpp','extra/mtrand.cc'])
+
+Alias('examples', prog)
