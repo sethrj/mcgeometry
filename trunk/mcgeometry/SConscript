@@ -4,10 +4,16 @@ Import('env')
 e = env.Clone()
 
 sourceFiles = Glob('*.cpp')
-#headerFiles = Glob('*.hpp')
 
 #Compile all the source files together into a library
-e.StaticLibrary(target = 'mcgeometry', source = sourceFiles)
+lib = e.StaticLibrary(target = 'mcgeometry', source = sourceFiles)
+Default(lib)
+
+#Install header files and library file, optionally
+Import('installHeaders')
+Import('installLibrary')
+installHeaders(e, Glob('*.hpp'))
+installLibrary(e, lib)
 
 #compile unit tests
 SConscript('tests/SConscript')

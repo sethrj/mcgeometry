@@ -18,11 +18,13 @@ sourceFiles = Glob('*.cpp', strings=True)
 for file in sourceFiles:
 	execName = re.sub(r'\.cpp$','',file)
 	if (execName != "tTemplate"):
-		e.Program(testDirPath + execName, file)
+		prog = e.Program(testDirPath + execName, file)
+		Alias('test',prog)
 
 # Copy auxiliary files
 #auxFiles = Glob('*.in', strings=True)
 #e.Install(testSupportPath, auxFiles)
 
 # Copy the python script
-e.Install(outputDirPath + 'test/', 'runTests.py')
+runTests = e.Install(outputDirPath + 'test/', 'runTests.py')
+Alias('test',runTests)
