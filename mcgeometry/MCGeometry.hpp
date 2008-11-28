@@ -57,10 +57,10 @@ public:
 
     //! ReturnStatus indicates whether it interacted with a special geometry
     enum ReturnStatus {
-        MCG_NORMAL    = 0,
-        MCG_DEADCELL,
-        MCG_REFLECTED,
-        MCG_LOST  // God help us all if this is ever returned!
+        NORMAL    = 0,
+        DEADCELL,
+        REFLECTED,
+        LOST  // God help us all if this is ever returned!
     };
 
     typedef std::vector<signed int>                 IntVec;
@@ -73,7 +73,8 @@ public:
     //! user passes in a vector of surface IDs with +/- 
     // return INTERNAL index of the surface (0 to N_cell - 1) 
     unsigned int addCell(const UserCellIDType userCellId,
-                         const IntVec surfaces);
+                         const IntVec surfaces,
+                         const CellT::CellFlags flags = CellT::NONE);
 
     //! do optimization after input is finished, check geometry for duplicate
     //surfaces, etc.

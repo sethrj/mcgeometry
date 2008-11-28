@@ -106,10 +106,18 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
 
     cellIndex = theGeom.addCell(50, theSurfaces);
 
-    theSurfaces.resize(1);
-    theSurfaces[0] = 5;
+    // instead of having the outer sphere be just "+5", we
+    // choose to use -5 with negation.
 
-    cellIndex = theGeom.addCell(60, theSurfaces);
+    theSurfaces.resize(1);
+    theSurfaces[0] = -5;
+
+    MCGeometry::CellT::CellFlags outsideFlags;
+    outsideFlags = MCGeometry::CellT::NEGATED;
+    //(MCGeometry::CellT::NEGATED | MCGeometry::CellT::DEADCELL);
+
+    cellIndex = theGeom.addCell(60, theSurfaces, outsideFlags);
+
     if (doCheck) 
     TESTER_CHECKFORPASS(cellIndex == 5);
 }

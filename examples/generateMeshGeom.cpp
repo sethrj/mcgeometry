@@ -32,9 +32,8 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
     const unsigned int maxXId = N+1;
     const unsigned int maxYId = 2*N+2;
     const unsigned int maxZId = 3*N+3;
+
     // Create global bounding planes
-    // Could have done this with PlaneNormal but doing it with general plane
-    // as an example
     mcGeometry::PlaneX minX(0);
     Geo.addSurface(minXId, minX);
     mcGeometry::PlaneY minY(0);
@@ -56,7 +55,7 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
          << minX << "\n"<< minY << "\n"<< minZ << "\n"
          << maxX << "\n"<< maxY << "\n"<< maxZ << endl;
 
-    // yn and zn are defined so they don't have to be recalculated many times
+    // yn and zn are the first index of each surface along one of the axes
     unsigned int yn = N+1;
     unsigned int zn = 2*(yn);
 
@@ -91,35 +90,56 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
         }
     }
 
-    // Create cells defining every thing outside of mesh
-    Surfaces.resize(1);
-    Surfaces[0] = -minXId;
-    Geo.addCell(ID, Surfaces); ++ID;
+    if (true) {
+        // use a negated outside cell
+        typedef mcGeometry::MCGeometry::CellT CellT;
 
-    Surfaces[0] = maxXId;
-    Geo.addCell(ID, Surfaces); ++ID;
+        CellT::CellFlags invFlags
+            = static_cast<CellT::CellFlags>(CellT::NEGATED | CellT::DEADCELL);
+        Surfaces.resize(0);
 
-    Surfaces.resize(3);
-    Surfaces[0] = minXId;
-    Surfaces[1] = -maxXId;
+        Surfaces.push_back( minXId);
+        Surfaces.push_back(-maxXId);
+        Surfaces.push_back( minYId);
+        Surfaces.push_back(-maxYId);
+        Surfaces.push_back( minZId);
+        Surfaces.push_back(-maxZId);
+        Geo.addCell(ID, Surfaces, invFlags); 
+        cout << "Outside cell ID: " << ID << endl;
+        ++ID;
 
-    Surfaces[2] = -minYId;
-    Geo.addCell(ID, Surfaces); ++ID;
+//    Geo.debugPrint();
+    } else {
+        // Create individual cells defining every thing outside of mesh
+        Surfaces.resize(1);
+        Surfaces[0] = -minXId;
+        Geo.addCell(ID, Surfaces); ++ID;
 
-    Surfaces[2] = maxYId;
-    Geo.addCell(ID, Surfaces); ++ID;
+        Surfaces[0] = maxXId;
+        Geo.addCell(ID, Surfaces); ++ID;
 
-    Surfaces.resize(5);
-    Surfaces[0] = minXId;
-    Surfaces[1] = -maxXId;
-    Surfaces[2] = minYId;
-    Surfaces[3] = -maxYId;
+        Surfaces.resize(3);
+        Surfaces[0] = minXId;
+        Surfaces[1] = -maxXId;
 
-    Surfaces[4] = -minZId;
-    Geo.addCell(ID, Surfaces); ++ID;
+        Surfaces[2] = -minYId;
+        Geo.addCell(ID, Surfaces); ++ID;
 
-    Surfaces[4] = maxZId;
-    Geo.addCell(ID, Surfaces); ++ID;
+        Surfaces[2] = maxYId;
+        Geo.addCell(ID, Surfaces); ++ID;
+
+        Surfaces.resize(5);
+        Surfaces[0] = minXId;
+        Surfaces[1] = -maxXId;
+        Surfaces[2] = minYId;
+        Surfaces[3] = -maxYId;
+
+        Surfaces[4] = -minZId;
+        Geo.addCell(ID, Surfaces); ++ID;
+
+        Surfaces[4] = maxZId;
+        Geo.addCell(ID, Surfaces); ++ID;
+    }
 
 }
 

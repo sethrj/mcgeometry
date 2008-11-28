@@ -15,9 +15,9 @@
 #include "Surface.hpp"
 #include "transupport/dbc.hpp"
 
-//#include <iostream>
-//using std::cout;
-//using std::endl;
+#include <iostream>
+using std::cout;
+using std::endl;
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
@@ -25,10 +25,12 @@ namespace mcGeometry {
 template <typename UserIdType>
 Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
         const UserIdType userId,
-        const unsigned int internalIndex ) 
+        const unsigned int internalIndex,
+        const CellFlags flags) 
     : _boundingSurfaces(boundingSurfaces),
       _userId(userId),
-      _internalIndex(internalIndex)
+      _internalIndex(internalIndex),
+      _flags(flags)
 {
     typedef std::pair<typename HoodMap::iterator, bool> ReturnedPair;
     Require(_boundingSurfaces.size() > 0);
@@ -36,6 +38,7 @@ Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
     // initialize hood map
     SASVec::const_iterator bsIt = _boundingSurfaces.begin();
 
+    // create empty neighborhood map, one entry for each surface
     while (bsIt != _boundingSurfaces.end()) {
         ReturnedPair result = 
             _hood.insert(std::make_pair(bsIt->first, CellContainer()));
@@ -47,24 +50,47 @@ Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
 /*----------------------------------------------------------------------------*/
 template <typename UserIdType>
 bool Cell<UserIdType>::isPointInside(const std::vector<double>& position,
-                                            const Surface* surfaceToSkip) const
+                                     const Surface* surfaceToSkip) const
 {
-    // loop over all surfaces
-    for (SASVec::const_iterator it = _boundingSurfaces.begin();
-                                      it != _boundingSurfaces.end(); ++it)
-    {
-        // it->first is the pointer to the Surface object
-        // it->second is the surface sense
-        
-        // if we need to check it
-        if (it->first != surfaceToSkip)
+    if (_flags & NEGATED) {
+        // the negated flag makes the whole cell greedy: 
+        //  ANYWHERE that disagrees with one of the specified faces is
+        //  considered part of the negated cell.
+        for (SASVec::const_iterator it  = _boundingSurfaces.begin();
+                                    it != _boundingSurfaces.end(); ++it)
         {
-           if ( it->first->hasPosSense(position) != it->second ) {
-               // if the surface reports that the sense of the point is 
-               // NOT the same sense as we know this cell is defined, then
-               // it is not inside.
-               return false;
-           }
+            if (it->first != surfaceToSkip) {
+                if ( it->first->hasPosSense(position) != it->second ) {
+                    return true;
+                }
+            }
+            else {
+                // we already know we're on the negated side!
+                return true;
+            }
+        }
+        // we're inside all the surfaces
+        return false;
+    }
+    else
+    {
+        // loop over all surfaces
+        for (SASVec::const_iterator it  = _boundingSurfaces.begin();
+                                    it != _boundingSurfaces.end(); ++it)
+        {
+            // it->first is the pointer to the Surface object
+            // it->second is the surface sense
+            
+            // if we need to check it
+            if (it->first != surfaceToSkip)
+            {
+               if ( it->first->hasPosSense(position) != it->second ) {
+                   // if the surface reports that the sense of the point is 
+                   // NOT the same sense as we know this cell is defined, then
+                   // it is not inside.
+                   return false;
+               }
+            }
         }
     }
     // we only get to this point if the point has the correct sense wrt every

@@ -33,6 +33,16 @@ class Surface;
 template <typename UserIdType>
 class Cell {
 public:
+    //! bit flags with details about the cells
+    //  use bitwise 'and' & to check for their being set
+    //  use bitwise 'or' | to set several of them at once 
+    enum CellFlags {
+        NONE     = 0u,
+        DEADCELL = 1u,
+        NEGATED  = 2u
+            //further flags should be powers of 2
+    };
+
     //! Stores a pointer to a Surface as well as the "sense" of that quadric
     //  as viewed from this cell
     typedef std::pair<Surface*, bool>          SurfaceAndSense;
@@ -47,11 +57,11 @@ public:
     //! constructor requires an immutable bounding surface
     Cell(   const SASVec& boundingSurfaces,
             const UserIdType userId,
-            const unsigned int internalIndex );
+            const unsigned int internalIndex,
+            const CellFlags flags = NONE);
 
     //! destructor doesn't have to do anything
     ~Cell() {
-//        cout << "Oh no, I (cell " << this << ") am dying!" << endl;
         /* * */
     }
 
@@ -102,6 +112,15 @@ public:
                     bool&     quadricSense,
                     double&   distance) const;
 
+    //! return if we are a dead cell
+    bool isDeadCell() const {
+        return (_flags & DEADCELL);
+    }
+
+    //! return if we are negated
+    bool isNegated() const {
+        return (_flags & NEGATED);
+    }
 private:
     //! map our surfaces to vectors of other cells attached to that surface
     typedef std::map< Surface*, CellContainer > HoodMap;
@@ -117,6 +136,9 @@ private:
 
     //! connectivity to other cell vectors through surfaces
     HoodMap _hood;
+
+    //! other information about this cell
+    CellFlags _flags;
 };
 /*----------------------------------------------------------------------------*/
 } // end namespace mcGeometry
