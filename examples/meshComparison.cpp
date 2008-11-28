@@ -32,15 +32,14 @@ typedef std::vector<monteCarlo::BasicTally<double> > TallyVec;
 void    SimulateMCComb(const int, const int, mcGeometry::MCGeometry&, TallyVec&);
 void    SimulateMCDet(int, int, TallyVec&);
 double  randDouble();
-bool isInside(const int size, const std::vector<double>& position,
-                     const std::vector<double>& direction);
+bool isInside(const int size, const std::vector<int>& index);
 void source(const int size, std::vector<double>& position,
                     std::vector<double>& direction);
 void    randDirection(std::vector<double>&);
 void    randPosition(double, std::vector<double>&);
 double  getXsn(const int cell);
 unsigned int getCell(const std::vector<double>& position, const int size);
-double  distanceToPlane(double, double);
+double  distanceToPlane(int, double, double);
 void    printPLTallies(int, const TallyVec&, const TallyVec&);
 void    diffTallies(int, const TallyVec&, const TallyVec& );
 
@@ -120,56 +119,69 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
     std::vector<double> new_position(3,0.0);
     std::vector<double> direction(3,0.0);
 
-    double dX, dY, dZ;  // Distance to 'planes' perp to X, Y, and Z axes
-    double dSurf;       // Smallesst distance to all planes
-    double dColl;       // Distance to collision
     double d;           // Distance traveled
     std::vector<double> point;       // Point on plane
 
+    std::vector<double> dPlane(3, 0.0); //distance to each plane
+
     double xT;    // Total cross section
     unsigned int cellNumber;
+    std::vector<int> cellIndex(3, 0); //index of particle in 3 D
+
+    int chosenDistanceIndex;
 
     // Track particles
     for( int n = 0; n < numParticles; ++n ){
         // source particle
         source(size, position, direction);
         
-        int j = 0;
-        while( isInside(size, position, direction) ){
+        for (int i = 0; i < 3; i++)
+            cellIndex[i] = std::floor(position[i]);
 
-            cellNumber = getCell(position, size);
+        while( isInside(size, cellIndex) ){
+
+            cellNumber =   cellIndex[0]
+                         + cellIndex[1]*size
+                         + cellIndex[2]*size*size;
+
+            //cellNumber = getCell(position, size);
             Check(cellNumber < numCells);
             Check(cellNumber >= 0);
 
             // Find distance to 'planes'
-            dX = distanceToPlane(position[0], direction[0]); 
-            dY = distanceToPlane(position[1], direction[1]); 
-            dZ = distanceToPlane(position[2], direction[2]); 
-
-            dSurf= dX;
-            if( dY < dSurf ) dSurf= dY;
-            if( dZ < dSurf ) dSurf= dZ;
-
-            Check(dSurf >= 0.0);
+            for (int i = 0; i < 3; i++)
+                dPlane[i] = distanceToPlane(cellIndex[i],
+                          position[i], direction[i]);
 
             // Sample distance to collision
             xT = getXsn(cellNumber);
-            dColl = (-1.0/xT)*std::log(randDouble());
+            d = (-1.0/xT)*std::log(randDouble());
+            chosenDistanceIndex = -1;
 
-            Check(dColl >= 0.0);
+            Check(d >= 0.0);
+
             // Determine minimum distance
-            if( dColl < dSurf ) {
-                d = dColl;
+            for (int i = 0; i < 3; i++) {
+                if (dPlane[i] < d) {
+                    d = dPlane[i];
+                    chosenDistanceIndex = i;
+                }
+            }
+            Check(d >= 0.0);
+
+            if ( chosenDistanceIndex == -1) {
+                // we've collided
                 PLTally[cellNumber].accumulateValue(d);
             }
             else {
-                d = dSurf;
+                // we've moved to a new surface
                 PLTally[cellNumber].accumulateValue(d);
                 PLTally[cellNumber].flush();
+
+                // update our cell index
+                cellIndex[chosenDistanceIndex] += 
+                    (direction[chosenDistanceIndex] > 0 ? 1 : -1);
             }
-//          cout << "dColl = " << dColl
-//               << ", dSurf = " << dSurf
-//               << ", d = " << d << endl;
                  
             position[0] += direction[0]*d;
             position[1] += direction[1]*d;
@@ -181,21 +193,7 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
                      << numCells << ", n = " << n 
                      << "\n\tposition: " << position << endl;
             }
-
-            ++j;
-            if (j > 10000) {
-                cout << "Position: "  << position
-                     << " Direction: " << direction << endl;
-
-                cout << "dx: " << distanceToPlane(position[0], direction[0]);
-                cout << " dy: " << distanceToPlane(position[1], direction[1]);
-                cout << " dz: " << distanceToPlane(position[2], direction[2]);
-                cout << endl;
-                Insist(0, "too many loops");
-            }
-            
         }
-//        PLTally[cellNumber].flush();
     }
     TallyVec::iterator talIter;
     for( talIter = PLTally.begin(); talIter != PLTally.end(); ++talIter ){
@@ -274,25 +272,21 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
 // Distance to plane is: t = n.(a-p)/(n.d) n is normal vector, a is point on 
 // plane, p is position d is direction vector.  Since all of our n's have only 
 // one non-zero term the dot products are just the product of two numbers
-inline double distanceToPlane(double x, double v){
-    double p;
+inline double distanceToPlane(int cellIndex, double x, double v)
+{
     if( v > 0 ){    // Moving in positive direction
-        p = std::floor(x * 1.000000000000001 + 1.0);  
-        return (p-x)/v;
+        return (cellIndex + 1.0 - x)/v;
     }
     else{
-        p = std::floor(x * 0.999999999999999);
-        return (x-p)/fabs(v);
+        //return (x - cellIndex)/fabs(v);
+        return (cellIndex - x) / v;
     }
 }
 
-inline bool isInside(const int size, const std::vector<double>& position,
-                     const std::vector<double>& direction)
+inline bool isInside(const int size, const std::vector<int>& index)
 {
     for (unsigned int i = 0; i < 3; i++) {
-        if (position[i] <= 0.0 && direction[i] < 0)
-            return false;
-        if (position[i] >= size && direction[i] > 0)
+        if (index[i] < 0 || index[i] >= size)
             return false;
     }
     return true;
@@ -409,19 +403,22 @@ void printPLTallies(int numCells, const TallyVec& comb, const TallyVec& det)
 void diffTallies(int numCells, const TallyVec& A, const TallyVec& B)
 {
 
+    cout << "Tallies in cells that differ more than 2.0 stdevs" << endl;
     cout << "abs(diff) / max(stdev of mean)" << endl;
 
+    double diff;
     int n = 0;
     for( int k = 0; k < numCells; ++k ){
         for( int j = 0; j < numCells; ++j ){
             for( int i = 0; i < numCells; ++i, ++n ){
-                cout << "Cell " << n << ": "
-                     << std::fabs(A[n].getMean() - B[n].getMean()) / 
-                            std::max(A[n].getMeanStdev(), B[n].getMeanStdev() )
-                     << endl;
+                diff = std::fabs(A[n].getMean() - B[n].getMean()) / 
+                        std::max(A[n].getMeanStdev(), B[n].getMeanStdev());
+                if (diff > 2.0) {
+                    cout << "Cell "<< i + 1 << "," << j + 1 << "," << k + 1
+                         << " [index " << n << "]: " << diff << endl;
+                }
             }
         }
-        cout << endl;
     }
     cout << endl;
 }
