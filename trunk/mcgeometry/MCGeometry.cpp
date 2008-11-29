@@ -37,76 +37,63 @@ void MCGeometry::findDistance(
     Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
     Require(oldCellIndex < getNumCells());
 
-    Surface* hitSurface;
-    bool oldSurfaceSense;
-
     // call intersect on the old cell to find the surface and distance that it
     // moves to
     _cells[oldCellIndex]->intersect(
                                 position, direction,
-                                hitSurface, oldSurfaceSense,
+                                _findCache.hitSurface,
+                                _findCache.oldSurfaceSense,
                                 distanceTraveled);
 
-    Check(hitSurface != NULL);
+    // cache variables for later
+    _findCache.oldCellIndex = oldCellIndex;
+    _findCache.distanceToSurface = distanceTraveled;
+    IfDbc(_findCache.position = position; _findCache.direction = direction;)
+
+    Check(_findCache.hitSurface != NULL);
     Ensure(distanceTraveled >= 0.0);
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::findNewCell(
                             const std::vector<double>& position,
                             const std::vector<double>& direction,
-                            const unsigned int oldCellIndex,
                             std::vector<double>& newPosition,
                             unsigned int& newCellIndex,
-                            double& distanceTraveled,
                             ReturnStatus& returnStatus)
 {
 //    cout << "unmatched surface count: " << _unMatchedSurfaces << endl;
-
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
-
-    Require(oldCellIndex < getNumCells());
+    Require(position  == _findCache.position);
+    Require(direction == _findCache.direction);
+    Require(_findCache.oldCellIndex < getNumCells());
 
     // a reference to the pointer to the old cell
-    CellT& oldCell = *(_cells[oldCellIndex]);
-
-    // call intersect on the old cell to find the surface and distance that it
-    // moves to
-    Surface* hitSurface;
-    bool     oldSurfaceSense;
-    oldCell.intersect(position, direction, hitSurface, oldSurfaceSense,
-                      distanceTraveled);
-
-    Check(hitSurface != NULL);
-    Check(distanceTraveled >= 0.0);
-
-    returnStatus = NORMAL;
+    CellT& oldCell = *(_cells[_findCache.oldCellIndex]);
 
     // ===== calculate transported position on the boundary of our new cell
     newPosition.resize(3);
     for (int i = 0; i < 3; i++) {
-        newPosition[i] = position[i] + distanceTraveled * direction[i];
+        newPosition[i] = position[i] +
+            _findCache.distanceToSurface * direction[i];
     }
 
-
     // ===== Loop over neighborhood cells
-    CellT::CellContainer& neighborhood = oldCell.getNeighbors(hitSurface);
+    CellT::CellContainer& neighborhood =
+            oldCell.getNeighbors(_findCache.hitSurface);
 
     // loop through the old cell's hood to find if it's in one of those cells
     for (CellT::CellContainer::const_iterator it  = neighborhood.begin();
                                        it != neighborhood.end(); ++it)
     {
-        // check if the point is inside (and pass hitSurface to exclude
+        // check if the point is inside (and pass _hitSurface to exclude
         // checking it)
-        if ( (*it)->isPointInside( newPosition, hitSurface ) )
+        if ( (*it)->isPointInside( newPosition, _findCache.hitSurface ) )
         {
             //we have found the new cell
             newCellIndex = (*it)->getIndex();
 
 //            cout << "Found ending cell index " << newCellIndex
 //                 << " already connected to starting cell index "
-//                 << oldCellIndex << " through hood" << endl;
+//                 << _findCache.oldCellIndex << " through hood" << endl;
 
             if ( (*it)->isDeadCell() )
                 returnStatus = DEADCELL;
@@ -119,14 +106,17 @@ void MCGeometry::findNewCell(
     // surface 2, and our cell is defined as being -2, then the cell on the
     // other side has to have orientation +2
 
-    SurfaceAndSense searchQas(hitSurface, !oldSurfaceSense);
+    SurfaceAndSense searchQas(_findCache.hitSurface,
+                                !(_findCache.oldSurfaceSense));
 
     SCConnectMap::iterator cellList
                  = _surfToCellConnectivity.find(searchQas);
 
     if (cellList == _surfToCellConnectivity.end()) {
+        // NOTE: if position and newPosition reference the same vector,
+        // this will print the new position, not the starting position
         _failGeometry("Surface connectivity not found for surface",
-                        oldCellIndex, position, direction);
+                        _findCache.oldCellIndex, position, direction);
     }
 
     CellVec& cellsToCheck = cellList->second;
@@ -134,9 +124,9 @@ void MCGeometry::findNewCell(
     for (CellVec::iterator pNewCell  = cellsToCheck.begin();
                            pNewCell != cellsToCheck.end(); ++pNewCell)
     {
-        // check if the point is inside (and pass hitSurface to exclude
+        // check if the point is inside (and pass _hitSurface to exclude
         // checking it)
-        if ( (*pNewCell)->isPointInside( newPosition, hitSurface ) )
+        if ( (*pNewCell)->isPointInside( newPosition, _findCache.hitSurface ) )
         {
             // if this is the first cell linked to this surface, we decrement 
             // the unmatched surfaces
@@ -147,7 +137,7 @@ void MCGeometry::findNewCell(
             neighborhood.push_back(*pNewCell);
 
             CellT::CellContainer& newNeighborhood
-                = (*pNewCell)->getNeighbors(hitSurface);
+                = (*pNewCell)->getNeighbors(_findCache.hitSurface);
 
             // if this is the first cell linked to this surface, we decrement 
             // the unmatched surfaces
@@ -161,7 +151,8 @@ void MCGeometry::findNewCell(
             newCellIndex = (*pNewCell)->getIndex();
 
 //            cout << "Connected ending cell index " << newCellIndex
-//                 << " to starting cell index " << oldCellIndex << endl;
+//                 << " to starting cell index " << _findCache.oldCellIndex
+//                 << endl;
 
             if (_unMatchedSurfaces == 0)
                 _completedConnectivity();
@@ -180,7 +171,7 @@ void MCGeometry::findNewCell(
     returnStatus = LOST;
 
     _failGeometry("Ruh-roh, new cell not found!",
-                    oldCellIndex, position, direction);
+                    _findCache.oldCellIndex, position, direction);
 }
 /*----------------------------------------------------------------------------*/
 unsigned int MCGeometry::findCell(

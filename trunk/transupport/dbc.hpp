@@ -89,6 +89,13 @@ inline void throwInsist(const char theMessage[], const char fileName[],
 #define Ensure(cond)
 #endif
 
+//! \brief Debug code for storage with DBC that gets turned off in production
+#if DBC > 0
+#define IfDbc(code) code
+#else
+#define IfDbc(code)
+#endif
+
 /*============================================================================*/
 //! Debug code to print some code to evaluate and the result of it (integer)
 #define PRINTINT(code)    std::printf("Result of {%s}: %d\n",    #code, (code))

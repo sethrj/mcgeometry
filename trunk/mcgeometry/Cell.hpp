@@ -93,11 +93,6 @@ public:
         return _userId;
     }
 
-    ////! get a list of known cell neighbors for a quadric
-    //void addNeighbor(const Surface*, ) {
-    //    return _boundingSurfaces;
-    //}
-
     //! \brief see if our cell contains the point; possibly skip one surface if
     //         testing "next region"
     // do this by comparing the "sense" of each of our surface to what the

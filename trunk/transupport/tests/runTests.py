@@ -8,8 +8,11 @@
 
 import sys, os, glob
 
-##! Path name to the current director
+##! Path name to the current directory
 pathName = os.path.dirname(sys.argv[0])
+if (len(sys.argv) > 1):
+	pathName = sys.argv[1];
+
 print "Looking for unit tests in <%s>" % pathName
 
 os.chdir(pathName)

@@ -38,11 +38,20 @@ private:
     friend std::ostream& operator<<( std::ostream&, const Surface& );
 public:
 
-    //! 
+    //! extra information about surfaces
+    // TODO this is not really yet implemented
     enum SurfaceFlags {
         NONE       = 0,
         REFLECTING = 1
     };
+
+//    //! surface types for volume calculation
+//    enum SurfaceKind {
+//        SK_OTHER       = 0,
+//        SK_PLANENORMAL = 1,
+//        SK_SPHERE      = 2,
+//        SK_CYLINDER    = 3
+//    }
 
     //! Determine 
     // See if going from a position in a direction with a surface sense 
@@ -56,6 +65,9 @@ public:
 
     //! create a copy of ourself
     virtual Surface* clone(const UserSurfaceIdType& newId) const = 0;
+
+    // //! return some identity about ourselves for volume calculation etc.
+    // virtual SurfaceKind getKind() const = 0;
 
     //!Calculate whether a point has a positive 
     // sense to this surface without doing all the distance calcs

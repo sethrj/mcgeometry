@@ -28,3 +28,5 @@ for file in sourceFiles:
 # Copy the python script
 runTests = e.Install(outputDirPath + 'test/', 'runTests.py')
 Alias('test',runTests)
+Import('installBinary')
+installBinary(e, 'runTests.py')

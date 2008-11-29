@@ -237,8 +237,8 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
         while( cell < numCells ){   // If false, particle has escaped
             xT = getXsn(cell);
             dColl = (-1.0/xT)*std::log(randDouble());
-            Geo.findNewCell( position, direction, cell, new_position, new_cell, 
-                        dSurf, returnStatus);
+
+            Geo.findDistance(position, direction, cell, dSurf);
 
             if( dColl < dSurf ){    // Collision
                 // Score pathlength tally
@@ -249,6 +249,8 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
                 position[2] += direction[2]*dColl;
             }
             else{       // Move to boundary
+                Geo.findNewCell( position, direction, new_position,
+                                 new_cell, returnStatus);
                 // Score pathlength tally
                 PLTally[cell].accumulateValue(dSurf);
                 PLTally[cell].flush();
@@ -402,23 +404,35 @@ void printPLTallies(int numCells, const TallyVec& comb, const TallyVec& det)
 //! easier to compare them.
 void diffTallies(int numCells, const TallyVec& A, const TallyVec& B)
 {
+    monteCarlo::BasicTally<double> deviationStats;
+    double cutoff = 0.5 + 2.5*std::log10(numCells);
 
-    cout << "Tallies in cells that differ more than 2.0 stdevs" << endl;
     cout << "abs(diff) / max(stdev of mean)" << endl;
+    cout << "Tallies in cells that differ more than " << cutoff << " stdevs"
+         << endl;
 
     double diff;
     int n = 0;
+    unsigned int countedTallies = 0;
     for( int k = 0; k < numCells; ++k ){
         for( int j = 0; j < numCells; ++j ){
             for( int i = 0; i < numCells; ++i, ++n ){
                 diff = std::fabs(A[n].getMean() - B[n].getMean()) / 
                         std::max(A[n].getMeanStdev(), B[n].getMeanStdev());
-                if (diff > 2.0) {
+                if (A[n].getMean() != 0) {
+                    deviationStats += diff;
+                    countedTallies++;
+                }
+
+                if (diff > cutoff) {
                     cout << "Cell "<< i + 1 << "," << j + 1 << "," << k + 1
                          << " [index " << n << "]: " << diff << endl;
                 }
             }
         }
     }
-    cout << endl;
+    deviationStats.setNumTrials(countedTallies);
+    cout << "Average cell deviation between the two: "
+         << deviationStats.getMean() << "+-" << deviationStats.getStdev()
+         << endl;
 }
