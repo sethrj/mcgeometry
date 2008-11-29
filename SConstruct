@@ -1,26 +1,32 @@
 #### for importing the mcgeometry library into 
 def useLibrary(env, libName):
-	Import('buildDir')
 	theDir = Dir(buildDir + libName)
 	env.Append(LIBPATH = [theDir])
 	env.Append(LIBS    = [libName])
 
 def installHeaders(env, files):
 	if env['prefix'] == '.':
+		if 'install' in map(str, BUILD_TARGETS):
+			print "ERROR: set prefix option to use install target"
 		return
 	installDir = env['prefix'] + '/include/' + projectName
-	#installDir = '#output/include/' + projectName
-	Import('projectName')
 	env.Alias('install',env.Install(installDir, files))
 
 def installLibrary(env, files):
 	if env['prefix'] == '.':
+		if 'install' in map(str, BUILD_TARGETS):
+			print "ERROR: set prefix option to use install target"
 		return
-	installDir = env['prefix'] + '/lib/' #+ projectName
-	#installDir = '#output/lib/' + projectName
-	Import('projectName')
+	installDir = env['prefix'] + '/lib/'
 	env.Alias('install',env.Install(installDir, files))
 
+def installBinary(env, files):
+	if env['prefix'] == '.':
+		if 'install' in map(str, BUILD_TARGETS):
+			print "ERROR: set prefix option to use install target"
+		return
+	installDir = env['prefix'] + '/bin/'
+	env.Alias('install', env.Install(installDir, files))
 ###############################################################################
 #                  MAIN FILE BEGINS HERE
 ###############################################################################
@@ -95,6 +101,7 @@ Export('outputDirPath')
 Export('useLibrary')
 Export('installHeaders')
 Export('installLibrary')
+Export('installBinary')
 
 ### TARGET OPTIONS ###
 # default to not building all the tests etc.; manually add libraries

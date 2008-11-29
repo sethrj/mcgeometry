@@ -150,6 +150,10 @@ public:
                     bool& hit,
                     double& distance) const;
 
+    //! return the index along which we are oriented
+    unsigned int getAxis() const {
+        return axis;
+    }
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
@@ -159,7 +163,8 @@ private:
 };
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-inline bool PlaneNormal<axis>::hasPosSense(const std::vector<double>& position) const
+inline bool PlaneNormal<axis>::hasPosSense(
+                    const std::vector<double>& position) const
 {
     Require(position.size() == 3);
     return _hasPosSense(position[axis] - _coordinate);

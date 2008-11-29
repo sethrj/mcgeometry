@@ -82,14 +82,22 @@ public:
 
     //!\brief Find the distance to the next geometry interaction.
     // Given a current position, location, and cell
+    // this also caches the hit surface so we don't have to re-calculate
+    // intersect
     void findDistance(      const std::vector<double>& position,
                             const std::vector<double>& direction,
                             const unsigned int oldCellIndex,
                             double& distanceTraveled);
 
-    //!\brief  given a current position, location, and cell; find the new one
+    //!\brief go ahead after finding 
     // we may have to add further code to pass back a surface ID for a surface
     // tally, for example
+    void findNewCell(       const std::vector<double>& position,
+                            const std::vector<double>& direction,
+                            std::vector<double>& newPosition,
+                            unsigned int& newCellIndex,
+                            ReturnStatus& returnStatus);
+
 
     //!\brief Calculate distance to next cell *and* do the next-cell calculation
     // in one go.
@@ -99,7 +107,12 @@ public:
                             std::vector<double>& newPosition,
                             unsigned int& newCellIndex,
                             double& distanceTraveled,
-                            ReturnStatus& returnStatus);
+                            ReturnStatus& returnStatus)
+    {
+        findDistance(position, direction, oldCellIndex, distanceTraveled);
+        findNewCell(position, direction, newPosition,
+                    newCellIndex, returnStatus);
+    }
 
     //! find a cell given a point
     unsigned int findCell(const std::vector<double>& position) const;
@@ -221,6 +234,20 @@ private:
     //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
     //  and probably will be double-counted
     unsigned int _unMatchedSurfaces;
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    // cache for storing intersect information from findDistance
+    struct {
+        unsigned int    oldCellIndex;
+        Surface*        hitSurface;
+        bool            oldSurfaceSense;
+        double          distanceToSurface;
+
+        IfDbc(std::vector<double> position; std::vector<double> direction;)
+
+    } _findCache;
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
     //! print a surface and its corresponding sense
     void _printSAS(const SurfaceAndSense& qas) const;
