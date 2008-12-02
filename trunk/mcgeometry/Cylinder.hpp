@@ -16,6 +16,10 @@
 
 #include "Surface.hpp"
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace mcGeometry {
 /*============================================================================*/
 /*!
@@ -28,10 +32,10 @@ public:
     Cylinder(const std::vector<double>& point,
              const std::vector<double>& axis,
              double radius)
-        : _point(point), _axis(axis), _radius(radius) 
+        : _pointOnAxis(point), _axis(axis), _radius(radius) 
     {
         // we only live in 3-space
-        Require( _point.size() == 3 );
+        Require( _pointOnAxis.size() == 3 );
         Require( _axis.size() == 3 );
         // require unit normal 
         Require(softEquiv(tranSupport::vectorNorm(_axis), 1.0));
@@ -40,7 +44,7 @@ public:
 
     Cylinder(const Cylinder& oldCylinder, const UserSurfaceIdType& newId)
         : Surface(newId),
-          _point(oldCylinder._point),
+          _pointOnAxis(oldCylinder._pointOnAxis),
           _axis(oldCylinder._axis),
           _radius(oldCylinder._radius)
     { /* * */ }
@@ -66,7 +70,7 @@ protected:
 
 private:
     //! some point through which the cylinder's axis passes
-    const std::vector<double> _point;
+    const std::vector<double> _pointOnAxis;
     //! axis about which the cylinder is centered
     const std::vector<double> _axis;
     //! cylinder radius
@@ -87,18 +91,18 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
     double eval(0);
 
     // Perform (X-P)^2
-    double posMinusPoint(0);
     for( int i = 0; i < 3; ++i ){
-        posMinusPoint += pow(position[i] - _point[0], 2);
+        eval += pow(position[i] - _pointOnAxis[i], 2);
     }
 
+    double tmpValue;
     // Perform [(X-P).U]^2
     for( int i = 0; i < 3; ++i ){
-        eval += posMinusPoint - posMinusPoint*_axis[i];
+        tmpValue += (position[i] - _pointOnAxis[i])*_axis[i];
     }
 
-    eval -= _radius*_radius;
-    
+    eval -= tmpValue*tmpValue + _radius*_radius;
+
     return _hasPosSense(eval);
 }
 
@@ -124,7 +128,7 @@ inline void Cylinder::intersect(
     double b(0.0);      // Temporary variable
     std::vector<double> bvec(3,0.0);
     std::vector<double> diff(position);
-    tranSupport::vectorMinusEq(diff, _point);
+    tranSupport::vectorMinusEq(diff, _pointOnAxis);
     b = tranSupport::vectorDot(diff, _axis);
     for( int i = 0; i < 3; ++i ) bvec[i] = _axis[i]*b;
     tranSupport::vectorMinusEq(diff, bvec);
@@ -133,7 +137,7 @@ inline void Cylinder::intersect(
     double C(0.0);
     double c(0.0);
     diff = std::vector<double>(position);
-    tranSupport::vectorMinusEq(diff, _point);
+    tranSupport::vectorMinusEq(diff, _pointOnAxis);
     c = tranSupport::vectorDot(diff, _axis);
     C = tranSupport::vectorDot(diff, diff) - c*c - _radius*_radius;
 
@@ -141,7 +145,7 @@ inline void Cylinder::intersect(
 }
 
 inline std::ostream& Cylinder::_output( std::ostream& os ) const {
-    os  << "[ CYL   Point:  " << std::setw(10) << _point
+    os  << "[ CYL   Point:  " << std::setw(10) << _pointOnAxis
         << " Axis: " << std::setw(10) << _axis 
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
@@ -189,7 +193,7 @@ protected:
 
 private:
     //! some point through which the cylinder's axis passes
-    const std::vector<double> _point;
+    const std::vector<double> _pointOnAxis;
     //! axis about which the cylinder is centered
     const std::vector<double> _axis;
     //! cylinder radius
