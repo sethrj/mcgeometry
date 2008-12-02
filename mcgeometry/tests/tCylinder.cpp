@@ -17,7 +17,9 @@
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-// #include "transupport/VectorPrint.hpp"
+//#include "transupport/VectorPrint.hpp"
+
+
 
 using namespace mcGeometry;
 
@@ -47,6 +49,8 @@ void runTestA() {
 
     particleLoc[0] = 1.5;
     particleDir[1] = 1.0;
+    cout << "particleLoc: " << particleLoc << endl;
+    cout << "particleDir: " << particleDir << endl;
 
     /********************/
     bool    didHit;
@@ -55,14 +59,14 @@ void runTestA() {
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    theCylinder.intersect(particleLoc, particleDir, true,
+    theCylinder.intersect(particleLoc, particleDir, false,
         didHit, distance);
 
-    cout << "Did hit: "  << didHit << endl
-         << "distance: " << distance << endl;
+//  cout << "Did hit: "  << didHit << endl
+//       << "distance: " << distance << endl;
 
     TESTER_CHECKFORPASS(didHit == true);
-    TESTER_CHECKFORPASS(softEquiv(distance, 3.0));
+    TESTER_CHECKFORPASS(softEquiv(distance, 4.0));
 
     /********************/
     particleLoc[0] = -1;
@@ -78,8 +82,13 @@ void runTestA() {
     theCylinder.intersect(particleLoc, particleDir, true,
         didHit, distance);
 
+<<<<<<< .mine
+//  cout << "Did hit: "  << didHit << endl
+//       << "distance: " << distance << endl;
+=======
 //    cout << "Did hit: "  << didHit << endl
 //         << "distance: " << distance << endl;
+>>>>>>> .r54
 
     TESTER_CHECKFORPASS(didHit == true);
     TESTER_CHECKFORPASS(softEquiv(distance, 0.0593405544489074));
@@ -93,8 +102,13 @@ void runTestA() {
     theCylinder.intersect(particleLoc, particleDir, true,
         didHit, distance);
 
+<<<<<<< .mine
+//  cout << "Did hit: "  << didHit << endl
+//       << "distance: " << distance << endl;
+=======
 //    cout << "Did hit: "  << didHit << endl
 //         << "distance: " << distance << endl;
+>>>>>>> .r54
 
     TESTER_CHECKFORPASS(didHit == false);
     /********************/
