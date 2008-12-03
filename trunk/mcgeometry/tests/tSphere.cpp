@@ -37,6 +37,7 @@ void runTests() {
     center[0] = 1.0;
 
     Sphere    theSphere(center, sphRadius);
+    TESTER_CHECKFORPASS(theSphere.isReflecting() == false);
 
 //    cout << theSphere << endl;
 
@@ -100,6 +101,7 @@ void runTests() {
     Surface* newSphere = theSphere.clone(182);
 
     TESTER_CHECKFORPASS(newSphere->getUserId() == 182);
+    TESTER_CHECKFORPASS(newSphere->isReflecting() == false);
 
     delete newSphere;
 }

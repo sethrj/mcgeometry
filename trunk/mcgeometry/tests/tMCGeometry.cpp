@@ -114,7 +114,6 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
 
     MCGeometry::CellT::CellFlags outsideFlags;
     outsideFlags = MCGeometry::CellT::NEGATED;
-    //(MCGeometry::CellT::NEGATED | MCGeometry::CellT::DEADCELL);
 
     cellIndex = theGeom.addCell(60, theSurfaces, outsideFlags);
 
@@ -187,7 +186,7 @@ void testGeometryErrorChecking()
     }
 }
 /*============================================================================*/
-void runTests() {   
+void testMainGeometry() {   
 
     MCGeometry theGeom;
 
@@ -254,7 +253,8 @@ void runTests() {
             {60, 60, 60, 20},
             {60, 60, 60, 10}
         };
-    bool correctEndingCells = true;
+    bool correctEndingCells  = true;
+    bool correctReturnStatus = true;
 
     doubleVec    newPosition;
     unsigned int newCellIndex;
@@ -279,7 +279,7 @@ void runTests() {
 //                cout << "New cell index = " << newCellIndex
 //                     << "; user cell id = "
 //                     << theGeom.getUserIdFromCellIndex(newCellIndex)
-//                     << "; expected" << expectedEndingCells[startLoc][dir]
+//                     << "; expected cell id =" << expectedEndingCells[startLoc][dir]
 //                     << endl;
 
 
@@ -287,21 +287,147 @@ void runTests() {
                     correctEndingCells &&
                     (theGeom.getUserIdFromCellIndex(newCellIndex)
                             == expectedEndingCells[startLoc][dir]);
+                correctReturnStatus =
+                    correctReturnStatus &&
+                    ( returnStatus == MCGeometry::NORMAL);
             }
         }
         TESTER_CHECKFORPASS(correctEndingCells);
+        TESTER_CHECKFORPASS(correctReturnStatus);
         
     }
 
 //    theGeom.debugPrint();
 }
+/*============================================================================*/
+void createReflectingGeometry( MCGeometry& theGeom) {
+    /* * * create sphere * * */
+    doubleVec center(3,0.0);
+    double    sphRadius = 3.0;
 
+    Sphere    theSphere(center, sphRadius);
+    theSphere.setReflecting();
+
+    PlaneX    thePlane(0.0);
+
+    //========== ADD SURFACES
+    unsigned int surfaceIndex;
+
+    surfaceIndex = theGeom.addSurface(1, thePlane);
+    surfaceIndex = theGeom.addSurface(2, theSphere);
+    
+    TESTER_CHECKFORPASS(surfaceIndex == 1);
+
+    //========== ADD CELLS
+    intVec theSurfaces(2,0);
+    unsigned int cellIndex;
+
+    // right half of sphere
+    theSurfaces[0] = 2;
+    theSurfaces[1] = -1;
+
+    cellIndex = theGeom.addCell(10, theSurfaces);
+
+    // left half of sphere
+    theSurfaces[0] = -2;
+    theSurfaces[1] = -1;
+
+    cellIndex = theGeom.addCell(20, theSurfaces);
+
+    // outside (should never interact, but make it just to be sure)
+    theSurfaces.resize(1);
+    theSurfaces[0] = 1;
+
+    MCGeometry::CellT::CellFlags outsideFlags = MCGeometry::CellT::DEADCELL;
+    cellIndex = theGeom.addCell(60, theSurfaces, outsideFlags);
+
+    TESTER_CHECKFORPASS(cellIndex == 2);
+
+}
+/*============================================================================*/
+void testReflectingGeometry() {   
+    MCGeometry theGeom;
+
+    createReflectingGeometry(theGeom);
+//    theGeom.debugPrint();
+
+    // - - - - - - - - - - - - - - - - - - - -
+    doubleVec position(3, 0.0);
+    doubleVec direction(3, 0.0);
+
+    // particle at (-1, 1, 0) moving in -X direction
+    position[0] = -1.0;
+    position[1] =  3.0 * 0.707106781186548;
+
+    direction[0] = -1.0;
+
+    TESTER_CHECKFORPASS(theGeom.findCell(position) == 1);
+
+    // move a particle, yay!
+    doubleVec    newPosition;
+    unsigned int newCellIndex;
+    double       distance;
+    MCGeometry::ReturnStatus returnStatus;
+
+
+    // find the distance to the boundary
+    theGeom.findDistance(position, direction, 1, distance);
+    TESTER_CHECKFORPASS(softEquiv(distance, 3.0 * 0.707106781186548 - 1.0, 1e-14));
+
+    // transport it to the boundary
+    theGeom.findNewCell(position, direction,
+                        newPosition, newCellIndex, returnStatus);
+    TESTER_CHECKFORPASS(returnStatus == MCGeometry::REFLECTED);
+    TESTER_CHECKFORPASS(newCellIndex == 1);
+
+    doubleVec expectedPosition(3, 0.0);
+    expectedPosition[0] = -3.0 * 0.707106781186548;
+    expectedPosition[1] = 3.0 * 0.707106781186548;
+    TESTER_CHECKFORPASS(softEquiv(newPosition, expectedPosition, 1e-14));
+
+    // reflect it
+    doubleVec newDirection;
+
+    theGeom.reflectDirection(newPosition, direction, newDirection);
+    
+    doubleVec expectedDirection(3, 0.0);
+    expectedDirection[1] = -1.0;
+    TESTER_CHECKFORPASS(softEquiv(newDirection, expectedDirection, 1e-14));
+
+    // - - - - - -
+    position.assign(3, 0.0);
+    direction.assign(3, 0.0);
+    direction[2] = 1.0;
+
+    // find the distance to the boundary
+    theGeom.findDistance(position, direction, 1, distance);
+    TESTER_CHECKFORPASS(softEquiv(distance, 3.0));
+
+    // transport it to the boundary
+    theGeom.findNewCell(position, direction,
+                        newPosition, newCellIndex, returnStatus);
+    TESTER_CHECKFORPASS(returnStatus == MCGeometry::REFLECTED);
+    TESTER_CHECKFORPASS(newCellIndex == 1);
+
+    expectedPosition.assign(3, 0.0);
+    expectedPosition[2] = 3.0;
+    TESTER_CHECKFORPASS(softEquiv(newPosition, expectedPosition));
+
+    // reflect it
+    theGeom.reflectDirection(newPosition, direction, newDirection);
+    
+    expectedDirection.assign(3, 0.0);
+    expectedDirection[2] = -1.0;
+    TESTER_CHECKFORPASS(softEquiv(newDirection, expectedDirection));
+
+}
 /*============================================================================*/
 int main(int argc, char *argv[]) {
     TESTER_INIT("MCGeometry");
     try {
-        testGeometryErrorChecking();
-        runTests();
+        //testGeometryErrorChecking();
+        //testMainGeometry();
+        testReflectingGeometry();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl

@@ -17,13 +17,12 @@
 #include "Surface.hpp"
 
 namespace mcGeometry {
-//forward declaration of surface
-class Surface;
 
 /*----------------------------------------------------------------------------*/
 /*!
  * \class MCGeometry
- * \brief Umbrella class that coordinates the cells in a problem
+ * \brief MCGeometry is an umbrella class that coordinates the cells in a 
+ *        problem.
  *
  * The MCGeometry parent class handles almost all the external associations
  * between Surfaces and Cells. It maps the user's IDs to internal pointers
@@ -66,18 +65,18 @@ public:
     typedef std::vector<signed int>                 IntVec;
 
     //! user creates an arbitrary quadric surface and passes it in with ID
-    // return INTERNAL index of the surface (0 to N_sur - 1)
+    //  return INTERNAL index of the surface (0 to N_sur - 1)
     unsigned int addSurface(const UserSurfaceIDType userSurfaceId,
                             const Surface& newSurface);
 
     //! user passes in a vector of surface IDs with +/- 
-    // return INTERNAL index of the surface (0 to N_cell - 1) 
+    //  return INTERNAL index of the surface (0 to N_cell - 1) 
     unsigned int addCell(const UserCellIDType userCellId,
                          const IntVec surfaces,
                          const CellT::CellFlags flags = CellT::NONE);
 
     //! do optimization after input is finished, check geometry for duplicate
-    //surfaces, etc.
+    //  surfaces, etc.
     void completedGeometryInput();
 
     //!\brief Find the distance to the next geometry interaction.
@@ -89,7 +88,7 @@ public:
                             const unsigned int oldCellIndex,
                             double& distanceTraveled);
 
-    //!\brief go ahead after finding 
+    //!\brief Go ahead and find the next cell after finding the distance.
     // we may have to add further code to pass back a surface ID for a surface
     // tally, for example
     void findNewCell(       const std::vector<double>& position,
@@ -113,11 +112,14 @@ public:
         findNewCell(position, direction, newPosition,
                     newCellIndex, returnStatus);
     }
+    
+    //! If we found that the surface was reflecting, change the direction
+    void reflectDirection(  const std::vector<double>& newPosition,
+                            const std::vector<double>& oldDirection,
+                            std::vector<double>& newDirection);
 
-    //! find a cell given a point
+    //! Find a cell given an arbitrary point in the problem.
     unsigned int findCell(const std::vector<double>& position) const;
-
-    //TODO: define IMP=0 cells, reflecting surfaces, etc.
 
     //! Debug printing; will be incorporated into file IO etc. later
     void debugPrint() const;
@@ -150,7 +152,7 @@ public:
         return findCMResult->second;
     }
 
-    //! get an internal index for a surface from a user ID
+    //! Get an internal index for a surface from a user ID.
     unsigned int getSurfaceIndexFromUserId(
                  const UserSurfaceIDType userSurfaceId) const
     {
@@ -248,9 +250,6 @@ private:
     } _findCache;
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-    //! print a surface and its corresponding sense
-    void _printSAS(const SurfaceAndSense& qas) const;
 
     //! do optimization whenever the last surface is linked
     void _completedConnectivity();

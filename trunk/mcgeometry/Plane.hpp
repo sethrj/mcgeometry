@@ -38,7 +38,7 @@ public:
     }
 
     Plane(const Plane& oldPlane, const UserSurfaceIdType& newId)
-        : Surface(newId),
+        : Surface(oldPlane, newId),
           _normal(oldPlane._normal),
           _coordinate(oldPlane._coordinate)
     { /* * */ }
@@ -57,6 +57,8 @@ public:
                     bool& hit,
                     double& distance) const;
 
+    void normalAtPoint( const std::vector<double>& position,
+                        std::vector<double>& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
@@ -102,6 +104,7 @@ inline void Plane::intersect(
 //      p = position
 //      p0 = point on plane
 inline bool Plane::hasPosSense(const std::vector<double>& position) const{
+    Require(position.size() == 3);
     double eval(0);
     for( int i = 0; i < 3; ++i ){
         eval += _normal[i]*position[i] - _normal[i]*_coordinate[i];
@@ -109,7 +112,20 @@ inline bool Plane::hasPosSense(const std::vector<double>& position) const{
 
     return _hasPosSense(eval);
 }
-
+/*----------------------------------------------------------------------------*/
+inline void Plane::normalAtPoint(  const std::vector<double>& position,
+                            std::vector<double>& unitNormal) const
+{
+    Require(position.size() == 3);
+    // "position" should be on the surface
+    IfDbc(  double eval(0);
+            for( int i = 0; i < 3; ++i )
+                eval += _normal[i]*position[i] - _normal[i]*_coordinate[i];
+         );
+    Require(softEquiv(eval, 0.0));
+    
+    unitNormal = _normal;
+}
 /*----------------------------------------------------------------------------*/
 inline std::ostream& Plane::_output( std::ostream& os ) const {
     os  << "[ PLANE  Point:  " << std::setw(10) << _coordinate 
@@ -132,7 +148,7 @@ public:
     { /* * */ }
 
     PlaneNormal(const PlaneNormal& oldPlane, const UserSurfaceIdType& newId)
-        : Surface(newId),
+        : Surface(oldPlane, newId),
           _coordinate(oldPlane._coordinate)
     { /* * */ }
 
@@ -149,6 +165,9 @@ public:
                     const bool posSense,
                     bool& hit,
                     double& distance) const;
+
+    void normalAtPoint( const std::vector<double>& position,
+                        std::vector<double>& unitNormal) const;
 
     //! return the index along which we are oriented
     unsigned int getAxis() const {
@@ -193,6 +212,18 @@ inline void PlaneNormal<axis>::intersect(
         distance = (_coordinate - position[axis]) / direction[axis];
         distance = std::max(0.0, distance);
     }
+}
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline void PlaneNormal<axis>::normalAtPoint( const std::vector<double>& position,
+                                       std::vector<double>& unitNormal) const
+{
+    // "position" should be on the surface
+    Require(position.size() == 3);
+    Require(softEquiv(position[axis] - _coordinate, 0.0));
+
+    unitNormal.assign(3,0.0);
+    unitNormal[axis] = 1.0;
 }
 
 /*----------------------------------------------------------------------------*/

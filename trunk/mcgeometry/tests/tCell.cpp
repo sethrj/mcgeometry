@@ -117,6 +117,7 @@ void runTests() {
     TESTER_CHECKFORPASS(invCell.getUserId() == 1337);
     TESTER_CHECKFORPASS(invCell.getIndex() == 3);
     TESTER_CHECKFORPASS(invCell.isDeadCell() == true);
+    TESTER_CHECKFORPASS(invCell.isNegated() == true);
 
     particleLoc.assign(3,0.0);
     particleLoc[0] = 2.5;

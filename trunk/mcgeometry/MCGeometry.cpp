@@ -8,6 +8,7 @@
 
 #include <utility>
 #include <map>
+#include <vector>
 
 #include "transupport/dbc.hpp"
 #include "transupport/VectorPrint.hpp"
@@ -70,12 +71,25 @@ void MCGeometry::findNewCell(
     CellT& oldCell = *(_cells[_findCache.oldCellIndex]);
 
     // ===== calculate transported position on the boundary of our new cell
+    //  (necessary for finding which cell the point belongs to)
     newPosition.resize(3);
     for (int i = 0; i < 3; i++) {
+        // transport the particle
         newPosition[i] = position[i] +
             _findCache.distanceToSurface * direction[i];
     }
 
+    // ===== if we're reflecting, just return the reflected status
+    if ( _findCache.hitSurface->isReflecting() ) {
+        returnStatus = REFLECTED;
+
+        // particle stays in the same cell
+        newCellIndex = _findCache.oldCellIndex;
+
+        return;
+    }
+
+    returnStatus = NORMAL;
     // ===== Loop over neighborhood cells
     CellT::CellContainer& neighborhood =
             oldCell.getNeighbors(_findCache.hitSurface);
@@ -172,6 +186,39 @@ void MCGeometry::findNewCell(
 
     _failGeometry("Ruh-roh, new cell not found!",
                     _findCache.oldCellIndex, position, direction);
+}
+/*----------------------------------------------------------------------------*/
+void MCGeometry::reflectDirection(const std::vector<double>& newPosition,
+                                  const std::vector<double>& oldDirection,
+                                  std::vector<double>& newDirection)
+{
+    // law of reflection: omega = omega - 2 (n . omega) n
+    std::vector<double> surfaceNormal;
+
+    // find the surface normal at the point of intersection
+    _findCache.hitSurface->normalAtPoint(newPosition, surfaceNormal);
+    Require(surfaceNormal.size() == 3);
+
+    // returned normal is with respect to the "positive" sense of the
+    // surface, so reverse if necessary
+    if (_findCache.oldSurfaceSense == false)
+    {
+        for (unsigned int i = 0; i < 3; i++) {
+            surfaceNormal[i] = -surfaceNormal[i];
+        }
+    }
+
+    double doubleProjection 
+        = 2 * tranSupport::vectorDot(oldDirection, surfaceNormal);
+
+    // calculate the new direction
+    newDirection.resize(3,0.0);
+    for (unsigned int i = 0; i < 3; i++) {
+        newDirection[i] = oldDirection[i] - doubleProjection * surfaceNormal[i];
+    }
+
+    Ensure(newDirection.size() == 3);
+    Ensure(softEquiv(tranSupport::vectorNorm(newDirection), 1.0));
 }
 /*----------------------------------------------------------------------------*/
 unsigned int MCGeometry::findCell(
@@ -383,8 +430,7 @@ void MCGeometry::_failGeometry(const std::string failureMessage,
     for (SASVec::const_iterator bsIt = boundingSurfaces.begin();
                                 bsIt != boundingSurfaces.end(); bsIt++)
     {
-        _printSAS(*bsIt);
-        cout << ":[";
+        cout << *bsIt << ":[";
 
         const CellT::CellContainer& otherCells =
             _cells[currentCellIndex]->getNeighbors(bsIt->first);
@@ -416,7 +462,12 @@ void MCGeometry::debugPrint() const
                                     surfIt != _surfaces.end(); ++surfIt)
     {
         cout << " SURFACE " << (*surfIt)->getUserId() << ": "
-             << *(*surfIt) << endl;
+             << *(*surfIt);
+
+        if ( (*surfIt)->isReflecting() )
+            cout << " <REFLECTING>";
+
+        cout << endl;
     }
 
     //-------------- PRINT CELLS TO SURFACES ----------------//
@@ -434,8 +485,7 @@ void MCGeometry::debugPrint() const
         for (CellT::SASVec::const_iterator bsIt  = boundingSurfaces.begin(); 
                                         bsIt != boundingSurfaces.end(); ++bsIt)
         {
-            _printSAS(*bsIt);
-            cout << " ";
+            cout << *bsIt << " ";
         }
 
         if ( (*cellIt)->isNegated() )
@@ -456,11 +506,7 @@ void MCGeometry::debugPrint() const
             ++surfToCellIt)
     {
         // print the surface and orientation
-        cout << " ";
-
-        _printSAS(surfToCellIt->first);
-
-        cout << ": ";
+        cout << " " << surfToCellIt->first << ": ";
         
         // print the cells
         const CellVec& theCells = surfToCellIt->second;
@@ -488,8 +534,7 @@ void MCGeometry::debugPrint() const
         for (CellT::SASVec::const_iterator bsIt = boundingSurfaces.begin();
                                     bsIt != boundingSurfaces.end(); bsIt++)
         {
-            _printSAS(*bsIt);
-            cout << ":{";
+            cout << *bsIt << ":{";
 
             const CellT::CellContainer& otherCells =
                 (*cellIt)->getNeighbors(bsIt->first);
@@ -506,16 +551,6 @@ void MCGeometry::debugPrint() const
 
         cout << endl;
     }  
-}
-/*----------------------------------------------------------------------------*/
-void MCGeometry::_printSAS(const SurfaceAndSense& qas) const
-{
-    if (qas.second == true)
-        cout << "+";
-    else
-        cout << "-";
-
-    cout << qas.first->getUserId();
 }
 /*----------------------------------------------------------------------------*/
 // creation
