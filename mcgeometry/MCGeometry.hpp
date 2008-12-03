@@ -69,10 +69,11 @@ public:
     unsigned int addSurface(const UserSurfaceIDType userSurfaceId,
                             const Surface& newSurface);
 
-    //! user passes in a vector of surface IDs with +/- 
-    //  return INTERNAL index of the surface (0 to N_cell - 1) 
-    unsigned int addCell(const UserCellIDType userCellId,
-                         const IntVec surfaces,
+    //! Parse a list of unsigned ints with +/- into surfaces and senses,
+    //  and add the new cell.
+    //  Return INTERNAL index of the surface (0 to N_cell - 1) 
+    unsigned int addCell(const UserCellIDType& userCellId,
+                         const IntVec& surfaces,
                          const CellT::CellFlags flags = CellT::NONE);
 
     //! do optimization after input is finished, check geometry for duplicate
@@ -250,6 +251,11 @@ private:
     } _findCache;
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+    //! internal mechanism to add a cell based on a list of surface/senses
+    unsigned int _addCell(          const UserCellIDType&  userCellId,
+                                    const CellT::SASVec&   boundingSurfaces,
+                                    const CellT::CellFlags flags);
 
     //! do optimization whenever the last surface is linked
     void _completedConnectivity();

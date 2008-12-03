@@ -283,21 +283,19 @@ unsigned int MCGeometry::addSurface( const MCGeometry::UserSurfaceIDType
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType userCellId,
-                                 const IntVec surfaceIds,
+//! basically, parse a list of unsigned ints with +/- into surfaces and senses,
+//  and add the cell
+unsigned int MCGeometry::addCell(const UserCellIDType& userCellId,
+                                 const IntVec& surfaceIds,
                                  const CellT::CellFlags flags)
 {
-    //---- convert surface ID to pairs of unsigned ints (surfaceIds) and bools
-    //                                                  (surface sense) -----//
     CellT::SASVec boundingSurfaces;
 
     // bounding surfaces should have same length as input list of surface IDs
     // so from the start just reserve that many spaces in memory
     boundingSurfaces.reserve(surfaceIds.size());
 
-
     // -------- ITERATE OVER INPUT SURFACE LIST -------- //
-    
     for (IntVec::const_iterator it = surfaceIds.begin();
                                 it != surfaceIds.end(); ++it) {
         unsigned int userSurfaceId; //an integer that only the user deals with
@@ -319,15 +317,22 @@ unsigned int MCGeometry::addCell(const MCGeometry::UserCellIDType userCellId,
 
         // add the surface to the vector of bounding surfaces
         boundingSurfaces.push_back(newSurface);
-
-        // this counts as another unmatched surface
-        _unMatchedSurfaces++;
-//        cout << "Added surface " << userSurfaceId << " to cell " << userCellId
-//             << " (unmatched surface count: " << _unMatchedSurfaces << ")"
-//             << endl;
+//        cout << "Added surface " << userSurfaceId << " to cell " << userCellId << endl;
     }
 
     Check(surfaceIds.size() == boundingSurfaces.size());
+
+    return _addCell(userCellId, boundingSurfaces, flags);
+}
+/*----------------------------------------------------------------------------*/
+//! add a cell based on a surface/sense vector
+unsigned int MCGeometry::_addCell(
+                                    const UserCellIDType&  userCellId,
+                                    const CellT::SASVec&   boundingSurfaces,
+                                    const CellT::CellFlags flags)
+{
+    // add a new "unmatched surface" for every surface in the cell
+    _unMatchedSurfaces += boundingSurfaces.size();
 
     //====== add cell to the internal cell vector
     unsigned int newCellIndex = _cells.size();

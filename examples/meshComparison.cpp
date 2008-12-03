@@ -6,7 +6,7 @@
 
 /*----------------------------------------------------------------------------*/
 
-#include "generateMeshGeom.hpp"
+#include "createGeometry.hpp"
 
 #include "mcgeometry/MCGeometry.hpp"
 
