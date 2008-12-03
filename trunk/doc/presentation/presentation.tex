@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{fancyvrb}
 
 \usetheme{Madrid}
 %\usecolortheme{seahorse}
@@ -69,8 +70,72 @@ University of Michigan, Ann Arbor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Mesh Geometry}
+\section{Results}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Complex Geometry}
+\begin{frame}{Multiply connected geometry}
+\begin{columns}[c]
+\column{0.5\textwidth}
+\begin{itemize}
+  \item One cell is connected to more than once cell through the same surface
+  \item Composed of sphere and four planes
+\end{itemize}
+
+\column{0.5\textwidth}
+    \includegraphics[width=\textwidth, keepaspectratio]{test_geom_1}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Complex Geometry Description}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth, keepaspectratio]{test_geom_1}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Complex Geometry Output}
+\fvset{frame=single,%
+		fontsize=\tiny}%
+
+\begin{Verbatim}
+SURFACES: 
+ SURFACE 5: [ SPHERE Center:          <0,0,0> Radius:     3 ]
+ SURFACE 1: [ PLANE  Point:           <0,1,0> Normal vector:          <0,1,0> ]
+ SURFACE 2: [ PLANE  Point:           <0,0,0> Normal vector:          <0,1,0> ]
+ SURFACE 3: [ PLANE  Point:           <0,-1,0> Normal vector:          <0,1,0> ]
+ SURFACE 4: [ PLANE  Point:           <0,0,0> Normal vector:          <1,0,0> ]
+CELLS: 
+ CELL 10: -5 -1 +3 +4 
+ CELL 20: -5 -1 +2 -4 
+ CELL 30: -5 -2 +3 -4 
+ CELL 40: -5 +1 
+ CELL 50: -5 -3 
+ CELL 60: -5  <NEGATED>
+SURFACES TO CELLS: 
+ -5: 10 20 30 40 50 
+ +5: 60 
+ -1: 10 20 
+ +1: 40 
+ -2: 30 
+ +2: 20 
+ -3: 50 
+ +3: 10 30 
+ -4: 20 30 
+ +4: 10 
+NEIGHBORHOOD CONNECTIVITY: 
+ CELL 10: -5:{60 } -1:{40 } +3:{50 } +4:{30 20 } 
+ CELL 20: -5:{60 } -1:{40 } +2:{30 } -4:{10 } 
+ CELL 30: -5:{60 } -2:{20 } +3:{50 } -4:{10 } 
+ CELL 40: -5:{60 } +1:{10 20 } 
+ CELL 50: -5:{60 } -3:{30 10 } 
+ CELL 60: -5:{50 30 10 20 40 } 
+\end{Verbatim}
+\end{frame}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Mesh Geometry}
 \begin{frame}
+\frametitle{Mesh Geometry}
 \begin{columns}[c]
 \column{0.5\textwidth}
 \begin{itemize}
@@ -109,8 +174,6 @@ University of Michigan, Ann Arbor
 \begin{frame}
     \includegraphics[width=\textwidth, keepaspectratio]{MeshTiming}
 \end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
 
