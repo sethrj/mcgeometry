@@ -6,6 +6,8 @@
 
 /*----------------------------------------------------------------------------*/
 
+#include "createGeometry.hpp"
+
 #include "mcgeometry/MCGeometry.hpp"
 #include "mcgeometry/Plane.hpp"
 #include "mcgeometry/Sphere.hpp"
@@ -18,7 +20,6 @@
 using std::cout;
 using std::endl;
 
-void CreateMesh(int, mcGeometry::MCGeometry&);
 void MeshTiming(int, mcGeometry::MCGeometry&, bool);
 
 int main(int argc, char* argv[]){

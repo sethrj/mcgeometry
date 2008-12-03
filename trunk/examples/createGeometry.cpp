@@ -7,6 +7,8 @@
  * surface/plane/cell headers at all.
  */
 
+#include "createGeometry.hpp"
+
 #include "mcgeometry/MCGeometry.hpp"
 #include "mcgeometry/Plane.hpp"
 

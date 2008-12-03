@@ -425,8 +425,8 @@ void testReflectingGeometry() {
 int main(int argc, char *argv[]) {
     TESTER_INIT("MCGeometry");
     try {
-        //testGeometryErrorChecking();
-        //testMainGeometry();
+        testGeometryErrorChecking();
+        testMainGeometry();
         testReflectingGeometry();
     }
     catch (tranSupport::tranError &theErr) {
