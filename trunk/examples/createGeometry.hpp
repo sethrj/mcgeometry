@@ -5,4 +5,6 @@
 
 void CreateMesh(int N, mcGeometry::MCGeometry& geo);
 
+void createTrickyGeometry(mcGeometry::MCGeometry& geo);
+
 #endif

@@ -49,8 +49,8 @@ void runTestA() {
 
     particleLoc[0] = 1.5;
     particleDir[1] = 1.0;
-    cout << "particleLoc: " << particleLoc << endl;
-    cout << "particleDir: " << particleDir << endl;
+//    cout << "particleLoc: " << particleLoc << endl;
+//    cout << "particleDir: " << particleDir << endl;
 
     /********************/
     bool    didHit;

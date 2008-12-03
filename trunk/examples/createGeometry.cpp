@@ -17,10 +17,11 @@
 
 using std::cout;
 using std::endl;
+using namespace mcGeometry;
 
 //! Mesh will create and use a retangular mesh using N planes spaced 1.0 units
 // apart
-void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
+void CreateMesh(int N, MCGeometry& Geo){
     // Normal vectors to planes perpendicular to axes
     std::vector<double> xNorm(3, 0.0);  xNorm[0] = 1.0;
     std::vector<double> yNorm(3, 0.0);  yNorm[1] = 1.0;
@@ -143,3 +144,76 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
 
 }
 
+//! \function createTrickyGeometry
+//  \author   Seth R. Johnson
+//  Looks sort of like AMR
+void createTrickyGeometry(mcGeometry::MCGeometry& geo)
+{
+    geo.addSurface(1, PlaneY(0.0));
+    geo.addSurface(2, PlaneY(2.0));
+    geo.addSurface(3, PlaneY(3.0));
+    geo.addSurface(4, PlaneY(4.0));
+
+    geo.addSurface(11, PlaneX(-2.0));
+    geo.addSurface(12, PlaneX(-1.0));
+    geo.addSurface(13, PlaneX( 0.0));
+    geo.addSurface(14, PlaneX( 1.0));
+    geo.addSurface(15, PlaneX( 2.0));
+
+    geo.addSurface(21, PlaneZ(-2.0));
+    geo.addSurface(22, PlaneZ(2.0));
+
+    std::vector<int> surfaces(6, 0);
+    surfaces[0] =  21;
+    surfaces[1] = -22;
+
+    // bottom row
+    surfaces[2] =  1;
+    surfaces[3] = -2;
+
+    surfaces[4] =  11;
+    surfaces[5] = -15;
+    geo.addCell(1, surfaces);
+
+    // second row
+    surfaces[2] =  2;
+    surfaces[3] = -3;
+
+    surfaces[4] =  11;
+    surfaces[5] = -13;
+    geo.addCell(2, surfaces);
+
+    surfaces[4] =  13;
+    surfaces[5] = -15;
+    geo.addCell(3, surfaces);
+
+    // third row
+    surfaces[2] =  3;
+    surfaces[3] = -4;
+
+    surfaces[4] =  11;
+    surfaces[5] = -12;
+    geo.addCell(4, surfaces);
+
+    surfaces[4] =  12;
+    surfaces[5] = -13;
+    geo.addCell(5, surfaces);
+
+    surfaces[4] =  13;
+    surfaces[5] = -14;
+    geo.addCell(6, surfaces);
+
+    surfaces[4] =  14;
+    surfaces[5] = -15;
+    geo.addCell(7, surfaces);
+
+    //outside cell
+    surfaces[2] =  1;
+    surfaces[3] = -4;
+
+    surfaces[4] =  11;
+    surfaces[5] = -15;
+
+    geo.addCell(100, surfaces,
+            MCGeometry::CellT::generateFlags(true, true));
+}

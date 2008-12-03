@@ -131,6 +131,7 @@ void Cell<UserIdType>::intersect(
     quadricSense = false;
     distance     = std::numeric_limits<double>::infinity();
 
+//    cout << "Doing intersect in cell " << getUserId() << endl;
     // loop over all surfaces
     for (SASVec::const_iterator it =  _boundingSurfaces.begin();
                                 it != _boundingSurfaces.end(); ++it)
@@ -147,10 +148,14 @@ void Cell<UserIdType>::intersect(
         // same distance from the particle; i.e. the particle ran into a corner?
         // what happens then?
 //        Check(theResult.second != distance);
+        
+//        if (thisHit) {
+//            cout << "Calculated an intersection (distance " << thisDistance 
+//                 << ") with " << *(it->first) << endl;
+//        } else {
+//            cout << "No intersection with " << *(it->first) << endl;
+//        }
 
-//        cout << "Test for " << typeid(*(it->first)).name()
-//             << ": hit=" << thisHit << " dist=" << thisDistance
-//             << endl;
 
         if (thisHit // if it hits, and if it's a smaller distance
                 && (thisDistance < distance))
