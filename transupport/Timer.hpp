@@ -97,6 +97,9 @@ private:
     TimerMap theTimers;
 };
 
+//! print a timer to a stream
+std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& t);
+
 /*----------------------------------------------------------------------------*/
 }
 /*============================================================================*/

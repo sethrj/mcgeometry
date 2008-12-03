@@ -94,8 +94,6 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
         // use a negated outside cell
         typedef mcGeometry::MCGeometry::CellT CellT;
 
-        CellT::CellFlags invFlags
-            = static_cast<CellT::CellFlags>(CellT::NEGATED | CellT::DEADCELL);
         Surfaces.resize(0);
 
         Surfaces.push_back( minXId);
@@ -104,7 +102,7 @@ void CreateMesh(int N, mcGeometry::MCGeometry& Geo){
         Surfaces.push_back(-maxYId);
         Surfaces.push_back( minZId);
         Surfaces.push_back(-maxZId);
-        Geo.addCell(ID, Surfaces, invFlags); 
+        Geo.addCell(ID, Surfaces, CellT::generateFlags(true, true)); 
         cout << "Outside cell ID: " << ID << endl;
         ++ID;
 

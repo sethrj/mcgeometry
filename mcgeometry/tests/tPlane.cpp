@@ -41,6 +41,7 @@ void testPlane() {
 
     Plane thePlane(normal, center);
 
+    TESTER_CHECKFORPASS(thePlane.isReflecting() == false);
     /* * * create "particle" * * */
     doubleVec particleLoc(3,0.0);
     doubleVec particleDir(3,0.0);
@@ -99,9 +100,39 @@ void testPlane() {
     Surface* newPlane = thePlane.clone(123);
 
     TESTER_CHECKFORPASS(newPlane->getUserId() == 123);
+    TESTER_CHECKFORPASS(newPlane->isReflecting() == false);
 
     delete newPlane;
 }
+/*============================================================================*/
+void testReflPlane() {
+    /* * * create plane * * */
+    doubleVec center(3,0.0);
+    doubleVec normal(3,0.0);
+
+    normal[0] = 0.707106781186547;
+    normal[1] = 0.707106781186547;
+
+    center[0] = 1.0;
+    center[1] = 1.0;
+
+    Plane thePlane(normal, center);
+    thePlane.setReflecting();
+
+    TESTER_CHECKFORPASS(thePlane.isReflecting() == true);
+
+    doubleVec returnedNormalVector;
+    thePlane.normalAtPoint(center, returnedNormalVector);
+    TESTER_CHECKFORPASS( softEquiv(returnedNormalVector, normal) );
+
+    /********************/
+    Surface* newPlane = thePlane.clone(223);
+
+    TESTER_CHECKFORPASS(newPlane->getUserId() == 223);
+    TESTER_CHECKFORPASS(newPlane->isReflecting() == true);
+
+}
+
 /*============================================================================*/
 void testPlaneX() {
     /* * * create plane * * */
@@ -253,6 +284,7 @@ int main(int argc, char *argv[]) {
     TESTER_INIT("Plane");
     try {
         testPlane();
+        testReflPlane();
         testPlaneX();
         testPlaneY();
         testPlaneZ();

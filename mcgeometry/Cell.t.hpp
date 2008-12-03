@@ -21,6 +21,20 @@ using std::endl;
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
+//! Static function to make flag generation easier.
+template <typename UserIdType>
+typename Cell<UserIdType>::CellFlags Cell<UserIdType>::generateFlags(
+                                bool isDeadCell, bool isNegated  )
+{
+    CellFlags flags = NONE;
+
+    if (isDeadCell) flags = static_cast<CellFlags>(flags | DEADCELL);
+    if (isNegated)  flags = static_cast<CellFlags>(flags | NEGATED);
+
+    return flags;
+}
+
+/*============================================================================*/
 //! constructor requires an immutable bounding surface
 template <typename UserIdType>
 Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,

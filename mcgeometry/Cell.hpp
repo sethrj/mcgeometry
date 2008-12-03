@@ -53,7 +53,12 @@ public:
     //! A container of pointers to Cells for neighborhood connectivity
 //    typedef std::vector< Cell<UserIdType> * >  CellContainer;
     typedef std::list< Cell<UserIdType> * >  CellContainer;
+    /*******************************/
+    //! Static function to make flag generation easier.
+    static CellFlags generateFlags(
+            bool isDeadCell = false, bool isNegated = false );
 
+    /*******************************/
     //! constructor requires an immutable bounding surface
     Cell(   const SASVec& boundingSurfaces,
             const UserIdType userId,
@@ -129,11 +134,11 @@ private:
     //! its index in the primary Cell array
     const unsigned int _internalIndex;
 
+    //! other information about this cell
+    const CellFlags _flags;
+
     //! connectivity to other cell vectors through surfaces
     HoodMap _hood;
-
-    //! other information about this cell
-    CellFlags _flags;
 };
 /*----------------------------------------------------------------------------*/
 } // end namespace mcGeometry

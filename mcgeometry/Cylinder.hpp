@@ -43,7 +43,7 @@ public:
     }
 
     Cylinder(const Cylinder& oldCylinder, const UserSurfaceIdType& newId)
-        : Surface(newId),
+        : Surface(oldCylinder, newId),
           _pointOnAxis(oldCylinder._pointOnAxis),
           _axis(oldCylinder._axis),
           _radius(oldCylinder._radius)
@@ -64,6 +64,8 @@ public:
                     bool& hit,
                     double& distance) const;
 
+    void normalAtPoint( const std::vector<double>& position,
+                        std::vector<double>& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
@@ -78,6 +80,7 @@ private:
 
 };
 
+/*----------------------------------------------------------------------------*/
 // TODO: eliminate use of pow with integer coefficients
 // also having it work would be nice!
 
@@ -89,13 +92,14 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
 {
     Require(position.size() == 3);
     double eval(0);
+    double tmpValue;
 
     // Perform (X-P)^2
     for( int i = 0; i < 3; ++i ){
-        eval += pow(position[i] - _pointOnAxis[i], 2);
+        tmpValue = position[i] - _pointOnAxis[i];
+        eval += tmpValue * tmpValue;
     }
 
-    double tmpValue;
     // Perform [(X-P).U]^2
     for( int i = 0; i < 3; ++i ){
         tmpValue += (position[i] - _pointOnAxis[i])*_axis[i];
@@ -106,6 +110,7 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
     return _hasPosSense(eval);
 }
 
+/*----------------------------------------------------------------------------*/
 // This could be done more efficiently but this way is (arguably) closer to 
 // the original math.
 inline void Cylinder::intersect(
@@ -143,7 +148,17 @@ inline void Cylinder::intersect(
 
     _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
 }
+/*----------------------------------------------------------------------------*/
+inline void Cylinder::normalAtPoint(
+                const std::vector<double>& position,
+                std::vector<double>& unitNormal) const
+{
+    // "position" should be on the surface
+    Require(position.size() == 3);
 
+    Insist(0, "Not yet implemented.");
+}
+/*----------------------------------------------------------------------------*/
 inline std::ostream& Cylinder::_output( std::ostream& os ) const {
     os  << "[ CYL   Point:  " << std::setw(10) << _pointOnAxis
         << " Axis: " << std::setw(10) << _axis 
@@ -187,6 +202,8 @@ public:
                     bool& hit,
                     double& distance) const;
 
+    void normalAtPoint( const std::vector<double>& position,
+                        std::vector<double>& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
@@ -242,7 +259,19 @@ inline void CylinderNormal<axis>::intersect(
                 const bool posSense,
                 bool& hit, double& distance) const
 {
+    Insist(0, "Not yet implemented.");
     return _calcQuadraticIntersect(0.0, 0.0, 0.0, posSense, hit, distance);
+}
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline void CylinderNormal<axis>::normalAtPoint(
+                const std::vector<double>& position,
+                std::vector<double>& unitNormal) const
+{
+    // "position" should be on the surface
+    Require(position.size() == 3);
+
+    Insist(0, "Not yet implemented.");
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
@@ -252,6 +281,15 @@ inline std::ostream& CylinderNormal<axis>::_output( std::ostream& os ) const
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
+/*============================================================================*/
+
+//! provide typedefs for user interaction
+typedef CylinderNormal<0> CylinderX;
+//! provide typedefs for user interaction
+typedef CylinderNormal<1> CylinderY;
+//! provide typedefs for user interaction
+typedef CylinderNormal<2> CylinderZ;
+
 /*============================================================================*/
 } // end namespace mcGeometry
 #endif
