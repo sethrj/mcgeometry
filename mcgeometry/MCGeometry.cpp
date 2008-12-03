@@ -322,6 +322,7 @@ unsigned int MCGeometry::addCell(const UserCellIDType& userCellId,
 
     Check(surfaceIds.size() == boundingSurfaces.size());
 
+    // call our internal function to do stuff to the parsed list of pointers
     return _addCell(userCellId, boundingSurfaces, flags);
 }
 /*----------------------------------------------------------------------------*/
