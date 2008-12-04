@@ -11,6 +11,8 @@
 
 #include "mcgeometry/MCGeometry.hpp"
 #include "mcgeometry/Plane.hpp"
+#include "mcgeometry/Sphere.hpp"
+#include "mcgeometry/Cylinder.hpp"
 
 #include <vector>
 #include <iostream>
@@ -217,4 +219,62 @@ void createTrickyGeometry(mcGeometry::MCGeometry& geo)
 
     geo.addCell(100, surfaces,
             MCGeometry::CellT::generateFlags(true, true));
+}
+/*============================================================================*/
+//! \function createTrickyGeometry2
+//  \author   Seth R. Johnson
+//  Two spheres with surrounding cylinder
+void createAnotherTrickyGeometry(mcGeometry::MCGeometry& geo)
+{
+    std::vector<double> xNorm(3, 0.0);  xNorm[0] = 1.0;
+
+    std::vector<double> position(3, 0.0);
+
+    position[0] = -1.0;
+    geo.addSurface(1, Sphere(position, 1.0));
+    position[0] = 1.0;
+    geo.addSurface(2, Sphere(position, 1.0));
+
+    geo.addSurface(3, Cylinder(position, xNorm, 1.0));
+
+
+    geo.addSurface(4, PlaneX(-1.0));
+    geo.addSurface(5, PlaneX( 1.0));
+
+    // add cells
+    std::vector<int> surfaces(1, 0);
+
+    surfaces[0] = -1;
+    geo.addCell(10, surfaces); //inside first sphere
+
+    surfaces[0] = -2;
+    geo.addCell(20, surfaces); //inside second sphere
+
+    surfaces.resize(5); //crazy region
+    surfaces[0] =  4;
+    surfaces[1] = -5;
+    surfaces[2] =  1;
+    surfaces[3] =  2;
+    surfaces[4] = -3;
+    geo.addCell(30, surfaces); // between the spheres
+
+    surfaces.resize(2);
+    surfaces[0] = -4;
+    surfaces[1] =  1;
+    geo.addCell(110, surfaces,
+            MCGeometry::CellT::generateFlags(true, false)); //dead cell
+
+
+    surfaces[0] =  5;
+    surfaces[1] =  2;
+    geo.addCell(120, surfaces,
+            MCGeometry::CellT::generateFlags(true, false)); //dead cell
+
+    surfaces.resize(3);
+    surfaces[0] =  4;
+    surfaces[1] = -5;
+    surfaces[2] =  3;
+    geo.addCell(130, surfaces,
+            MCGeometry::CellT::generateFlags(true, false)); //dead cell
+
 }

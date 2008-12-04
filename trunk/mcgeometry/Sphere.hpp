@@ -120,8 +120,8 @@ inline void Sphere::intersect(
             );
 }
 /*----------------------------------------------------------------------------*/
-void Sphere::normalAtPoint( const std::vector<double>& position,
-                            std::vector<double>& unitNormal) const
+inline void Sphere::normalAtPoint( const std::vector<double>& position,
+                                   std::vector<double>& unitNormal) const
 {
     Require(position.size() == 3);
     // (position is on the outer edge of the sphere, we hope)

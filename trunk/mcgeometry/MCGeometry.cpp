@@ -84,6 +84,7 @@ void MCGeometry::findNewCell(
     //
     // This is a very minor nudge and should happen only EXTREMELY infrequently
     // (i.e. pretty much JUST on fabricated problems)
+    //  THIS IS A RARE CASE OF WHAT COULD HAPPEN
     if (_findCache.distanceToSurface == 0.0) {
         _findCache.distanceToSurface
             = tranSupport::vectorNorm(position)
@@ -119,6 +120,8 @@ void MCGeometry::findNewCell(
     for (CellT::CellContainer::const_iterator it  = neighborhood.begin();
                                        it != neighborhood.end(); ++it)
     {
+//        cout << "Checking if cell UserID " << (*it)->getUserId()
+//             << " contains point " << newPosition << endl;
         // check if the point is inside (and pass _hitSurface to exclude
         // checking it)
         if ( (*it)->isPointInside( newPosition, _findCache.hitSurface ) )
@@ -159,50 +162,48 @@ void MCGeometry::findNewCell(
     for (CellVec::iterator pNewCell  = cellsToCheck.begin();
                            pNewCell != cellsToCheck.end(); ++pNewCell)
     {
+//        cout << "Checking if cell UserID " << (*pNewCell)->getUserId()
+//             << " contains point " << newPosition << endl;
         // check if the point is inside (and pass _hitSurface to exclude
         // checking it)
         if ( (*pNewCell)->isPointInside( newPosition, _findCache.hitSurface ) )
         {
-            // if this is the first cell linked to this surface, we decrement 
-            // the unmatched surfaces
-            if (neighborhood.size() == 0)
-                _unMatchedSurfaces--;
-
-            // add new cell to old cell's hood connectivity
-            neighborhood.push_back(*pNewCell);
-
-            CellT::CellContainer& newNeighborhood
-                = (*pNewCell)->getNeighbors(_findCache.hitSurface);
-
-            // if this is the first cell linked to this surface, we decrement 
-            // the unmatched surfaces
-            if (newNeighborhood.size() == 0)
-                _unMatchedSurfaces--;
-
-            // add old cell to new cell's hood connectivity
-            newNeighborhood.push_back(&oldCell);
-
             // we have found the new cell
             newCellIndex = (*pNewCell)->getIndex();
 
-//            cout << "Connected ending cell index " << newCellIndex
-//                 << " to starting cell index " << _findCache.oldCellIndex
-//                 << endl;
-
-            if (_unMatchedSurfaces == 0)
-                _completedConnectivity();
-            #if DBC > 0
-            if (_unMatchedSurfaces < 0)
-            { cout << "Whoa, negative unmatched surfaces!" << endl;
-                _unMatchedSurfaces = 0; }
-            #endif
-
+            _updateConnectivity(&oldCell, *pNewCell, neighborhood);
 
             if ( (*pNewCell)->isDeadCell() )
                 returnStatus = DEADCELL;
             return;
         }
     }
+
+    // after checking cells connected to the surface, check all cells in the
+    // problem to make sure it doesn't show up there
+    //  THIS IS A RARE CASE OF WHAT COULD HAPPEN
+    for (unsigned int i = 0; i < _cells.size(); ++i) {
+        if (i != _findCache.oldCellIndex) {
+            if (_cells[i]->isPointInside(newPosition, _findCache.hitSurface)) {
+                // found it?
+                cout << "GEOMETRY WARNING: Global search had to be used "
+                     << " at surface ID " << _findCache.hitSurface->getUserId()
+                     << " from cell user ID " << oldCell.getUserId()
+                     << " to find new cell " <<_cells[i]->getUserId()
+                     << endl;
+
+                _updateConnectivity(&oldCell, _cells[i], neighborhood);
+
+                newCellIndex = _cells[i]->getIndex();
+
+                if ( _cells[i]->isDeadCell() )
+                    returnStatus = DEADCELL;
+
+                return;
+            }
+        }
+    }
+
 
     // TODO: when looping through the other cells in the problem, exclude the
     // ones that we already checked in the cell's hood; means more loops but
@@ -214,6 +215,50 @@ void MCGeometry::findNewCell(
     _failGeometry("Ruh-roh, new cell not found!",
                     _findCache.oldCellIndex, position, direction);
 }
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+//     SUBROUTINES USED IN findNewCell MULTIPLE TIMES
+inline void MCGeometry::_updateConnectivity(
+                CellT* oldCell,
+                CellT* newCell,
+                CellT::CellContainer& oldNeighborhood)
+{
+    // if this is the first cell linked to this surface, we decrement 
+    // the unmatched surfaces
+    if (oldNeighborhood.size() == 0)
+        _unMatchedSurfaces--;
+
+    // add new cell to old cell's hood connectivity
+    oldNeighborhood.push_back(newCell);
+
+    CellT::CellContainer& newNeighborhood
+        = newCell->getNeighbors(_findCache.hitSurface);
+
+    // if this is the first cell linked to this surface, we decrement 
+    // the unmatched surfaces
+    if (newNeighborhood.size() == 0)
+        _unMatchedSurfaces--;
+
+    // add old cell to new cell's hood connectivity
+    newNeighborhood.push_back(oldCell);
+
+    //            cout << "Connected ending cell index " << newCellIndex
+    //                 << " to starting cell index " << _findCache.oldCellIndex
+    //                 << endl;
+
+    if (_unMatchedSurfaces == 0)
+        _completedConnectivity();
+
+    #if DBC > 0
+    if (_unMatchedSurfaces < 0)
+    {
+        cout << "Whoa, negative unmatched surfaces!" << endl;
+        _unMatchedSurfaces = 0;
+    }
+    #endif
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
 /*----------------------------------------------------------------------------*/
 void MCGeometry::reflectDirection(const std::vector<double>& newPosition,
                                   const std::vector<double>& oldDirection,
@@ -439,7 +484,9 @@ MCGeometry::UserSurfaceIDType MCGeometry::getUserIdFromSurfaceIndex(
 \*============================================================================*/
 void MCGeometry::_completedConnectivity()
 {
-    cout << "<<CONNECTIVITY IS COMPLETE>>" << endl;
+    // THIS CODE IS ALMOST ALWAYS VALID BUT NOT ALWAYS
+
+//    cout << "<<CONNECTIVITY IS COMPLETE>>" << endl;
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::_failGeometry(const std::string failureMessage,
@@ -478,10 +525,8 @@ void MCGeometry::_failGeometry(const std::string failureMessage,
         cout << "] ";
     }
 
-
     cout << "Was checking position " << position << " and direction "
          << direction << endl;
-
 
     Insist(0, "Geometry failure.");
 }
