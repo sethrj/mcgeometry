@@ -54,8 +54,8 @@ void runProgram(int argc, char* argv[]){
 
     Insist( numCells > 0, "Number of divisions should be positive." );
     Insist( numParticles > 0, "Number of particles should be positive." );
-    Insist( printFlag > -1, "printFlag must be either 0 or 1.");
-    Insist( printFlag < 2, "printFlag must be either 0 or 1.");
+    Insist( printFlag > -1, "printFlag must be either 0, 1 or 2.");
+    Insist( printFlag < 3, "printFlag must be either 0, 1 or 2.");
 
     cout << "\n=====================================================" 
          << "\nComparing combinatorial mesh with deterministic mesh." 
@@ -68,13 +68,20 @@ void runProgram(int argc, char* argv[]){
     CreateMesh(numCells, Geo);
     TIMER_STOP("Creating the combinatorial mesh.");
 
-    TallyVec combPL;
+    TallyVec combPL1;
+    TallyVec combPL2;
 
-    cout << "Combinatorial Geometry." << endl;
+    cout << "Combinatorial Geometry.\nFirst time." << endl;
 
-    TIMER_START("Transport in combinatorial mesh.");
-    SimulateMCComb(numParticles, numCells, Geo, combPL);
-    TIMER_STOP("Transport in combinatorial mesh.");
+    TIMER_START("First transport in combinatorial mesh.");
+    SimulateMCComb(numParticles, numCells, Geo, combPL1);
+    TIMER_STOP("First transport in combinatorial mesh.");
+
+    cout << "\nSecond time." << endl;
+
+    TIMER_START("Second transport in combinatorial mesh.");
+    SimulateMCComb(numParticles, numCells, Geo, combPL2);
+    TIMER_STOP("Second transport in combinatorial mesh.");
 
     TallyVec detPL;
 
@@ -83,10 +90,16 @@ void runProgram(int argc, char* argv[]){
     SimulateMCDet(numParticles, numCells, detPL);
     TIMER_STOP("Transport in deterministic mesh.");
 
-    if( printFlag == 1) printPLTallies(numCells, combPL, detPL);
+    if( printFlag > 0){
+        printPLTallies(numCells, combPL1, detPL);
+        printPLTallies(numCells, combPL2, detPL);
+    }
     
     cout << "Difference between pathlength tallies." << endl;
-    diffTallies(numCells, combPL, detPL);
+    if( printFlag > 1 ){
+        diffTallies(numCells, combPL1, detPL);
+        diffTallies(numCells, combPL2, detPL);
+    }
 
     TIMER_PRINT();
 }
