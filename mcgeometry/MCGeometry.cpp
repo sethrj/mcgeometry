@@ -73,6 +73,27 @@ void MCGeometry::findNewCell(
     // ===== calculate transported position on the boundary of our new cell
     //  (necessary for finding which cell the point belongs to)
     newPosition.resize(3);
+
+    // if the distance to the next surface is zero, we may be stuck at a corner!
+    // move the particle so that instead of 
+    // $$ \vec{x}_\text{new} = \vec{x}_\text{old} + \vec{\Omega} d $$
+    // where $d=0$, use
+    // $$ d = \| x \| 2 \varepsilon_\text{mach} $$
+    // so that the position is perturbed in the particle direction by 
+    // machine epsilon times the particle's order of magnitude
+    //
+    // This is a very minor nudge and should happen only EXTREMELY infrequently
+    // (i.e. pretty much JUST on fabricated problems)
+    if (_findCache.distanceToSurface == 0.0) {
+        _findCache.distanceToSurface
+            = tranSupport::vectorNorm(position)
+                 * 2 * std::numeric_limits<double>::epsilon();
+        cout << "GEOMETRY WARNING: Bumping the particle"
+             << " at surface ID " << _findCache.hitSurface->getUserId()
+             << " from cell user ID " << oldCell.getUserId()
+             << " by |dx| = " << _findCache.distanceToSurface << endl;
+    }
+
     for (int i = 0; i < 3; i++) {
         // transport the particle
         newPosition[i] = position[i] +
