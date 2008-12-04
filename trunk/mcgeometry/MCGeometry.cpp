@@ -170,6 +170,12 @@ void MCGeometry::findNewCell(
 
             if (_unMatchedSurfaces == 0)
                 _completedConnectivity();
+            #if DBC > 0
+            if (_unMatchedSurfaces < 0)
+            { cout << "Whoa, negative unmatched surfaces!" << endl;
+                _unMatchedSurfaces = 0; }
+            #endif
+
 
             if ( (*pNewCell)->isDeadCell() )
                 returnStatus = DEADCELL;
