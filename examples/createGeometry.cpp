@@ -144,6 +144,7 @@ void CreateMesh(int N, MCGeometry& Geo){
 
 }
 
+/*============================================================================*/
 //! \function createTrickyGeometry
 //  \author   Seth R. Johnson
 //  Looks sort of like AMR

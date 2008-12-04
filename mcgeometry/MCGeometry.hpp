@@ -236,7 +236,7 @@ private:
     //  when this reaches zero, connectivity is complete
     //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
     //  and probably will be double-counted
-    unsigned int _unMatchedSurfaces;
+    int _unMatchedSurfaces;
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     // cache for storing intersect information from findDistance
