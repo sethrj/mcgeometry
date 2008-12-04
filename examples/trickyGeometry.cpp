@@ -88,26 +88,22 @@ void transport(MCGeometry& theGeom, unsigned int oldCellIndex,
     while (returnStatus != MCGeometry::DEADCELL)
     {
         cout << "Particle at " << position << " with direction " << direction 
-             << " in cell index " << oldCellIndex << endl;
+             << " in cell user ID "
+             << theGeom.getUserIdFromCellIndex(oldCellIndex) << endl;
+
         theGeom.findDistance(position, direction, oldCellIndex, distance);
         cout << "Distance to next surface: " << distance << endl;
 
         theGeom.findNewCell(position, direction,
                             newPosition, newCellIndex, returnStatus);
 
-        if (oldCellIndex == newCellIndex) {
-            cout << "Particle is stuck! :(" << endl;
-            cout << "New position: " << newPosition 
-                 << "; New cell index: " << newCellIndex << endl;
-            return;
-        }
-
         oldCellIndex = newCellIndex;
         position = newPosition;
 
         if (returnStatus == MCGeometry::DEADCELL) {
             cout << "Particle is deeeeaaaad at " << newPosition
-                 << " in cell index " << newCellIndex << endl;
+                 << " in cell user ID " 
+                 << theGeom.getUserIdFromCellIndex(newCellIndex) << endl;
         } else if (returnStatus != MCGeometry::NORMAL) {
             cout << "Got unexpected return status " << returnStatus << endl;
             return;
@@ -233,18 +229,89 @@ void runAnother() {
 //    geom2.debugPrint();
 }
 /*============================================================================*/
+void trickyGeometrySpheres() {
+    MCGeometry geom3;
+
+    createAnotherTrickyGeometry(geom3);
+    geom3.debugPrint();
+
+    unsigned int oldCellIndex;
+    doubleVec position(3, 0);
+    doubleVec direction(3, 0.0);
+
+//    cout << "**********Streaming into tangent spheres"
+//         << endl;
+//    direction[0] = 1.0;
+//    direction[1] = 0.0;
+//    direction[2] = 0.0;
+//
+//    position[0]  = -1.0;
+//    oldCellIndex = geom3.findCell(position);
+//    transport(geom3, oldCellIndex, position, direction);
+
+    cout << "**********Streaming into right tangent sphere/plane/cylinder"
+         << endl;
+    direction[0] = 0.0;
+    direction[1] = 1.0;
+    direction[2] = 0.0;
+
+    position[0] = 1.0;
+    position[1] = 0.0;
+    position[2] = 0.0;
+    oldCellIndex = geom3.findCell(position);
+    transport(geom3, oldCellIndex, position, direction);
+
+    cout << "**********Streaming into left tangent sphere/plane/cylinder"
+         << endl;
+    direction[0] = 0.0;
+    direction[1] = 1.0;
+    direction[2] = 0.0;
+
+    position[0] = -1.0;
+    position[1] = 0.0;
+    position[2] = 0.0;
+    oldCellIndex = geom3.findCell(position);
+    transport(geom3, oldCellIndex, position, direction);
+
+
+    position[0] = -1.0;
+    position[1] = 1.5;
+    position[2] = 0.0;
+    cout << "Above left sphere: "
+         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+
+    position[0] = -2.5;
+    position[1] = 0.0;
+    position[2] = 0.0;
+    cout << "Leftmost cell: "
+         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+
+    position[0] = 2.5;
+    position[1] = 0.0;
+    position[2] = 0.0;
+    cout << "Rightmost cell: "
+         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+
+    geom3.debugPrint();
+}
+/*============================================================================*/
 int main(int argc, char *argv[]) {
-    MCGeometry geom;
     try {
-        cout << "================== TRICKY GEOMETRY 1 =================="
+//        MCGeometry trickyGeom1;
+//        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
+//             << endl;
+//        createTrickyGeometry(trickyGeom1);
+//        testGeometry(trickyGeom1);
+////        trickyGeom1.debugPrint();
+//        run(trickyGeom1);
+//
+//        cout << "================== TRICKY CORNERS    =================="
+//             << endl;
+//        runAnother();
+
+        cout << "================== TRICKY GEOMETRY (CURVES)=================="
              << endl;
-        createTrickyGeometry(geom);
-        testGeometry(geom);
-//        geom.debugPrint();
-        run(geom);
-        cout << "================== TRICKY CORNERS    =================="
-             << endl;
-        runAnother();
+        trickyGeometrySpheres();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "FAILURE: CAUGHT ERROR" << endl

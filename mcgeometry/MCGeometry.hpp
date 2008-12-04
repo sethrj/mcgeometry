@@ -251,7 +251,11 @@ private:
     } _findCache;
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+    //! after finding two newly connecting cells, update their connections
+    void _updateConnectivity(
+                CellT* oldCell,
+                CellT* newCell,
+                CellT::CellContainer& oldNeighborhood);
     //! internal mechanism to add a cell based on a list of surface/senses
     unsigned int _addCell(          const UserCellIDType&  userCellId,
                                     const CellT::SASVec&   boundingSurfaces,

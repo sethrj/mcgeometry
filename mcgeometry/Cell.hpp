@@ -81,12 +81,14 @@ public:
     //  TODO possibly poor design here?
     //const CellContainer& getNeighbors(const Surface* surface) const {
     CellContainer& getNeighbors(Surface* surface) {
-        // I think surface can't be const because findResult returns a pair
-        // that has a non-const Surface* in it
-        typename HoodMap::iterator findResult = _hood.find(surface);
-        Require(findResult != _hood.end());
-
-        return findResult->second;
+//        // I think surface can't be const because findResult returns a pair
+//        // that has a non-const Surface* in it
+//        typename HoodMap::iterator findResult = _hood.find(surface);
+//        Require(findResult != _hood.end());
+//
+//        return findResult->second;
+        // this may create new surface connections
+        return _hood[surface];
     }
 
     //! Return the internal index (needed for turning "neighbor" to index) 
