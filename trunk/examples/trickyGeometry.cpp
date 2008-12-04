@@ -159,8 +159,9 @@ void runAnother() {
     unsigned int numSides = 3;
 
     CreateMesh(numSides, geom2);
+//    geom2.debugPrint();
 
-    cout << "**********Streaming into many corners from bottom left front"
+    cout << "**********Streaming into 3-corners from bottom left front"
          << endl;
     unsigned int oldCellIndex;
     doubleVec position(3, 0);
@@ -173,7 +174,19 @@ void runAnother() {
     oldCellIndex = geom2.findCell(position);
     transport(geom2, oldCellIndex, position, direction);
 
-    cout << "**********Streaming into many cornders from upper right back"
+    cout << "**********Streaming into 2-corners from upper right back"
+         << endl;
+    position.assign(3, numSides);
+    position[2] = 0.5;
+
+    direction[0] = -tranSupport::constants::SQRTHALF;
+    direction[1] = -tranSupport::constants::SQRTHALF;
+    direction[2] = 0;
+
+    oldCellIndex = numSides * numSides - 1;
+    transport(geom2, oldCellIndex, position, direction);
+
+    cout << "**********Streaming into 3-corners from upper right back"
          << endl;
     position.assign(3, numSides);
 
@@ -181,9 +194,21 @@ void runAnother() {
     direction[1] = -tranSupport::constants::SQRTTHIRD;
     direction[2] = -tranSupport::constants::SQRTTHIRD;
 
-    oldCellIndex = 26;
-    cout << "Quitting because the next one will fail :(" << endl;
-return;
+    oldCellIndex = numSides * numSides * numSides - 1;
+    transport(geom2, oldCellIndex, position, direction);
+
+    cout << "**********Streaming into 3-corners from upper right back perturbed"
+         << endl;
+
+    position.assign(3, numSides);
+    position[0] -= 1e-15;
+    position[1] -= 2e-15;
+
+    direction[0] = -tranSupport::constants::SQRTTHIRD;
+    direction[1] = -tranSupport::constants::SQRTTHIRD;
+    direction[2] = -tranSupport::constants::SQRTTHIRD;
+
+    oldCellIndex = numSides * numSides * numSides - 1;
     transport(geom2, oldCellIndex, position, direction);
 
     // throw particles around
@@ -204,16 +229,21 @@ return;
         geom2.findNewCell( position, direction,
                            newPosition, newCellIndex, returnStatus);
     }
-    geom2.debugPrint();
+
+//    geom2.debugPrint();
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {
     MCGeometry geom;
     try {
+        cout << "================== TRICKY GEOMETRY 1 =================="
+             << endl;
         createTrickyGeometry(geom);
         testGeometry(geom);
 //        geom.debugPrint();
         run(geom);
+        cout << "================== TRICKY CORNERS    =================="
+             << endl;
         runAnother();
     }
     catch (tranSupport::tranError &theErr) {

@@ -144,11 +144,6 @@ void Cell<UserIdType>::intersect(
         it->first->intersect(position, direction, it->second,
                              thisHit, thisDistance); //(return results)
 
-        // if this check fails, then two surfaces apparently have exactly the
-        // same distance from the particle; i.e. the particle ran into a corner?
-        // what happens then?
-//        Check(theResult.second != distance);
-        
 //        if (thisHit) {
 //            cout << "Calculated an intersection (distance " << thisDistance 
 //                 << ") with " << *(it->first) << endl;
@@ -157,12 +152,20 @@ void Cell<UserIdType>::intersect(
 //        }
 
 
-        if (thisHit // if it hits, and if it's a smaller distance
-                && (thisDistance < distance))
+        if (thisHit) // if it hits, and if it's a smaller distance
         {
-            distance     = thisDistance;
-            hitSurface   = it->first;
-            quadricSense = it->second;
+            if (thisDistance < distance)
+            {
+                distance     = thisDistance;
+                hitSurface   = it->first;
+                quadricSense = it->second;
+            }
+//            else if (thisDistance == distance) {
+//                cout << "@@@@@@@ Two surfaces at the same distance!" << endl;
+//                return;
+//                hitSurface   = it->first;
+//                quadricSense = it->second;
+//            }
         }
     }
 
