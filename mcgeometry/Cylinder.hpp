@@ -222,11 +222,13 @@ inline bool CylinderNormal<0>::hasPosSense(
                 const std::vector<double>& position) const
 {
     Require(position.size() == 3);
-    return _hasPosSense(
-            position[1] * position[1] + 
-            position[2] * position[2] 
-            - _radius * _radius
-            );
+
+    double eval = 
+              position[1] * position[1]
+            + position[2] * position[2] 
+            - _radius * _radius;
+
+    return _hasPosSense( eval );
 }
 
 template<>
@@ -234,8 +236,10 @@ inline bool CylinderNormal<1>::hasPosSense(
                 const std::vector<double>& position) const
 {
     Require(position.size() == 3);
+
     return _hasPosSense(
-            position[0] * position[0] + position[2] * position[2] 
+              position[0] * position[0]
+            + position[2] * position[2] 
             - _radius * _radius
             );
 }
@@ -245,8 +249,10 @@ inline bool CylinderNormal<2>::hasPosSense(
                 const std::vector<double>& position) const
 {
     Require(position.size() == 3);
+
     return _hasPosSense(
-            position[0] * position[0] + position[1] * position[1] 
+            position[0] * position[0]
+            + position[1] * position[1] 
             - _radius * _radius
             );
 }
@@ -261,16 +267,29 @@ inline void CylinderNormal<axis>::intersect(
     Insist(0, "Not yet implemented.");
     return _calcQuadraticIntersect(0.0, 0.0, 0.0, posSense, hit, distance);
 }
-/*----------------------------------------------------------------------------*/
-template<unsigned int axis>
-inline void CylinderNormal<axis>::normalAtPoint(
-                const std::vector<double>& position,
-                std::vector<double>& unitNormal) const
+
+template<>
+inline void CylinderNormal<2>::intersect(
+                const std::vector<double>& position, 
+                const std::vector<double>& direction,
+                const bool posSense,
+                bool& hit, double& distance) const
 {
-    // "position" should be on the surface
+    Require(direction.size() == 3);
     Require(position.size() == 3);
 
-    Insist(0, "Not yet implemented.");
+    double A = direction[0] * direction[0]
+             + direction[1] * direction[1];
+
+    double B = direction[0] * position[0]
+             + direction[1] * position[1];
+
+    double C = direction[0] * direction[0]
+             + direction[1] * direction[1]
+             - _radius * _radius;
+
+    return _calcQuadraticIntersect(A, B, C, posSense,
+                                   hit, distance);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>

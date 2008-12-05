@@ -162,7 +162,7 @@ void testAmrGeometry()
 /*============================================================================*/
 void testMeshGeometry() {
     MCGeometry geom2;
-    unsigned int numSides = 3;
+    unsigned int numSides = 4;
 
     CreateMesh(numSides, geom2);
 //    geom2.debugPrint();
@@ -246,19 +246,29 @@ void testSphereGeometry() {
     MCGeometry geom3;
 
     createAnotherTrickyGeometry(geom3);
-    geom3.debugPrint();
+//    geom3.debugPrint();
 
     unsigned int oldCellIndex;
     doubleVec position(3, 0);
     doubleVec direction(3, 0.0);
 
-    cout << "**********Streaming into tangent spheres"
+    cout << "**********Streaming into tangent spheres from left"
          << endl;
     direction[0] = 1.0;
     direction[1] = 0.0;
     direction[2] = 0.0;
 
     position[0]  = -1.0;
+    oldCellIndex = geom3.findCell(position);
+    transport(geom3, oldCellIndex, position, direction);
+
+    cout << "**********Streaming into tangent spheres from right"
+         << endl;
+    direction[0] = -1.0;
+    direction[1] = 0.0;
+    direction[2] = 0.0;
+
+    position[0]  = 1.0;
     oldCellIndex = geom3.findCell(position);
     transport(geom3, oldCellIndex, position, direction);
 
@@ -298,20 +308,6 @@ void testSphereGeometry() {
     oldCellIndex = geom3.findCell(position);
     transport(geom3, oldCellIndex, position, direction);
 
-
-    cout << "**********Streaming global search tricky spot"
-         << endl;
-    position[0] = -4.0942420251667500e-02;
-    position[1] = -8.4021689370274544e-02;
-    position[2] = -1.0882760118693113e-01;
-
-    direction[0] = -0.5795818511396646;
-    direction[1] = -0.5994806788880104;
-    direction[2] =  0.5520034361029738;
-
-    oldCellIndex = 0;
-    transport(geom3, oldCellIndex, position, direction);
-
 //    position[0] = -1.0;
 //    position[1] = 1.5;
 //    position[2] = 0.0;
@@ -344,7 +340,7 @@ void testSphereGeometry() {
     bounds[1] = 2.0; subtract[1] = 1.0;
     bounds[2] = 2.0; subtract[2] = 1.0;
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10000; i++) {
         randDirection(direction);
 
         do {
@@ -352,23 +348,22 @@ void testSphereGeometry() {
             oldCellIndex = geom3.findCell(position);
         } while ( geom3.isDeadCell(oldCellIndex) );
 
-//        if (oldCellIndex == 2) cout << " -- transporting cell 30 -- " << endl;
         geom3.findDistance(position, direction, oldCellIndex, distance);
         geom3.findNewCell( position, direction,
                            newPosition, newCellIndex, returnStatus);
-//        if (oldCellIndex == 2) cout << " -- transported to cell " << newCellIndex << endl;
     }
+//    geom3.debugPrint();
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {
     try {
-//        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
-//             << endl;
-//        testAmrGeometry();
-//
-//        cout << "================== TRICKY CORNERS    =================="
-//             << endl;
-//        testMeshGeometry();
+        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
+             << endl;
+        testAmrGeometry();
+
+        cout << "================== TRICKY CORNERS    =================="
+             << endl;
+        testMeshGeometry();
 
         cout << "================== TRICKY GEOMETRY (CURVES)=================="
              << endl;
