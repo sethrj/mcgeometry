@@ -80,7 +80,7 @@ void MCGeometry::findNewCell(
     // move the particle so that instead of 
     // $$ \vec{x}_\text{new} = \vec{x}_\text{old} + \vec{\Omega} d $$
     // where $d=0$, use
-    // $$ d = \| x \| 2 \varepsilon_\text{mach} $$
+    // $$ d = \| \vec{x} \| 2 \varepsilon_\text{mach} $$
     // so that the position is perturbed in the particle direction by 
     // machine epsilon times the particle's order of magnitude
     //
@@ -90,6 +90,8 @@ void MCGeometry::findNewCell(
     if (_findCache.distanceToSurface == 0.0) {
         _findCache.distanceToSurface = tranSupport::vectorNorm(position)
                                 * 2 * std::numeric_limits<double>::epsilon();
+        _findCache.distanceToSurface = std::max(_findCache.distanceToSurface,
+                                    std::numeric_limits<double>::epsilon());
 
         std::ostringstream message;
         message << "crossing surface ID " << _findCache.hitSurface->getUserId()
@@ -520,7 +522,7 @@ void MCGeometry::_warnGeometry( const std::string& shortMessage,
          << "       DIRECTION:  " << direction << "\n"
          << std::setprecision(6)
          << "       CELL INDEX: " << oldCell->getIndex()
-         << "       (user id "    << oldCell->getUserId() << ") \n"
+         << "       (user ID "    << oldCell->getUserId() << ") \n"
          << "       " << longMessage << "\n"
          << "      ****************************************************"
          << endl;
