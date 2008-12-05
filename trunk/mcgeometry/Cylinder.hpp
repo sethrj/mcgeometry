@@ -92,17 +92,16 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
 {
     Require(position.size() == 3);
     double eval(0);
-    double tmpValue;
+    double diff(0);
+    double tmpValue(0);
 
-    // Perform (X-P)^2
     for( int i = 0; i < 3; ++i ){
-        tmpValue = position[i] - _pointOnAxis[i];
-        eval += tmpValue * tmpValue;
-    }
+        // Perform (X-P)^2
+        diff = position[i] - _pointOnAxis[i];
+        eval += diff*diff;
 
-    // Perform [(X-P).U]^2
-    for( int i = 0; i < 3; ++i ){
-        tmpValue += (position[i] - _pointOnAxis[i])*_axis[i];
+        // Perform [(X-P).U]^2
+        tmpValue += diff*_axis[i];
     }
 
     eval -= tmpValue*tmpValue + _radius*_radius;
