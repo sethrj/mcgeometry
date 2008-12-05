@@ -122,6 +122,9 @@ public:
     //! Find a cell given an arbitrary point in the problem.
     unsigned int findCell(const std::vector<double>& position) const;
 
+    //! See whether a given cell is a dead cell.
+    bool isDeadCell(const unsigned int cellIndex) const;
+
     //! Debug printing; will be incorporated into file IO etc. later
     void debugPrint() const;
 
@@ -263,6 +266,12 @@ private:
 
     //! do optimization whenever the last surface is linked
     void _completedConnectivity();
+
+    void _warnGeometry(             const std::string& shortMessage,
+                                    const std::vector<double>& position,
+                                    const std::vector<double>& direction,
+                                    const CellT* oldCell,
+                                    const std::string& longMessage) const;
 
     //! print geometry failure message
     void _failGeometry(            const std::string failureMessage,

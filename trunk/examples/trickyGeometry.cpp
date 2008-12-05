@@ -31,6 +31,7 @@ mtRand::MTRand randGen;
 inline double randDouble(){
     return randGen();
 }
+
 //! Pick a random direction on the unit sphere
 inline void randDirection(std::vector<double>& v){
     double phi = tranSupport::constants::TWOPI*randDouble();
@@ -41,39 +42,19 @@ inline void randDirection(std::vector<double>& v){
     v[1] = mu*std::cos(phi);
     v[2] = mu*std::sin(phi);
 }
+
 //! Pick a random position in our geometry
-inline void randPosition( std::vector<double>& position ){
+inline void randPosition(   const std::vector<double> bounds,
+                            const std::vector<double> subtract,
+                            std::vector<double>& position )
+{
+    Require(bounds.size() == 3);
+    Require(subtract.size() == 3);
+    Require(position.size() == 3);
     // choose x in (-2,2)   y in (0,4)  z in (-2, 2)
     //
-    std::vector<double>::iterator vecIter;
-    for(vecIter = position.begin(); vecIter != position.end(); ++vecIter){
-        *vecIter = 4*randDouble();
-    }
-    position[0] -= 2.0;
-    position[2] -= 2.0;
-}
-
-/*============================================================================*/
-//! throw around a bunch of particles to hopefully make sure there are no dead
-//  spots, and to build the connectivity 
-void testGeometry(MCGeometry& theGeom)
-{
-    doubleVec position(3, 0.0);
-    doubleVec direction(3, 0.0);
-
-    doubleVec    newPosition;
-    unsigned int oldCellIndex;
-    unsigned int newCellIndex;
-    double       distance;
-    MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
-    for (int i = 0; i < 1000; i++) {
-        randDirection(direction);
-        randPosition(position);
-        oldCellIndex = theGeom.findCell(position);
-
-        theGeom.findDistance(position, direction, oldCellIndex, distance);
-        theGeom.findNewCell(position, direction,
-                            newPosition, newCellIndex, returnStatus);
+    for(int i = 0; i < 3; i++){
+        position[i] = bounds[i] * randDouble() - subtract[i];
     }
 }
 /*============================================================================*/
@@ -111,8 +92,11 @@ void transport(MCGeometry& theGeom, unsigned int oldCellIndex,
     }
 }
 /*============================================================================*/
-void run(MCGeometry& theGeom)
+void testAmrGeometry()
 {
+    MCGeometry theGeom;
+    createTrickyGeometry(theGeom);
+
     unsigned int oldCellIndex;
     doubleVec position(3, 0.0);
     doubleVec direction(3, 0.0);
@@ -148,9 +132,35 @@ void run(MCGeometry& theGeom)
     oldCellIndex = theGeom.getCellIndexFromUserId(7);
 
     transport(theGeom, oldCellIndex, position, direction);
+
+    // throw around a bunch of particles to hopefully make sure there are
+    // no dead spots, and to build the connectivity 
+    cout << "********** throwing particles around"
+         << endl;
+    doubleVec bounds(3, 4.0);
+    doubleVec subtract;
+    subtract.push_back(2.0);
+    subtract.push_back(0.0);
+    subtract.push_back(2.0);
+
+    doubleVec    newPosition;
+    unsigned int newCellIndex;
+    double       distance;
+    MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
+
+    for (int i = 0; i < 10000; i++) {
+        randDirection(direction);
+        randPosition(bounds, subtract, position);
+        oldCellIndex = theGeom.findCell(position);
+
+        theGeom.findDistance(position, direction, oldCellIndex, distance);
+        theGeom.findNewCell(position, direction,
+                            newPosition, newCellIndex, returnStatus);
+    }
+//    theGeom.debugPrint();
 }
 /*============================================================================*/
-void runAnother() {
+void testMeshGeometry() {
     MCGeometry geom2;
     unsigned int numSides = 3;
 
@@ -208,16 +218,19 @@ void runAnother() {
     transport(geom2, oldCellIndex, position, direction);
 
     // throw particles around
-    doubleVec    newPosition;
+    cout << "********** throwing particles around"
+         << endl;
+    doubleVec    newPosition(3, 0.0);
     unsigned int newCellIndex;
     double       distance;
     MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
+
+    doubleVec bounds(3, numSides);
+    doubleVec subtract(3, 0.0);
+
     for (int i = 0; i < 10000; i++) {
         randDirection(direction);
-
-        position[0] = randDouble() * numSides;
-        position[1] = randDouble() * numSides;
-        position[2] = randDouble() * numSides;
+        randPosition(bounds, subtract, position);
 
         oldCellIndex = geom2.findCell(position);
 
@@ -229,7 +242,7 @@ void runAnother() {
 //    geom2.debugPrint();
 }
 /*============================================================================*/
-void trickyGeometrySpheres() {
+void testSphereGeometry() {
     MCGeometry geom3;
 
     createAnotherTrickyGeometry(geom3);
@@ -239,15 +252,15 @@ void trickyGeometrySpheres() {
     doubleVec position(3, 0);
     doubleVec direction(3, 0.0);
 
-//    cout << "**********Streaming into tangent spheres"
-//         << endl;
-//    direction[0] = 1.0;
-//    direction[1] = 0.0;
-//    direction[2] = 0.0;
-//
-//    position[0]  = -1.0;
-//    oldCellIndex = geom3.findCell(position);
-//    transport(geom3, oldCellIndex, position, direction);
+    cout << "**********Streaming into tangent spheres"
+         << endl;
+    direction[0] = 1.0;
+    direction[1] = 0.0;
+    direction[2] = 0.0;
+
+    position[0]  = -1.0;
+    oldCellIndex = geom3.findCell(position);
+    transport(geom3, oldCellIndex, position, direction);
 
     cout << "**********Streaming into right tangent sphere/plane/cylinder"
          << endl;
@@ -273,45 +286,93 @@ void trickyGeometrySpheres() {
     oldCellIndex = geom3.findCell(position);
     transport(geom3, oldCellIndex, position, direction);
 
+    cout << "**********Streaming in middle region"
+         << endl;
+    direction[0] = 0.0;
+    direction[1] = 1.0;
+    direction[2] = 0.0;
 
-    position[0] = -1.0;
-    position[1] = 1.5;
+    position[0] = 0.0;
+    position[1] = 0.01;
     position[2] = 0.0;
-    cout << "Above left sphere: "
-         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+    oldCellIndex = geom3.findCell(position);
+    transport(geom3, oldCellIndex, position, direction);
 
-    position[0] = -2.5;
-    position[1] = 0.0;
-    position[2] = 0.0;
-    cout << "Leftmost cell: "
-         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
 
-    position[0] = 2.5;
-    position[1] = 0.0;
-    position[2] = 0.0;
-    cout << "Rightmost cell: "
-         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+    cout << "**********Streaming global search tricky spot"
+         << endl;
+    position[0] = -4.0942420251667500e-02;
+    position[1] = -8.4021689370274544e-02;
+    position[2] = -1.0882760118693113e-01;
 
-    geom3.debugPrint();
+    direction[0] = -0.5795818511396646;
+    direction[1] = -0.5994806788880104;
+    direction[2] =  0.5520034361029738;
+
+    oldCellIndex = 0;
+    transport(geom3, oldCellIndex, position, direction);
+
+//    position[0] = -1.0;
+//    position[1] = 1.5;
+//    position[2] = 0.0;
+//    cout << "Above left sphere: "
+//         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+//
+//    position[0] = -2.5;
+//    position[1] = 0.0;
+//    position[2] = 0.0;
+//    cout << "Leftmost cell: "
+//         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+//
+//    position[0] = 2.5;
+//    position[1] = 0.0;
+//    position[2] = 0.0;
+//    cout << "Rightmost cell: "
+//         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
+
+    // throw particles around
+    cout << "********** throwing particles around"
+         << endl;
+    doubleVec    newPosition(3, 0.0);
+    unsigned int newCellIndex;
+    double       distance;
+    MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
+
+    doubleVec bounds(3, 0.0);
+    doubleVec subtract(3, 0.0);
+    bounds[0] = 4.0; subtract[0] = 2.0;
+    bounds[1] = 2.0; subtract[1] = 1.0;
+    bounds[2] = 2.0; subtract[2] = 1.0;
+
+    for (int i = 0; i < 100; i++) {
+        randDirection(direction);
+
+        do {
+            randPosition(bounds, subtract, position);
+            oldCellIndex = geom3.findCell(position);
+        } while ( geom3.isDeadCell(oldCellIndex) );
+
+//        if (oldCellIndex == 2) cout << " -- transporting cell 30 -- " << endl;
+        geom3.findDistance(position, direction, oldCellIndex, distance);
+        geom3.findNewCell( position, direction,
+                           newPosition, newCellIndex, returnStatus);
+//        if (oldCellIndex == 2) cout << " -- transported to cell " << newCellIndex << endl;
+    }
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {
     try {
-//        MCGeometry trickyGeom1;
 //        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
 //             << endl;
-//        createTrickyGeometry(trickyGeom1);
-//        testGeometry(trickyGeom1);
-////        trickyGeom1.debugPrint();
-//        run(trickyGeom1);
+//        testAmrGeometry();
 //
 //        cout << "================== TRICKY CORNERS    =================="
 //             << endl;
-//        runAnother();
+//        testMeshGeometry();
 
         cout << "================== TRICKY GEOMETRY (CURVES)=================="
              << endl;
-        trickyGeometrySpheres();
+        testSphereGeometry();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "FAILURE: CAUGHT ERROR" << endl

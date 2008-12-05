@@ -15,6 +15,7 @@
 #include "Surface.hpp"
 #include "transupport/dbc.hpp"
 
+#include "transupport/VectorPrint.hpp"
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -88,6 +89,8 @@ bool Cell<UserIdType>::isPointInside(const std::vector<double>& position,
     }
     else
     {
+//        cout << "Checking for whether " << position << " is inside cell UID"
+//             << _userId << endl;
         // loop over all surfaces
         for (SASVec::const_iterator it  = _boundingSurfaces.begin();
                                     it != _boundingSurfaces.end(); ++it)
@@ -99,12 +102,26 @@ bool Cell<UserIdType>::isPointInside(const std::vector<double>& position,
             if (it->first != surfaceToSkip)
             {
                if ( it->first->hasPosSense(position) != it->second ) {
+//                   cout << "Looks like cell UID " << _userId
+//                        << " has the WRONG sense wrt "
+//                        << "surface UID " << it->first->getUserId()
+//                        << endl;
                    // if the surface reports that the sense of the point is 
                    // NOT the same sense as we know this cell is defined, then
                    // it is not inside.
                    return false;
                }
+//               else {
+//                   cout << "Looks like cell UID " << _userId
+//                        << " has the correct sense wrt "
+//                        << "surface UID " << it->first->getUserId()
+//                        << endl;
+//               }
             }
+//            else {
+//                cout << "Skipping surface " << surfaceToSkip->getUserId()
+//                     << endl;
+//            }
         }
     }
     // we only get to this point if the point has the correct sense wrt every
