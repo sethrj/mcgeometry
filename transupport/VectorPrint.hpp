@@ -25,17 +25,17 @@ inline std::ostream& operator<<( std::ostream& os,
 {
    std::vector<double>::const_iterator it = vec.begin();
    int i = 0;
-   os << "<";
+   os << "< ";
    while (it != vec.end()) {
       if (it != vec.begin()) {
-         os << ",";
+         os << " , ";
       }
       os << *it;
       //os << std::setw(4) << i << std::setw(8) << *it << std::endl;
       it++;
       i++;
    }
-   os << ">";
+   os << " >";
    return os;
 }
 

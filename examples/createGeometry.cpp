@@ -56,9 +56,9 @@ void CreateMesh(int N, MCGeometry& Geo){
     mcGeometry::PlaneZ maxZ(N);
     Geo.addSurface(3*(N+1), maxZ);
 
-    cout << "Global bounding box defined by following surfaces:\n"
-         << minX << "\n"<< minY << "\n"<< minZ << "\n"
-         << maxX << "\n"<< maxY << "\n"<< maxZ << endl;
+//    cout << "Global bounding box defined by following surfaces:\n"
+//         << minX << "\n"<< minY << "\n"<< minZ << "\n"
+//         << maxX << "\n"<< maxY << "\n"<< maxZ << endl;
 
     // yn and zn are the first index of each surface along one of the axes
     unsigned int yn = N+1;
@@ -235,6 +235,7 @@ void createAnotherTrickyGeometry(mcGeometry::MCGeometry& geo)
     position[0] = 1.0;
     geo.addSurface(2, Sphere(position, 1.0));
 
+    position[0] = 0.0;
     geo.addSurface(3, Cylinder(position, xNorm, 1.0));
 
 

@@ -192,11 +192,45 @@ void runTestB() {
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == true);
 }
 /*============================================================================*/
+// test some positive sense stuff
+void runTestC() {
+    /* * * create cylinder * * */
+    double radius = 1.0;
+    doubleVec center(3,0.0);
+    doubleVec axis(3,0.0);
+
+    axis[0] = 1.0;    // Cylinder parallel to x-axis
+
+    Cylinder theCylinder(center, axis, radius);
+
+    /* * * create "particle" * * */
+    doubleVec particleLoc(3,0.0);
+
+    particleLoc[0] = 0.0;
+    particleLoc[1] = -0.7;
+    particleLoc[2] = 0.5;
+
+    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
+
+    particleLoc[0] = -0.726551;
+    particleLoc[1] = -0.79317;
+    particleLoc[2] = 0.544158;
+
+    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
+    
+    particleLoc[0] = 0.;
+    particleLoc[1] = 0.79317;
+    particleLoc[2] = 0.544158;
+
+    TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
+}
+/*============================================================================*/
 int main(int argc, char *argv[]) {
     TESTER_INIT("Cylinder");
     try {
         runTestA();
         runTestB();
+        runTestC();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl

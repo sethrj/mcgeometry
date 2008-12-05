@@ -19,7 +19,9 @@
 #include "Surface.hpp"
 #include "Cell.hpp"
 
+#include <sstream>
 #include <iostream>
+#include <iomanip>
 using std::cout;
 using std::endl;
 
@@ -86,13 +88,14 @@ void MCGeometry::findNewCell(
     // (i.e. pretty much JUST on fabricated problems)
     //  THIS IS A RARE CASE OF WHAT COULD HAPPEN
     if (_findCache.distanceToSurface == 0.0) {
-        _findCache.distanceToSurface
-            = tranSupport::vectorNorm(position)
-                 * 2 * std::numeric_limits<double>::epsilon();
-        cout << "GEOMETRY WARNING: Bumping the particle"
-             << " at surface ID " << _findCache.hitSurface->getUserId()
-             << " from cell user ID " << oldCell.getUserId()
-             << " by |dx| = " << _findCache.distanceToSurface << endl;
+        _findCache.distanceToSurface = tranSupport::vectorNorm(position)
+                                * 2 * std::numeric_limits<double>::epsilon();
+
+        std::ostringstream message;
+        message << "crossing surface ID " << _findCache.hitSurface->getUserId()
+                << " and adding |dx| = " << _findCache.distanceToSurface;
+        _warnGeometry("Bumping the particle", position, direction, &oldCell,
+                      message.str());
     }
 
     for (int i = 0; i < 3; i++) {
@@ -185,13 +188,16 @@ void MCGeometry::findNewCell(
     for (unsigned int i = 0; i < _cells.size(); ++i) {
         if (i != _findCache.oldCellIndex) {
             if (_cells[i]->isPointInside(newPosition, _findCache.hitSurface)) {
-                // found it?
-                cout << "GEOMETRY WARNING: Global search had to be used "
-                     << " at surface ID " << _findCache.hitSurface->getUserId()
-                     << " from cell user ID " << oldCell.getUserId()
-                     << " to find new cell " <<_cells[i]->getUserId()
-                     << endl;
+                
+                std::ostringstream message;
+                message << "crossing surface ID "
+                        << _findCache.hitSurface->getUserId()
+                        << " into new cell index " << _cells[i]->getIndex()
+                        << " (user ID " << _cells[i]->getUserId() << ")";
 
+                _warnGeometry("Used global search", position, direction, 
+                                &oldCell, message.str());
+         
                 _updateConnectivity(&oldCell, _cells[i], neighborhood);
 
                 newCellIndex = _cells[i]->getIndex();
@@ -315,6 +321,13 @@ unsigned int MCGeometry::findCell(
     _failGeometry("Could not find cell!", 0, position, std::vector<double>());
     return 0;
 }
+/*----------------------------------------------------------------------------*/
+bool MCGeometry::isDeadCell(const unsigned int cellIndex) const
+{
+    Require(cellIndex < getNumCells() );
+    return ( _cells[cellIndex]->isDeadCell() );
+}
+
 
 /*============================================================================*\
  * subroutines that the user calls to create the geometry
@@ -488,6 +501,33 @@ void MCGeometry::_completedConnectivity()
 
 //    cout << "<<CONNECTIVITY IS COMPLETE>>" << endl;
 }
+/*----------------------------------------------------------------------------*/
+void MCGeometry::_warnGeometry( const std::string& shortMessage,
+                                const std::vector<double>& position,
+                                const std::vector<double>& direction,
+                                const CellT* oldCell,
+                                const std::string& longMessage) const
+{
+    std::ios_base::fmtflags ff;
+    ff = cout.flags();
+    cout << "      ****************************************************\n"
+         << "        GEOMETRY WARNING: " << shortMessage << "\n"
+         << "      ****************************************************\n"
+         << std::setprecision(16)
+         << std::scientific
+         << "       POSITION:   " << position   << "\n"
+         << std::fixed
+         << "       DIRECTION:  " << direction << "\n"
+         << std::setprecision(6)
+         << "       CELL INDEX: " << oldCell->getIndex()
+         << "       (user id "    << oldCell->getUserId() << ") \n"
+         << "       " << longMessage << "\n"
+         << "      ****************************************************"
+         << endl;
+
+    cout.flags(ff);
+}
+                               
 /*----------------------------------------------------------------------------*/
 void MCGeometry::_failGeometry(const std::string failureMessage,
                                const unsigned int currentCellIndex,
