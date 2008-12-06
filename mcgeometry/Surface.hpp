@@ -53,10 +53,13 @@ public:
 //        SK_CYLINDER    = 3
 //    }
 
-    //! Determine distance to intersection with the surface
-    // See if going from a position in a direction with a surface sense 
-    // intersects the surface; pass back whether it hits and what the distance
-    // is
+    /*!
+     * \brief Determine distance to intersection with the surface.  
+     *
+     * See if going from a position in a direction with a surface sense
+     * intersects the surface; pass back whether it hits and what the distance
+     * is.
+     */
     virtual void intersect(const std::vector<double>& position, 
                            const std::vector<double>& direction,
                            const bool PosSense,
@@ -64,23 +67,25 @@ public:
                            double& distance) const = 0;
 
     //! Calculate whether a point has a positive sense to this surface without
-    //  doing all the distance calculations
+    //!  doing all the distance calculations
     virtual bool hasPosSense(const std::vector<double>& position) const = 0;
 
     //! \brief Calculate the surface normal at a point, necessary for reflection
-    //  The value returned is the surface normal with a direction in the
-    //  "positive" sense of the surface.
+    //!
+    //!  The value returned is the surface normal with a direction in the
+    //!  "positive" sense of the surface.
     virtual void normalAtPoint( const std::vector<double>& position,
                                 std::vector<double>& unitNormal) const = 0;
                 
-    //! create a "new" copy of ourself
+    //! Create a "new" copy of ourself, so that a user-created surface can be
+    //! retained by MCGeometry.
     virtual Surface* clone(const UserSurfaceIdType& newId) const = 0;
 
     // //! return some identity about ourselves for volume calculation etc.
     // virtual SurfaceKind getKind() const = 0;
 
 
-    //! return the user ID associated with this surface and stored internally
+    //! Return the user ID associated with this surface.
     const UserSurfaceIdType& getUserId() const {
         return _userId;
     }
@@ -101,34 +106,40 @@ public:
     }
 
 protected:
+    //! Create a surface without any extra information
     Surface() : _userId(), _flags(NONE)
     { /* * */ }
-    //{ /* * */ cout << "Empty constructor" << endl; }
 
+    //! Copy an old surface, but with a user ID
     Surface(const Surface& oldSurface, const UserSurfaceIdType& userId)
         : _userId(userId), _flags(oldSurface._flags)
     { /* * */ }
-    //{ cout << "UserId copy constructor; ID " << _userId << " flags " << _flags << endl; }
 
+    //! Copy an old surface, and use th eold surface user ID.
     Surface(const Surface& oldSurface)
         : _userId(oldSurface._userId), _flags(oldSurface._flags)
     { /* * */ }
-    //{ cout << "Copy constructor; { old ID " << _userId << "} flags " << _flags << endl; }
 
+    //! Determine if an evaluated point is considered to have a positive sense
+    //! or not
     bool _hasPosSense(const double eval) const;
 
+    //! Calculate the intersection of a surface with calculated quadratic
+    //! values.
     void _calcQuadraticIntersect(
                             const double A, const double B, const double C,
                             const bool posSense,
                             bool& particleHitsSurface,
                             double& distanceToIntercept ) const;
 
-    //! output to a stream
+    //! Output surface information to a stream.
     virtual std::ostream& _output( std::ostream& os ) const = 0;
 
 private:
-    //! hold the user's identification of this surface
+    //! Store the user's identification of this surface.
     UserSurfaceIdType _userId;
+    //! Store extra information about the surface (e.g. whether it is
+    //! reflecting)
     SurfaceFlags      _flags;
 };
 /*----------------------------------------------------------------------------*/
