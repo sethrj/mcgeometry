@@ -36,43 +36,113 @@ University of Michigan, Ann Arbor
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introduction and Background}
-\subsection{La la la}
+\section{Introduction}
 \begin{frame}
-  \frametitle{Intro}
+  \frametitle{Introduction}
   \begin{itemize}
   \item First
   \item Second
   \item Third
 \end{itemize}
 \end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Goals}
-\begin{frame}{Motivation}
-\begin{columns}[c] % the "c" option specifies center vertical alignment
-\column{.5\textwidth} % column designated by a command
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Goals}
 \begin{itemize}
-  \item Wish to better represent range of opacities
-  \item Increasing number of groups will not increase ``opacity resolution'' at
-	 transition lines
-  \item Opacity Distribution Function (ODF) method allows each group to have
-	 multiple opacities
-  \item Implement ODFs in Milagro
-  \item Improve ODF method with better frequency-dependence for improved physics
+  \item Fully-functional combinatorial geometry
+  \item Zero lost particles, no soft equivalence
+  \item Minimize user burden: no manual connectivity
 \end{itemize}
-
-\column{.5\textwidth}
-  \includegraphics[width=\textwidth]{umlogo}
-\end{columns}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Method}
+\begin{enumerate}
+  \item Find crossed surface
+  \item Check list of known cells across that surface (``neighborhood'');
+    if particle is inside one, we're done
+  \item Check list of all cells on the other side of the surface; if the
+    particle is inside one, add new cell to old cell's neighborhood, and
+    vice versa
+\end{enumerate}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Object structure}
+\begin{itemize}
+  \item \texttt{Plane}, \texttt{Sphere},
+        \texttt{Cylinder}, etc. inherit from abstract \texttt{Surface} class
+    \begin{itemize}
+      \item \texttt{hasPosSense}
+        : Calculate whether a point has a positive sense to this
+        surface without doing any distance calculations
+      \item \texttt{intersect}
+        : Calculate distance to intersection
+      \item \texttt{normalAtPoint}
+        : Calculate unit normal at a position on the surface
+    \end{itemize}
+  \item \texttt{Cell} : contains a vector of bounding surfaces and senses, as
+    well as neighborhood connectivity
+    \begin{itemize}
+      \item \texttt{isPointInside}
+        : Find if a point is inside our cell, optionally exclude checking one
+        surface
+      \item \texttt{intersect}
+        : Calculate distance to intersection and hit surface
+    \end{itemize}
+  \item \texttt{MCGeometry} : coordinate cells and surfaces and user
+    interactions
+    \begin{itemize}
+      \item \texttt{findDistance}
+        : Calculate distance to next surface
+      \item \texttt{findNewCell}
+        : Find the new cell index and position
+    \end{itemize}
+\end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Key data structures}
+\begin{itemize}
+  \item \texttt{MCGeometry}
+    \begin{itemize}
+      \item Vector of \texttt{Cell*}
+      \item Vector of \texttt{Surface*}
+      \item Map of \texttt{std::pair<Surface*, bool>} to 
+        vector of \texttt{Cell*} : list of all cells that might possibly be on
+        the other side of crossing a surface
+    \end{itemize}
+  \item \texttt{Cell}
+    \begin{itemize}
+      \item Vector of \texttt{std::pair<Surface*, bool>} (bounding surfaces)
+      \item Map of \texttt{Surface*} to list of \texttt{Cell*} : 
+        neighborhood of cells connected through a surface; use
+        \texttt{std::list} because we will add to it constantly
+    \end{itemize}
+\end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Implementation}
+\begin{itemize}
+  \item Object-oriented design with C++
+  \item Robustness through ``Design By Contract''
+    \begin{itemize}
+      \item Check \emph{every} assumption with an assertion
+      \item Put sanity checks wherever possible
+      \item Disable all debug code with compiler flag for production
+    \end{itemize}
+  \item Verification through unit tests
+  \item \emph{Keep speed in mind throughout the programming process}
+\end{itemize}
+\end{frame}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Complex Geometry}
+\subsection{Capability: Complex Geometry}
+
 \begin{frame}{Multiply connected geometry}
 \begin{columns}[c]
 \column{0.5\textwidth}
@@ -86,12 +156,14 @@ University of Michigan, Ann Arbor
 \end{columns}
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Complex Geometry Description}
   \begin{center}
     \includegraphics[width=0.9\textwidth, keepaspectratio]{test_geom_1}
   \end{center}
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[fragile]
 \frametitle{Complex Geometry Output}
 \fvset{frame=single,%
@@ -133,48 +205,43 @@ NEIGHBORHOOD CONNECTIVITY:
 \end{frame}  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Mesh Geometry}
+\subsection{Robustness: Tricky geometries}
+\begin{frame}{Tricky geometries}
+\begin{columns}[c]
+\column{0.5\textwidth}
+\begin{itemize}
+  \item Can we handle geometries with crazy intersections without losing
+    particles?
+  \item Spheres tangent at a point, spheres tangent to cylinder and plane along
+    circles
+  \item Also: transporting through corners
+\end{itemize}
+
+\column{0.5\textwidth}
+    \includegraphics[width=\textwidth, keepaspectratio]{tricky_geometry}
+\end{columns}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Speed: Mesh Geometry}
 \begin{frame}
 \frametitle{Mesh Geometry}
 \begin{columns}[c]
 \column{0.5\textwidth}
-\begin{itemize}
-    \item Mesh has $N\times N \times N$ cells
-\end{itemize}
-
+  \begin{itemize}
+      \item Mesh has $N\times N \times N$ cells
+  \end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \column{0.5\textwidth}
-    \includegraphics[width=\textwidth, keepaspectratio]{Mesh}
+  \only<1>{\includegraphics[width=\textwidth, keepaspectratio]{Mesh}}
+  \only<2>{\includegraphics[width=\textwidth, keepaspectratio]{ForwardSweep}}
+  \only<3>{\includegraphics[width=\textwidth, keepaspectratio]{BackwardSweep}}
 \end{columns}
 \end{frame}
-
-\begin{frame}
-\begin{columns}[c]
-\column{0.5\textwidth}
-\begin{itemize}
-    \item Mesh has $N\times N \times N$ cells
-\end{itemize}
-
-\column{0.5\textwidth}
-    \includegraphics[width=\textwidth, keepaspectratio]{ForwardSweep}
-\end{columns}
-\end{frame}
-
-\begin{frame}
-\begin{columns}[c]
-\column{0.5\textwidth}
-\begin{itemize}
-    \item Mesh has $N\times N \times N$ cells
-\end{itemize}
-
-\column{0.5\textwidth}
-    \includegraphics[width=\textwidth, keepaspectratio]{BackwardSweep}
-\end{columns}
-\end{frame}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
     \includegraphics[width=\textwidth, keepaspectratio]{MeshTiming}
 \end{frame}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \begin{columns}[c]
 \column{0.5\textwidth}
@@ -188,6 +255,8 @@ NEIGHBORHOOD CONNECTIVITY:
     \includegraphics[width=\textwidth, keepaspectratio]{MeshCompGraphic}
 \end{columns}
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
     \includegraphics[width=\textwidth, keepaspectratio]{MeshComparison}
 \end{frame}
@@ -197,16 +266,21 @@ NEIGHBORHOOD CONNECTIVITY:
 \begin{frame}
   \frametitle{Conclusions}
   \begin{itemize}
-	 \item Our geometry works (assuming our test codes are complete)
-     \item It isn't terribly difficult to implement
-         \begin{itemize}
-             \item We implemented the geometry code in half a semester
-             \item But you don't have to!   http://code.google.com/p/mcgeometry
-         \end{itemize}
-     \item Caching connectivity improves runtime
+	 \item Our geometry works
+   \item Caching connectivity drastically improves runtime
+   
+     % Jeremy, you can't say this! You barely touched most of the real code. :P
+     % It was tricky to think of the right way to do it, and get it working,
+     % and get it working efficiently.
+%     \item It isn't terribly difficult to implement
+%         \begin{itemize}
+%             \item We implemented the geometry code in half a semester
+%             \item But you don't have to!   http://code.google.com/p/mcgeometry
+%         \end{itemize}
+     \item Available at http://code.google.com/p/mcgeometry
      \item Better than doing the last homework assignment
          \begin{itemize}
-             \item Takes more time, but …
+             \item Takes more time, but\dots
              \item Is more useful in the long run
          \end{itemize}
 	 \item We deserve an A+ (of course!)
@@ -216,8 +290,9 @@ NEIGHBORHOOD CONNECTIVITY:
 \begin{frame}
   \frametitle{Future work}
   \begin{itemize}
-	 \item Write connections to a file
-	 \item Parallelism issues
+	 \item Write ``restart file'' for geometry (including connectivity)
+   \item Use count of unmatched surfaces to obviate extra ``is point inside''
+     checking of completed, simply connected geometries
    \item Further optimization tricks
   \end{itemize}
 \end{frame}

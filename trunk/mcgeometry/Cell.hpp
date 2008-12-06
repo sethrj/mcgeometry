@@ -52,7 +52,7 @@ public:
 
     //! A container of pointers to Cells for neighborhood connectivity
 //    typedef std::vector< Cell<UserIdType> * >  CellContainer;
-    typedef std::list< Cell<UserIdType> * >  CellContainer;
+    typedef std::list< Cell<UserIdType> * >    CellContainer;
     /*******************************/
     //! Static function to make flag generation easier.
     static CellFlags generateFlags(

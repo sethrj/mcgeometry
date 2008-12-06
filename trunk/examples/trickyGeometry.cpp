@@ -166,19 +166,22 @@ void testMeshGeometry() {
 
     CreateMesh(numSides, geom2);
 //    geom2.debugPrint();
-
-    cout << "**********Streaming into 3-corners from bottom left front"
-         << endl;
     unsigned int oldCellIndex;
     doubleVec position(3, 0);
     doubleVec direction(3, 0.0);
 
-    direction[0] = tranSupport::constants::SQRTTHIRD;
-    direction[1] = tranSupport::constants::SQRTTHIRD;
-    direction[2] = tranSupport::constants::SQRTTHIRD;
+    cout << "**********Streaming into 2-corners from bottom left front"
+         << endl;
+    position.assign(3, 0.0);
+    position[2] = 0.5;
 
-    oldCellIndex = geom2.findCell(position);
+    direction[0] = tranSupport::constants::SQRTHALF;
+    direction[1] = tranSupport::constants::SQRTHALF;
+    direction[2] = 0;
+
+    oldCellIndex = 0;
     transport(geom2, oldCellIndex, position, direction);
+
 
     cout << "**********Streaming into 2-corners from upper right back"
          << endl;
@@ -192,6 +195,30 @@ void testMeshGeometry() {
     oldCellIndex = numSides * numSides - 1;
     transport(geom2, oldCellIndex, position, direction);
 
+    cout << "**********JESSE TRANSPORT 5 to 2"
+         << endl;
+    position.assign(3, numSides);
+    position[0] = 1.0;
+    position[1] = 2.0;
+    position[2] = 0.5;
+
+    direction[0] = tranSupport::constants::SQRTHALF;
+    direction[1] = -tranSupport::constants::SQRTHALF;
+    direction[2] = 0;
+
+    oldCellIndex = 5;
+    transport(geom2, oldCellIndex, position, direction);
+
+    cout << "**********Streaming into 3-corners from bottom left front"
+         << endl;
+
+    position.assign(3, 0.0);
+    direction[0] = tranSupport::constants::SQRTTHIRD;
+    direction[1] = tranSupport::constants::SQRTTHIRD;
+    direction[2] = tranSupport::constants::SQRTTHIRD;
+
+    oldCellIndex = geom2.findCell(position);
+    transport(geom2, oldCellIndex, position, direction);
     cout << "**********Streaming into 3-corners from upper right back"
          << endl;
     position.assign(3, numSides);
@@ -357,17 +384,17 @@ void testSphereGeometry() {
 /*============================================================================*/
 int main(int argc, char *argv[]) {
     try {
-        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
-             << endl;
-        testAmrGeometry();
+//        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
+//             << endl;
+//        testAmrGeometry();
 
         cout << "================== TRICKY CORNERS    =================="
              << endl;
         testMeshGeometry();
 
-        cout << "================== TRICKY GEOMETRY (CURVES)=================="
-             << endl;
-        testSphereGeometry();
+//        cout << "================== TRICKY GEOMETRY (CURVES)=================="
+//             << endl;
+//        testSphereGeometry();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "FAILURE: CAUGHT ERROR" << endl
