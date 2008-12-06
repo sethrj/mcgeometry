@@ -26,6 +26,7 @@ namespace mcGeometry {
  */
 class Plane : public Surface {
 public:
+    //! User-called constructor.
     Plane( const std::vector<double>& normal,
            const std::vector<double>& coord) 
                                     : _normal(normal), _coordinate(coord)
@@ -37,12 +38,14 @@ public:
         Require(softEquiv(tranSupport::vectorNorm(_normal), 1.0));
     }
 
+    //! Copy the surface with a new user ID.
     Plane(const Plane& oldPlane, const UserSurfaceIdType& newId)
         : Surface(oldPlane, newId),
           _normal(oldPlane._normal),
           _coordinate(oldPlane._coordinate)
     { /* * */ }
 
+    //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
         return new Plane(*this, newId);
     }
@@ -64,8 +67,10 @@ protected:
     std::ostream& _output( std::ostream& os ) const;
 
 private:
+    //! Unit normal to the plane for a positive sense.
     const std::vector<double> _normal;
-    const std::vector<double> _coordinate;    // Coordinate of point in plane
+    //! Some coordinate through which the plane passes.
+    const std::vector<double> _coordinate;
 };
 
 /*----------------------------------------------------------------------------*/
@@ -144,14 +149,17 @@ inline std::ostream& Plane::_output( std::ostream& os ) const {
 template<unsigned int axis>
 class PlaneNormal : public Surface {
 public:
+    //! User-called constructor.
     PlaneNormal( const double coord) : _coordinate(coord)
     { /* * */ }
 
+    //! Copy the surface with a new user ID.
     PlaneNormal(const PlaneNormal& oldPlane, const UserSurfaceIdType& newId)
         : Surface(oldPlane, newId),
           _coordinate(oldPlane._coordinate)
     { /* * */ }
 
+    //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
         return new PlaneNormal<axis>(*this, newId);
     }
@@ -178,7 +186,8 @@ protected:
     std::ostream& _output( std::ostream& os ) const;
 
 private:
-    const double              _coordinate;    // Coordinate of plane along axis
+    //! The coordinate along the axis through which the plane passes.
+    const double              _coordinate;
 };
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>

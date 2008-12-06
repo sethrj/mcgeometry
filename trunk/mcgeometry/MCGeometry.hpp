@@ -14,9 +14,10 @@
 #include <string>
 
 #include "Cell.hpp"
-#include "Surface.hpp"
 
 namespace mcGeometry {
+
+class Surface;
 
 /*----------------------------------------------------------------------------*/
 /*!
@@ -47,14 +48,16 @@ namespace mcGeometry {
  */
 class MCGeometry {
 public:
-    //! user's surface IDs are unsigned ints for now
+    //! User's surface IDs are unsigned ints for now. (Maybe templated later.)
     typedef unsigned int UserSurfaceIDType;
-    //! user's cell IDs are unsigned ints for now
+
+    //! User's cell IDs are unsigned ints for now. (Maybe templated later.)
     typedef unsigned int UserCellIDType;
 
+    //! We only use one kind of templated cell.
     typedef Cell<UserCellIDType> CellT;
 
-    //! ReturnStatus indicates whether it interacted with a special geometry
+    //! ReturnStatus indicates whether it interacted with a special geometry.
     enum ReturnStatus {
         NORMAL    = 0,
         DEADCELL,
@@ -62,45 +65,67 @@ public:
         LOST  // God help us all if this is ever returned!
     };
 
+    //! Vector of signed integers that are passed in by the user and parsed
+    //! into surfaces and sense.
     typedef std::vector<signed int>                 IntVec;
 
-    //! user creates an arbitrary quadric surface and passes it in with ID
-    //  return INTERNAL index of the surface (0 to N_sur - 1)
+    /*!
+     * \brief Add a new \c Surface to our geometry, with an associated user ID.
+     *
+     * Return INTERNAL index of the surface (0 to N_sur - 1).
+     */
     unsigned int addSurface(const UserSurfaceIDType userSurfaceId,
                             const Surface& newSurface);
 
-    //! Parse a list of unsigned ints with +/- into surfaces and senses,
-    //  and add the new cell.
-    //  Return INTERNAL index of the surface (0 to N_cell - 1) 
+    /*!
+     * \brief Parse a list of unsigned ints with +/- into surfaces and senses,
+     * and add the new cell.
+     *
+     * Return INTERNAL index of the surface (0 to N_cell - 1).
+     */
     unsigned int addCell(const UserCellIDType& userCellId,
                          const IntVec& surfaces,
                          const CellT::CellFlags flags = CellT::NONE);
 
-    //! do optimization after input is finished, check geometry for duplicate
-    //  surfaces, etc.
+    //! Do optimization after input is finished, check geometry for duplicate
+    //! surfaces, etc.
     void completedGeometryInput();
 
-    //!\brief Find the distance to the next geometry interaction.
-    // Given a current position, location, and cell
-    // this also caches the hit surface so we don't have to re-calculate
-    // intersect
+    /*!
+     * \brief Find the distance to the closest geometry interaction.
+     *
+     *  Given a current position, location, and cell this also caches the hit
+     *  surface so we don't have to re-calculate the intersected surface, etc.
+     *  \param[in]  position     Current particle position.
+     *  \param[in]  direction    Current particle direction.
+     *  \param[in]  oldCellIndex Current particle internal cell index.
+     *  \param[out] distance     Distance to intersecting a surface.
+     */
     void findDistance(      const std::vector<double>& position,
                             const std::vector<double>& direction,
                             const unsigned int oldCellIndex,
-                            double& distanceTraveled);
+                            double& distance);
 
-    //!\brief Go ahead and find the next cell after finding the distance.
-    // we may have to add further code to pass back a surface ID for a surface
-    // tally, for example
+    /*!
+     * \brief Go ahead and find the next cell after finding the distance.
+     *
+     *  \param[in]  position     Current particle position.
+     *  \param[in]  direction    Current particle direction.
+     *  \param[out] newPosition  Particle's new position at the surface.
+     *  \param[out] newCellIndex Internal cell index of the new cell.
+     *  \param[out] returnStatus Extra information about the transport.
+     */
     void findNewCell(       const std::vector<double>& position,
                             const std::vector<double>& direction,
                             std::vector<double>& newPosition,
                             unsigned int& newCellIndex,
                             ReturnStatus& returnStatus);
 
+    // we may have to add further code to pass back a surface ID for a surface
+    // tally, for example
 
     //!\brief Calculate distance to next cell *and* do the next-cell calculation
-    // in one go.
+    //! in one go.
     void findNewCell(       const std::vector<double>& position,
                             const std::vector<double>& direction,
                             const unsigned int oldCellIndex,
@@ -114,7 +139,7 @@ public:
                     newCellIndex, returnStatus);
     }
     
-    //! If we found that the surface was reflecting, change the direction
+    //! If we found that the surface was reflecting, change the direction.
     void reflectDirection(  const std::vector<double>& newPosition,
                             const std::vector<double>& oldDirection,
                             std::vector<double>& newDirection);
@@ -125,76 +150,62 @@ public:
     //! See whether a given cell is a dead cell.
     bool isDeadCell(const unsigned int cellIndex) const;
 
-    //! Debug printing; will be incorporated into file IO etc. later
+    //! Print a user-readable copy of all our geometry information.
     void debugPrint() const;
 
-    //! return the number of cells we have stored
+    //! Return the number of cells we have stored.
     unsigned int getNumCells() const {
         return _cells.size();
     }
 
-    //! returns the number of surfaces we have stored
-    // (will not necessarily be the number of surfaces that are used)
+    //! Returns the number of surfaces we have stored.
+    //!
+    //! This will not necessarily be the number of surfaces that are used.
     unsigned int getNumSurfaces() const {
         return _surfaces.size();
     }
 
     // ======= user ID to internal index translation ======= //
 
-    //! get an internal index for a cell from a user ID
+    //! Get an internal index for a cell from a user ID.
     unsigned int getCellIndexFromUserId(
-                    const UserCellIDType userCellId) const
-    {
-        // translate the user's given surface ID to a Surface pointer
-        CellRevIDMap::const_iterator findCMResult = 
-            _cellRevUserIds.find(userCellId);
-
-        if (findCMResult == _cellRevUserIds.end()) {
-            Insist(0,
-            "FATAL ERROR: cell user ID does not exist.");
-        }
-        return findCMResult->second;
-    }
+                    const UserCellIDType userCellId) const;
 
     //! Get an internal index for a surface from a user ID.
     unsigned int getSurfaceIndexFromUserId(
-                 const UserSurfaceIDType userSurfaceId) const
-    {
-        // translate the user's given surface ID to a Surface pointer
-        SurfaceRevIDMap::const_iterator findSMResult = 
-            _surfaceRevUserIds.find(userSurfaceId);
+                 const UserSurfaceIDType userSurfaceId) const;
 
-        if (findSMResult == _surfaceRevUserIds.end()) {
-            Insist(0,
-            "FATAL ERROR: surface user ID does not exist.");
-        }
-        return findSMResult->second;
-    }
-
-    //! get a user ID internal index  from a cell index
+    //! Get a user ID for a cell from a cell internal index.
     UserCellIDType getUserIdFromCellIndex(
                     const unsigned int index) const;
 
-    //! get a user ID internal index  from a surface index
+    //! Get a user ID for a surface from a surface internal index.
     UserSurfaceIDType getUserIdFromSurfaceIndex(
                     const unsigned int index) const;
 
-    //! constructor
+    //! Constructor.
     MCGeometry();
     
-    //! destructor must delete surfaces and cells
+    //! Destructor must delete actual surfaces and cell memory.
     ~MCGeometry();
 
 private:
+    //! A \c Surface and sense (true = positive, false = negative)
     typedef std::pair<Surface*, bool>             SurfaceAndSense;
+    //! Vector that defines cell bounding surfaces.
     typedef std::vector<SurfaceAndSense>          SASVec;
 
+    //! Vector of pointers to surfaces
     typedef std::vector< Surface* >               SurfaceVec;
+    //! Vector of pointers to cells
     typedef std::vector< CellT* >                 CellVec;
 
+    //! Connect surface-and-senses to a vector of cells on the other side
     typedef std::map< SurfaceAndSense, CellVec >  SCConnectMap;
 
+    //! Map user surface IDs to surface internal index
     typedef std::map< UserSurfaceIDType, unsigned int >   SurfaceRevIDMap;
+    //! Map user cell IDs to cell internal index
     typedef std::map< UserCellIDType, unsigned int >      CellRevIDMap;
 
     //====== INTERNAL ASSOCIATIVE VECTORS AND MAPS ======//
@@ -203,15 +214,15 @@ private:
     // for the entire problem.
     // They therefore need to be as efficient as possible.
 
-    //! all of the Surface surfaces in the problem
-    //  indexed by our internal representation of them
+    //! All of the Surface s in the problem; indexed by our internal
+    //! representation of them
     SurfaceVec _surfaces;
 
-    //! all of the Cell s in the problem
-    //  indexed by our internal representation of them
+    //! All of the Cell s in the problem; indexed by our internal
+    //! representation of them
     CellVec    _cells;
 
-    //! +-surface --> cell connectivity
+    //! What cells connect to a surface with a particular sense.
     SCConnectMap _surfToCellConnectivity;
 
     //======     USER ASSOCIATIVE MAPS     ======//
@@ -235,14 +246,16 @@ private:
      * SENSE HAS QUADRIC DEFINED AS THE FIRST PART OF THE PAIR.
      */
 
-    //! keep track of surface neighborhood connectivity
-    //  when this reaches zero, connectivity is complete
-    //  unmatched surfaces are from cell's point of view, i.e. surfaces may be
-    //  and probably will be double-counted
+    /*! \brief Keep track of surface neighborhood connectivity.
+     *
+     *  When this reaches zero, connectivity is complete.
+     *  Unmatched surfaces are from the cell's point of view, i.e. surfaces may
+     *  be and probably will be double-counted.
+     */
     int _unMatchedSurfaces;
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-    // cache for storing intersect information from findDistance
+    //! Cache for storing intersection information from findDistance
     struct {
         unsigned int    oldCellIndex;
         Surface*        hitSurface;
@@ -254,26 +267,29 @@ private:
     } _findCache;
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-    //! after finding two newly connecting cells, update their connections
+
+    //! After finding two newly connecting cells, update their connections.
     void _updateConnectivity(
                 CellT* oldCell,
                 CellT* newCell,
                 CellT::CellContainer& oldNeighborhood);
-    //! internal mechanism to add a cell based on a list of surface/senses
+
+    //! Internal mechanism to add a cell based on a list of surface/senses.
     unsigned int _addCell(          const UserCellIDType&  userCellId,
                                     const CellT::SASVec&   boundingSurfaces,
                                     const CellT::CellFlags flags);
 
-    //! do optimization whenever the last surface is linked
+    //! Do optimization whenever the last surface is linked.
     void _completedConnectivity();
 
+    //! Print some kind of warning during findNewCell.
     void _warnGeometry(             const std::string& shortMessage,
                                     const std::vector<double>& position,
                                     const std::vector<double>& direction,
                                     const CellT* oldCell,
                                     const std::string& longMessage) const;
 
-    //! print geometry failure message
+    //! Print geometry failure message.
     void _failGeometry(            const std::string failureMessage,
                                    const unsigned int currentCellIndex,
                                    const std::vector<double>& position,

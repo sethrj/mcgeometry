@@ -506,6 +506,36 @@ MCGeometry::UserSurfaceIDType MCGeometry::getUserIdFromSurfaceIndex(
 
     return _surfaces[index]->getUserId();
 }
+/*----------------------------------------------------------------------------*/
+//! Get an internal index for a cell from a user ID.
+unsigned int MCGeometry::getCellIndexFromUserId(
+                const UserCellIDType userCellId) const
+{
+    // translate the user's given surface ID to a Surface pointer
+    CellRevIDMap::const_iterator findCMResult = 
+        _cellRevUserIds.find(userCellId);
+
+    if (findCMResult == _cellRevUserIds.end()) {
+        Insist(0,
+        "FATAL ERROR: cell user ID does not exist.");
+    }
+    return findCMResult->second;
+}
+/*----------------------------------------------------------------------------*/
+//! Get an internal index for a surface from a user ID.
+unsigned int MCGeometry::getSurfaceIndexFromUserId(
+             const UserSurfaceIDType userSurfaceId) const
+{
+    // translate the user's given surface ID to a Surface pointer
+    SurfaceRevIDMap::const_iterator findSMResult = 
+        _surfaceRevUserIds.find(userSurfaceId);
+
+    if (findSMResult == _surfaceRevUserIds.end()) {
+        Insist(0,
+        "FATAL ERROR: surface user ID does not exist.");
+    }
+    return findSMResult->second;
+}
 
 /*============================================================================*\
  * other internal-use code

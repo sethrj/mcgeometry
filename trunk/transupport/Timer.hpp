@@ -21,18 +21,23 @@ using std::string;
 namespace tranSupport {
 
 /*----------------------------------------------------------------------------*/
-/* \class Timer
- * \brief An individual timer that starts, stops, and can be reset
+/*!
+ * \class Timer
+ * \brief An individual timer that starts, stops, and can be reset.
  * 
- * It knows the startClock
+ * It knows the startClock, and subtracts the ending computer clock whenever
+ * "stop" is called.
  *
  */
 class Timer {
     friend std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& theTimer);
 
 public:
+    //! Start the timer. This fails if it has already run or is running.
     bool start();
+    //! Stop the timer. This fails if the timer is not running.
     bool stop();
+    //! Reset the timer.
     bool reset();
 
     //! return the elapsed time in seconds
@@ -40,19 +45,21 @@ public:
         return elapsedTime;
     }
 
-    // constructor: initialize the timer
+    //! constructor: initialize the timer
     Timer() : isRunning(false), startClock(0), elapsedTime(0)
         { /* * */ }
 
-    //! return the estimated minimum delta_t
+    //! Return the estimated minimum timing resolution.
     static double TimeResolution() {
         return (1.0 / CLOCKS_PER_SEC);
     }
 
 private:
+    //! Are we running?
     bool             isRunning;
+    //! What time did we start?
     std::clock_t     startClock;
-    //! elapsed time in seconds
+    //! Elapsed time in seconds.
     double           elapsedTime;
 };
 
@@ -85,19 +92,22 @@ public:
     void printTimers();
 
 private:
-    // hide constructors and assignment operator
+    //! disallow empty constructor
     SuperTimer() { /* * */ }
     ~SuperTimer();
+    //! disallow copy constructor
     SuperTimer(SuperTimer const&) { /* * */ }
+    //! disallow assignment
     SuperTimer& operator=(SuperTimer const&) { /* * */ return *this; }
 
+    //! Translate string to an actual timer.
     typedef std::map<string, Timer* >  TimerMap;
-    typedef std::pair<string, Timer* > TimerMapPair;
 
+    //! All the timers in the problem.
     TimerMap theTimers;
 };
 
-//! print a timer to a stream
+//! Print a timer to a stream.
 std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& t);
 
 /*----------------------------------------------------------------------------*/

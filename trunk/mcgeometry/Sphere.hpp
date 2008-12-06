@@ -27,18 +27,21 @@ namespace mcGeometry {
  */
 class Sphere : public Surface {
 public:
+    //! User-called constructor.
     Sphere(std::vector<double>& C, double R)
         : _center(C), _radius(R)
     { 
         Insist(R > 0, "Sphere must have positive radius.");
     }
 
+    //! Copy the surface with a new user ID.
     Sphere(const Sphere& oldSphere, const UserSurfaceIdType& newId)
         : Surface(oldSphere, newId),
           _center(oldSphere._center),
           _radius(oldSphere._radius)
     { /* * */ }
 
+    //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
         return new Sphere(*this, newId);
     }
@@ -61,7 +64,9 @@ protected:
     std::ostream& _output( std::ostream& os ) const;
 
 private:
+    //! Center point of the sphere.
     const std::vector<double> _center;
+    //! Radius of the sphere.
     const double _radius;
 };
 
@@ -163,17 +168,20 @@ inline std::ostream& Sphere::_output( std::ostream& os ) const {
  */
 class SphereO : public Surface {
 public:
-    SphereO(double R)
-        : _radius(R)
+    //! User-called constructor.
+    SphereO(double radius)
+        : _radius(radius)
     { 
         Insist(R > 0, "SphereO must have positive radius.");
     }
 
+    //! Copy the surface with a new user ID.
     SphereO(const SphereO& oldSphere, const UserSurfaceIdType& newId)
         : Surface(oldSphere, newId),
           _radius(oldSphere._radius)
     { /* * */ }
 
+    //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
         return new SphereO(*this, newId);
     }
@@ -196,6 +204,7 @@ protected:
     std::ostream& _output( std::ostream& os ) const;
 
 private:
+    //! Radius of the sphere.
     const double _radius;
 };
 

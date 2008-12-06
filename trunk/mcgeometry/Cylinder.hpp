@@ -28,7 +28,7 @@ namespace mcGeometry {
  */
 class Cylinder : public Surface {
 public:
-    //! generic cylinder constructor
+    //! User-called constructor.
     Cylinder(const std::vector<double>& point,
              const std::vector<double>& axis,
              double radius)
@@ -42,6 +42,7 @@ public:
         Require( _radius > 0.0 );
     }
 
+    //! Copy the surface with a new user ID.
     Cylinder(const Cylinder& oldCylinder, const UserSurfaceIdType& newId)
         : Surface(oldCylinder, newId),
           _pointOnAxis(oldCylinder._pointOnAxis),
@@ -50,6 +51,7 @@ public:
     { /* * */ }
 
 
+    //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
         return new Cylinder(*this, newId);
     }
@@ -173,13 +175,14 @@ inline std::ostream& Cylinder::_output( std::ostream& os ) const {
 template<unsigned int axis>
 class CylinderNormal : public Surface {
 public:
-    //! generic cylinder constructor
+    //! User-called constructor.
     CylinderNormal( double radius )
         : _radius(radius) 
     {
         Require( _radius > 0.0 );
     }
 
+    //! Copy the surface with a new user ID.
     CylinderNormal(const CylinderNormal& oldCylinder,
                    const UserSurfaceIdType& newId)
         : Surface(newId),
@@ -187,6 +190,7 @@ public:
     { /* * */ }
 
 
+    //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
         return new CylinderNormal(*this, newId);
     }
