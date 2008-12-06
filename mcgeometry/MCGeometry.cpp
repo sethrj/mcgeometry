@@ -121,6 +121,17 @@ void MCGeometry::findNewCell(
     CellT::CellContainer& neighborhood =
             oldCell.getNeighbors(_findCache.hitSurface);
 
+
+//    // if we've completed the geometry and there is only once cell on the other
+//    // side, then we know that it's the right cell
+//    if ((_unMatchedSurfaces == 0) && (neighborhood.size() == 1)) {
+//        newCellIndex = neighborhood.front()->getIndex();
+//
+//        if ( neighborhood.front()->isDeadCell() )
+//            returnStatus = DEADCELL;
+//        return;
+//    }
+
     // loop through the old cell's hood to find if it's in one of those cells
     for (CellT::CellContainer::const_iterator it  = neighborhood.begin();
                                        it != neighborhood.end(); ++it)
@@ -199,6 +210,8 @@ void MCGeometry::findNewCell(
 
                 _warnGeometry("Used global search", position, direction, 
                                 &oldCell, message.str());
+
+//                _unMatchedSurfaces++; // do this? or something more complicated?
          
                 _updateConnectivity(&oldCell, _cells[i], neighborhood);
 
@@ -499,7 +512,9 @@ MCGeometry::UserSurfaceIDType MCGeometry::getUserIdFromSurfaceIndex(
 \*============================================================================*/
 void MCGeometry::_completedConnectivity()
 {
-    // THIS CODE IS ALMOST ALWAYS VALID BUT NOT ALWAYS
+    // THIS CODE IS ALMOST ALWAYS VALID
+    //  difficulties: transporting across negative-sense surfaces into corners
+    //                doing global geometry search
 
 //    cout << "<<CONNECTIVITY IS COMPLETE>>" << endl;
 }
