@@ -23,25 +23,25 @@ using std::endl;
 int main(int argc, char *argv[]) {
    TESTER_INIT("VectorMath");
 
-   int vecLength = 5;
+   int vecLength = 3;
    doubleVector vec1(vecLength), vec2(vecLength);
 
    for (int i = 0; i < vecLength; i++) {
-      vec1[i] = i / 2.0;
+      vec1[i] = (i + 1) / 2.0;
       vec2[i] = (vecLength - i + 1) * 3;
    }
 
 // cout << vec1 << vec2 << endl;
 
    // ===== check the summation ===== //
-   TESTER_CHECKFORPASS(softEquiv(tranSupport::vectorSum(vec1), 5.0));
+   TESTER_CHECKFORPASS(softEquiv(tranSupport::vectorSum(vec1), 3.0));
    
    // ===== check the dot product ===== //
-   TESTER_CHECKFORPASS(softEquiv(tranSupport::vectorDot(vec1, vec2), 45.0));
+   TESTER_CHECKFORPASS(softEquiv(tranSupport::vectorDot(vec1, vec2), 24.0));
    
    // ===== check the distance ===== //
    TESTER_CHECKFORPASS(softEquiv(tranSupport::distance(vec1, vec2),
-                                                 26.9722079185224, 1e-14));
+                                                 14.7139389695621610));
 
    TESTER_PRINTRESULT();
    

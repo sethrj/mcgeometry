@@ -172,7 +172,7 @@ public:
     SphereO(double radius)
         : _radius(radius)
     { 
-        Insist(R > 0, "SphereO must have positive radius.");
+        Insist(_radius > 0, "SphereO must have positive radius.");
     }
 
     //! Copy the surface with a new user ID.
