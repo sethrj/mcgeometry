@@ -63,6 +63,21 @@ inline double vectorDot( const std::vector<double> &a,
                                b.begin(), 0.0);
 }
 
+//! Get the dot product of two length-3 vectors
+inline double vectorDot3( const std::vector<double> &a,
+                          const std::vector<double> &b)
+{
+    Require(a.size() == 3);
+    Require(b.size() == 3);
+
+    double dotProduct = 0.0;
+    for (unsigned int i = 0; i < 3; ++i) {
+        dotProduct += a[i] * b[i];
+    }
+    return dotProduct;
+}
+
+
 //! get the total element-wise sum of a vector
 inline double vectorSum( const std::vector<double> &a) {
    return std::accumulate(a.begin(), a.end(), 0.0);
@@ -82,24 +97,36 @@ inline double vectorNorm( const std::vector<double> &a) {
    return std::sqrt(theSum);
 }
 
+//! get the vector's 2-norm
+// (square root of sum of squares)
+inline double vectorNorm3( const std::vector<double> &a) {
+    Require(a.size() == 3);
+    Require(b.size() == 3);
+
+    double theSum = 0.0;
+    for (unsigned int i = 0; i < 3; ++i) {
+        theSum += a[i] * a[i];
+    }
+    return std::sqrt(theSum);
+}
+
+
 //! get the distance between two vectors
 // square root of sum of differences squared
 inline double distance( const std::vector<double> &a,
-                        const std::vector<double> &b) {
-   Require(a.size() == b.size());
-   double theSum = 0.0;
-   double tempDiff;
+                        const std::vector<double> &b)
+{
+    Require(a.size() == 3);
+    Require(a.size() == 3);
+    double theSum = 0.0;
+    double tempDiff;
 
-   std::vector<double>::const_iterator itA = a.begin();
-   std::vector<double>::const_iterator itB = b.begin();
-   while(itA != a.end()) {
-      tempDiff = *itA - *itB;
-      theSum += tempDiff * tempDiff;
-      ++itA;
-      ++itB;
-   }
+    for (unsigned int i = 0; i < 3; ++i) {
+        tempDiff = a[i] - b[i];
+        theSum  += tempDiff * tempDiff;
+    }
 
-   return std::sqrt(theSum);
+    return std::sqrt(theSum);
 }
 
 

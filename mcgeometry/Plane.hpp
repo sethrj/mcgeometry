@@ -89,7 +89,7 @@ inline void Plane::intersect(
     hit = false;
     distance = 0.0;
 
-    double cosine = tranSupport::vectorDot(_normal, direction);
+    double cosine = tranSupport::vectorDot3(_normal, direction);
 
     if ( ((posSense == false) && (cosine > 0))
          || ((posSense == true) and (cosine < 0)) )

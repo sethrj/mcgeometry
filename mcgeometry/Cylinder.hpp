@@ -83,9 +83,6 @@ private:
 };
 
 /*----------------------------------------------------------------------------*/
-// TODO: eliminate use of pow with integer coefficients
-// also having it work would be nice!
-
 // Equation: (X-P)^2 - [(X-P).U]^2 - R^2 = 0
 //      X = position 
 //      P = point on axis of cylinder
@@ -112,8 +109,7 @@ inline bool Cylinder::hasPosSense(const std::vector<double>& position) const
 }
 
 /*----------------------------------------------------------------------------*/
-// This could be done more efficiently but this way is (arguably) closer to 
-// the original math.
+// TODO: optimization needed here
 inline void Cylinder::intersect(
         const std::vector<double>& position, 
         const std::vector<double>& direction,
@@ -135,17 +131,17 @@ inline void Cylinder::intersect(
     std::vector<double> bvec(3,0.0);
     std::vector<double> diff(position);
     tranSupport::vectorMinusEq(diff, _pointOnAxis);
-    b = tranSupport::vectorDot(diff, _axis);
+    b = tranSupport::vectorDot3(diff, _axis);
     for( int i = 0; i < 3; ++i ) bvec[i] = _axis[i]*b;
     tranSupport::vectorMinusEq(diff, bvec);
-    B = tranSupport::vectorDot(diff, direction);
+    B = tranSupport::vectorDot3(diff, direction);
 
     double C(0.0);
     double c(0.0);
     diff = std::vector<double>(position);
     tranSupport::vectorMinusEq(diff, _pointOnAxis);
-    c = tranSupport::vectorDot(diff, _axis);
-    C = tranSupport::vectorDot(diff, diff) - c*c - _radius*_radius;
+    c = tranSupport::vectorDot3(diff, _axis);
+    C = tranSupport::vectorDot3(diff, diff) - c*c - _radius*_radius;
 
     _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
 }

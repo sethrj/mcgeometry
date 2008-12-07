@@ -76,6 +76,22 @@ University of Michigan, Ann Arbor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Implementation}
+\begin{itemize}
+  \item Object-oriented design with C++
+  \item Robustness through ``Design By Contract''
+    \begin{itemize}
+      \item Check \emph{every} assumption with an assertion
+      \item Put sanity checks wherever possible
+      \item Disable all debug code with compiler flag for production
+    \end{itemize}
+  \item Verification through unit tests
+  \item \emph{Keep speed in mind throughout the programming process}
+  \item 2600 lines of main code, 1300 lines of unit tests, 1400 lines of
+    example/test code
+\end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
 \frametitle{Object structure}
 \begin{itemize}
@@ -130,21 +146,6 @@ University of Michigan, Ann Arbor
     \end{itemize}
 \end{itemize}
 \end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Implementation}
-\begin{itemize}
-  \item Object-oriented design with C++
-  \item Robustness through ``Design By Contract''
-    \begin{itemize}
-      \item Check \emph{every} assumption with an assertion
-      \item Put sanity checks wherever possible
-      \item Disable all debug code with compiler flag for production
-    \end{itemize}
-  \item Verification through unit tests
-  \item \emph{Keep speed in mind throughout the programming process}
-\end{itemize}
-\end{frame}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
