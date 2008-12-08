@@ -285,6 +285,7 @@ void MCGeometry::reflectDirection(const std::vector<double>& newPosition,
                                   const std::vector<double>& oldDirection,
                                   std::vector<double>& newDirection)
 {
+    Require(oldDirection == _findCache.direction);
     // law of reflection: omega = omega - 2 (n . omega) n
     std::vector<double> surfaceNormal;
 
@@ -302,7 +303,7 @@ void MCGeometry::reflectDirection(const std::vector<double>& newPosition,
     }
 
     double doubleProjection 
-        = 2 * tranSupport::vectorDot(oldDirection, surfaceNormal);
+        = 2 * tranSupport::vectorDot3(oldDirection, surfaceNormal);
 
     // calculate the new direction
     newDirection.resize(3,0.0);
@@ -312,6 +313,37 @@ void MCGeometry::reflectDirection(const std::vector<double>& newPosition,
 
     Ensure(newDirection.size() == 3);
     Ensure(softEquiv(tranSupport::vectorNorm(newDirection), 1.0));
+}
+/*----------------------------------------------------------------------------*/
+void MCGeometry::getSurfaceCrossing(
+                            const std::vector<double>& newPosition,
+                            const std::vector<double>& oldDirection,
+                            MCGeometry::UserSurfaceIDType&
+                                              surfaceCrossingUserId,
+                            double&       dotProduct)
+{
+    Require(oldDirection == _findCache.direction);
+    Require(newPosition.size() == 3);
+    Require(softEquiv(tranSupport::vectorNorm(oldDirection), 1.0));
+
+    std::vector<double> surfaceNormal;
+
+    // find the surface normal at the point of intersection
+    _findCache.hitSurface->normalAtPoint(newPosition, surfaceNormal);
+
+    // returned normal is with respect to the "positive" sense of the
+    // surface, so reverse if necessary
+    if (_findCache.oldSurfaceSense == false)
+    {
+        for (unsigned int i = 0; i < 3; i++) {
+            surfaceNormal[i] = -surfaceNormal[i];
+        }
+    }
+
+    Check(softEquiv(tranSupport::vectorNorm(surfaceNormal), 1.0));
+
+    surfaceCrossingUserId = _findCache.hitSurface->getUserId();
+    dotProduct = tranSupport::vectorDot3(oldDirection, surfaceNormal);
 }
 /*----------------------------------------------------------------------------*/
 unsigned int MCGeometry::findCell(
