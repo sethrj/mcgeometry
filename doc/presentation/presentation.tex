@@ -2,11 +2,7 @@
 % \documentclass{article}
 % \usepackage{beamerarticle}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
 \usepackage{fancyvrb}
-\usepackage{pgf}
 
 \mode<article>{\usepackage{fullpage}}
 \mode<presentation>{\usetheme{AnnArbor}}
@@ -76,7 +72,7 @@ University of Michigan, Ann Arbor
     \end{itemize}
   \item Verification through unit tests
   \item \emph{Keep speed in mind throughout the programming process}
-  \item 2600 lines of main code, 1300 lines of unit tests, 1400 lines of
+  \item 2600 lines of main code, 1300 lines of unit tests, 1600 lines of
     example/test code
 \end{itemize}
 \end{frame}
@@ -164,8 +160,7 @@ University of Michigan, Ann Arbor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[fragile]
 \frametitle{Complex Geometry Output}
-\fvset{frame=single,%
-		fontsize=\tiny}%
+\fvset{fontsize=\tiny}%
 
 \begin{Verbatim}
 SURFACES: 
@@ -208,16 +203,20 @@ NEIGHBORHOOD CONNECTIVITY:
 \begin{columns}[c]
 \column{0.5\textwidth}
 \begin{itemize}
-  \item Can we handle geometries with crazy intersections without losing
-    particles?
   \item Spheres tangent at a point, spheres tangent to cylinder and plane along
     circles
   \item Also: transporting through corners
+  \item Can we handle geometries with crazy intersections without losing
+    particles?
 \end{itemize}
 
 \column{0.5\textwidth}
     \includegraphics[width=\textwidth, keepaspectratio]{tricky_geometry}
 \end{columns}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Yes, yes we can.}
+    \includegraphics[width=\textwidth, keepaspectratio]{tricky_geometry_matlab}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Speed: Mesh Geometry}
@@ -275,7 +274,7 @@ NEIGHBORHOOD CONNECTIVITY:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
     \includegraphics[width=\textwidth, keepaspectratio]{MeshComparison}
-    \includegraphics[width=\textwidth, keepaspectratio]{MeshComparison-2}
+%    \includegraphics[width=\textwidth, keepaspectratio]{MeshComparison-2}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
@@ -307,7 +306,7 @@ NEIGHBORHOOD CONNECTIVITY:
              \item Takes more time, but\dots
              \item Is more useful (to us) in the long run
          \end{itemize}
-     \item<6-> \color{red}{We deserve an A}
+     \item<6-> \color{red}{We deserve an A+}
   \end{itemize}
 \end{frame}
 
