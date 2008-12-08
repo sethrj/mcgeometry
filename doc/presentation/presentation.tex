@@ -1,13 +1,15 @@
-\documentclass{beamer}
+\documentclass[color={usenames, dvipsnames},ignorenonframetext]{beamer}
+% \documentclass{article}
+% \usepackage{beamerarticle}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{fancyvrb}
+\usepackage{pgf}
 
-\usetheme{Madrid}
-%\usecolortheme{seahorse}
-%\usecolortheme{rose}
+\mode<article>{\usepackage{fullpage}}
+\mode<presentation>{\usetheme{AnnArbor}}
 \setbeamertemplate{navigation symbols}{\insertframenavigationsymbol}
 
 \title[MCGeometry]%
@@ -39,21 +41,8 @@ University of Michigan, Ann Arbor
 \end{center}
 \end{frame}
 
-%\begin{frame}{Outline}
-%\tableofcontents
-%\end{frame}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\begin{frame}
-  \frametitle{Introduction}
-  \begin{itemize}
-  \item First
-  \item Second
-  \item Third
-\end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Goals}
 \begin{itemize}
   \item Fully-functional combinatorial geometry
@@ -238,12 +227,25 @@ NEIGHBORHOOD CONNECTIVITY:
 \column{0.5\textwidth}
   \begin{itemize}
       \item Mesh has $N\times N \times N$ cells
+      \item Checkerboard pattern of alternating total cross sections
+          \begin{itemize}
+              \item $\Sigma_t = 1.0$
+              \item $\Sigma_t = 0.5$
+          \end{itemize}
+      \item Chose position at center of each cell
+      \item Transport
+      \begin{itemize}
+          \item<2-> Forward Sweep
+          \item<4-> Backward Sweep
+          \end{itemize}
   \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \column{0.5\textwidth}
   \only<1>{\includegraphics[width=\textwidth, keepaspectratio]{Mesh}}
   \only<2>{\includegraphics[width=\textwidth, keepaspectratio]{ForwardSweep}}
-  \only<3>{\includegraphics[width=\textwidth, keepaspectratio]{BackwardSweep}}
+  \only<3>{\includegraphics[width=\textwidth, keepaspectratio]{ForwardSweep-2}}
+  \only<4>{\includegraphics[width=\textwidth, keepaspectratio]{BackwardSweep}}
+  \only<5>{\includegraphics[width=\textwidth, keepaspectratio]{BackwardSweep-2}}
 \end{columns}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -256,6 +258,11 @@ NEIGHBORHOOD CONNECTIVITY:
 \column{0.5\textwidth}
 \begin{itemize}
     \item Mesh has $N\times N \times N$ cells
+      \item Checkerboard pattern of alternating total cross sections
+          \begin{itemize}
+              \item $\Sigma_t = 1.0$
+              \item $\Sigma_t = 0.5$
+          \end{itemize}
     \item Random point picked
     \item Particle streams until it leaves geometry
 \end{itemize}
@@ -275,24 +282,31 @@ NEIGHBORHOOD CONNECTIVITY:
 \begin{frame}
   \frametitle{Conclusions}
   \begin{itemize}
-	 \item Our geometry works
-   \item Caching connectivity drastically improves runtime
+    \item<1-> Fully-functional combinatorial geometry
+        \begin{itemize}
+            \item Planes, Spheres, Cylinders
+            \item Reflecting surfaces
+            \item No lost particles
+                \begin{itemize}
+                    \item Complex and ``tricky'' geometry
+                    \item Scale independent
+                \end{itemize}
+            \item Automatically generate connectivity
+        \end{itemize}
+    \item<2-> Caching connectivity improves runtime
    
-     % Jeremy, you can't say this! You barely touched most of the real code. :P
-     % It was tricky to think of the right way to do it, and get it working,
-     % and get it working efficiently.
-%     \item It isn't terribly difficult to implement
-%         \begin{itemize}
-%             \item We implemented the geometry code in half a semester
-%             \item But you don't have to!   http://code.google.com/p/mcgeometry
-%         \end{itemize}
-     \item Available at http://code.google.com/p/mcgeometry
-     \item Better than doing the last homework assignment
+    \item<3-> Combinatorial geometry concept is intuitive
+    \item<4-> Implementation is difficult
+        \begin{itemize}
+            \item We implemented the geometry code in half a semester
+            \item Available at \color{blue}{http://code.google.com/p/mcgeometry}
+        \end{itemize}
+     \item<5-> Better than doing the last homework assignment!
          \begin{itemize}
              \item Takes more time, but\dots
-             \item Is more useful in the long run
+             \item Is more useful (to us) in the long run
          \end{itemize}
-	 \item We deserve an A+ (of course!)
+     \item<6-> \color{red}{We deserve an A}
   \end{itemize}
 \end{frame}
 
@@ -306,10 +320,5 @@ NEIGHBORHOOD CONNECTIVITY:
   \end{itemize}
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\appendix
-%\begin{frame}{References}
-%  References go here?
-%\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}

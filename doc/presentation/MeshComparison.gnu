@@ -14,7 +14,7 @@
 #    
 #    	Send bug reports and suggestions to <http://sourceforge.net/projects/gnuplot>
 #    
-# set terminal aqua 0 title "Figure 0" size 846 594 font "Times-Roman,14" noenhanced solid
+set terminal aqua 0 title "Figure 0" size 846 594 font "Times-Roman,18" noenhanced solid
 # set output
 unset clip points
 set clip one
@@ -143,5 +143,5 @@ set loadpath
 set fontpath 
 set fit noerrorvariables
 GNUTERM = "aqua"
-plot "MeshComparison.dat" using 1:2 with lines title "First Run", "MeshComparison.dat" using 1:3 with lines title "Second Run", "MeshComparison.dat" using 1:4 with lines title "Deterministic"
+plot "MeshComparison.dat" using 1:2 with lines title "Unconnected" lw 1.5, "MeshComparison.dat" using 1:3 with lines title "Connected" lc 2 lw 1.5, "MeshComparison.dat" using 1:4 with lines title "Deterministic" lw 1.5
 #    EOF
