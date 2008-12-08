@@ -138,7 +138,7 @@ inline void Cylinder::intersect(
 
     double C(0.0);
     double c(0.0);
-    diff = std::vector<double>(position);
+    diff = position;
     tranSupport::vectorMinusEq(diff, _pointOnAxis);
     c = tranSupport::vectorDot3(diff, _axis);
     C = tranSupport::vectorDot3(diff, diff) - c*c - _radius*_radius;
@@ -150,10 +150,26 @@ inline void Cylinder::normalAtPoint(
                 const std::vector<double>& position,
                 std::vector<double>& unitNormal) const
 {
-    // "position" should be on the surface
     Require(position.size() == 3);
 
-    Insist(0, "Not yet implemented.");
+    // "unitNormal" is now particle location translated to cylinder
+    unitNormal = position;
+    tranSupport::vectorMinusEq(unitNormal, _pointOnAxis);
+
+    double cosTheta = tranSupport::vectorDot3(unitNormal, _axis);
+
+    // make "unitNormal" the un-normalized difference to the axis (position
+    // minus projection)
+    for (int i = 0; i < 3; ++i)
+        unitNormal[i] -= _axis[i] * cosTheta;
+
+    // the vector length should now be just the radius, if we have done it right
+    Check(softEquiv(tranSupport::vectorNorm(unitNormal), _radius));
+
+    for (int i = 0; i < 3; ++i)
+        unitNormal[i] /= _radius;
+
+    Ensure(softEquiv(tranSupport::vectorNorm(unitNormal), 1.0));
 }
 /*----------------------------------------------------------------------------*/
 inline std::ostream& Cylinder::_output( std::ostream& os ) const {

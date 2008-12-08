@@ -139,10 +139,34 @@ public:
                     newCellIndex, returnStatus);
     }
     
-    //! If we found that the surface was reflecting, change the direction.
+     /*!
+     * \brief If we found that the surface was reflecting, change the direction.
+     *
+     *
+     *  \param[in]  newPosition  Particle position after transporting
+     *  \param[in]  oldDirection Particle direction before reflecting
+     *  \param[out] newDirection Direction after reflecting
+     *
+     */
     void reflectDirection(  const std::vector<double>& newPosition,
                             const std::vector<double>& oldDirection,
                             std::vector<double>& newDirection);
+
+    /*!
+     * \brief Return information about a crossed surface.
+     *
+     *
+     *  \param[in]  newPosition  Particle position after transporting
+     *  \param[in]  oldDirection Particle direction
+     *  \param[out] surfaceCrossingUserId User ID of the surface that was
+     *                      crossed
+     *  \param[out] dotProduct   Omega dot n (use for surface current tally)
+     *
+     */
+    void getSurfaceCrossing(    const std::vector<double>& newPosition,
+                                const std::vector<double>& oldDirection,
+                                UserSurfaceIDType& surfaceCrossingUserId,
+                                double&       dotProduct);
 
     //! Find a cell given an arbitrary point in the problem.
     unsigned int findCell(const std::vector<double>& position) const;

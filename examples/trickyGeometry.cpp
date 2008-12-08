@@ -10,6 +10,7 @@
 #include "mcgeometry/MCGeometry.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cmath>
 #include "transupport/constants.hpp"
@@ -360,6 +361,8 @@ void testSphereGeometry() {
     unsigned int newCellIndex;
     double       distance;
     MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
+    unsigned int surfaceCrossId;
+    double       dotProduct;
 
     doubleVec bounds(3, 0.0);
     doubleVec subtract(3, 0.0);
@@ -367,7 +370,11 @@ void testSphereGeometry() {
     bounds[1] = 2.0; subtract[1] = 1.0;
     bounds[2] = 2.0; subtract[2] = 1.0;
 
-    for (int i = 0; i < 10000; i++) {
+    std::fstream outFile;
+
+    outFile.open("sphereOut.txt", std::fstream::out);
+
+    for (int i = 0; i < 50000; i++) {
         randDirection(direction);
 
         do {
@@ -378,23 +385,29 @@ void testSphereGeometry() {
         geom3.findDistance(position, direction, oldCellIndex, distance);
         geom3.findNewCell( position, direction,
                            newPosition, newCellIndex, returnStatus);
+        geom3.getSurfaceCrossing( newPosition, direction, surfaceCrossId,
+                dotProduct);
+
+        outFile << surfaceCrossId << "\t" << newPosition[0] << "\t"
+                << newPosition[1] << "\t" << newPosition[2] << endl;
     }
+    outFile.close();
 //    geom3.debugPrint();
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {
     try {
-//        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
-//             << endl;
-//        testAmrGeometry();
+        cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
+             << endl;
+        testAmrGeometry();
 
         cout << "================== TRICKY CORNERS    =================="
              << endl;
         testMeshGeometry();
 
-//        cout << "================== TRICKY GEOMETRY (CURVES)=================="
-//             << endl;
-//        testSphereGeometry();
+        cout << "================== TRICKY GEOMETRY (CURVES)=================="
+             << endl;
+        testSphereGeometry();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "FAILURE: CAUGHT ERROR" << endl
