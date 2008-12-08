@@ -45,7 +45,7 @@ set format cb "% g"
 set angles radians
 unset grid
 set key title ""
-set key inside left top vertical Right noreverse enhanced autotitles nobox
+set key inside left top vertical Right noreverse enhanced autotitles box
 set key noinvert samplen 4 spacing 1 width 0 height 0 
 unset label
 unset arrow

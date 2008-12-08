@@ -145,7 +145,7 @@ set loadpath
 set fontpath 
 set fit noerrorvariables
 GNUTERM = "aqua"
-plot "MeshTiming.dat" using 2:3 with lines title "Creation" lw 1.5 lt 1, "MeshTiming.dat" using 2:4 with lines title "Forward Sweep" lw 1.5 lt 1 lc 3, "MeshTiming.dat" using 2:5 with lines title "Backward Sweep" lw 1.5 lt 1 lc 2
+plot "MeshTiming.dat" using 2:3 with lines title "Geometry Creation" lw 1.5 lt 1, "MeshTiming.dat" using 2:4 with lines title "Forward Sweep" lw 1.5 lt 1 lc 3, "MeshTiming.dat" using 2:5 with lines title "Backward Sweep" lw 1.5 lt 1 lc 2
 
 F(x) = x**mF*10**bF   # fit line to data for log-log plot
 fit F(x) "MeshTiming.dat" using 2:4 via mF, bF
