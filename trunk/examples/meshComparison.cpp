@@ -45,9 +45,6 @@ void    diffTallies(int, const TallyVec&, const TallyVec& );
 
 void runProgram(int argc, char* argv[]){
 
-    Insist( argc == 4,
-            "Syntax: meshComparsion numCells numparticles printFlag." );
-
     int numCells( std::atoi(argv[1]) );
     int numParticles( std::atoi(argv[2]) );
     int printFlag( std::atoi(argv[3]) );
@@ -105,6 +102,13 @@ void runProgram(int argc, char* argv[]){
 }
 
 int main(int argc, char* argv[]){
+
+    if (argc != 4) {
+        cout << "Syntax: meshComparsion numCells numparticles printFlag."
+             << endl;
+        return 1;
+    }
+
     try {
         runProgram(argc, argv);
     }
