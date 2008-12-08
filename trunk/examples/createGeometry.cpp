@@ -147,7 +147,94 @@ void CreateMesh(int N, MCGeometry& Geo){
 }
 
 /*============================================================================*/
-//! \function createTrickyGeometry
+//! \fn createComplexGeometry
+//  \author   Seth R. Johnson
+//  Create the sphere with planes used in the first unit test
+void createComplexGeometry( MCGeometry& theGeom) {
+    /* * * create sphere * * */
+    std::vector<double> center(3,0.0);
+    double      sphRadius = 3.0;
+
+    Sphere    theSphere(center, sphRadius);
+
+    /* * * create planes * * */
+    std::vector<double> normal(3,0.0);
+
+    normal[1] = 1.0;
+
+    center[1] = 1.0;
+    Plane plane1(normal, center);
+
+    center[1] = 0.0;
+    Plane plane2(normal, center);
+
+    center[1] = -1.0;
+    Plane plane3(normal, center);
+
+    normal.assign(3,0.0);
+    center.assign(3,0.0);
+    normal[0] = 1.0;
+    center[0] = 0.0;
+    Plane plane4(normal, center);
+
+    //========== ADD SURFACES
+    unsigned int surfaceIndex;
+
+    surfaceIndex = theGeom.addSurface(5, theSphere);
+    
+    surfaceIndex = theGeom.addSurface(1, plane1);
+    surfaceIndex = theGeom.addSurface(2, plane2);
+    surfaceIndex = theGeom.addSurface(3, plane3);
+    surfaceIndex = theGeom.addSurface(4, plane4);
+    
+    //========== ADD CELLS
+    std::vector<int>  theSurfaces(4,0);
+    unsigned int cellIndex;
+
+    theSurfaces[0] = -5;
+    theSurfaces[1] = -1;
+    theSurfaces[2] =  3;
+    theSurfaces[3] =  4;
+
+    cellIndex = theGeom.addCell(10, theSurfaces);
+
+    theSurfaces[0] = -5;
+    theSurfaces[1] = -1;
+    theSurfaces[2] =  2;
+    theSurfaces[3] = -4;
+
+    cellIndex = theGeom.addCell(20, theSurfaces);
+
+    theSurfaces[0] = -5;
+    theSurfaces[1] = -2;
+    theSurfaces[2] =  3;
+    theSurfaces[3] = -4;
+
+    cellIndex = theGeom.addCell(30, theSurfaces);
+
+    theSurfaces.resize(2);
+    theSurfaces[0] = -5;
+    theSurfaces[1] =  1;
+
+    cellIndex = theGeom.addCell(40, theSurfaces);
+
+    theSurfaces[0] = -5;
+    theSurfaces[1] = -3;
+
+    cellIndex = theGeom.addCell(50, theSurfaces);
+
+    // instead of having the outer sphere be just "+5", we
+    // choose to use -5 with negation.
+
+    theSurfaces.resize(1);
+    theSurfaces[0] = -5;
+
+    cellIndex = theGeom.addCell(60, theSurfaces, 
+            MCGeometry::CellT::generateFlags(true, true));
+}
+
+/*============================================================================*/
+//! \fn createTrickyGeometry
 //  \author   Seth R. Johnson
 //  Looks sort of like AMR
 void createTrickyGeometry(mcGeometry::MCGeometry& geo)
@@ -221,7 +308,7 @@ void createTrickyGeometry(mcGeometry::MCGeometry& geo)
             MCGeometry::CellT::generateFlags(true, true));
 }
 /*============================================================================*/
-//! \function createTrickyGeometry2
+//! \fn createAnotherTrickyGeometry
 //  \author   Seth R. Johnson
 //  Two spheres with surrounding cylinder
 void createAnotherTrickyGeometry(mcGeometry::MCGeometry& geo)

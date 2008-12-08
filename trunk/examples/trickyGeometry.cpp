@@ -7,10 +7,10 @@
 /*----------------------------------------------------------------------------*/
 
 #include "createGeometry.hpp"
+#include "visualizeSurfaces.hpp"
 #include "mcgeometry/MCGeometry.hpp"
 
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <cmath>
 #include "transupport/constants.hpp"
@@ -25,39 +25,6 @@ using std::endl;
 typedef std::vector<double> doubleVec;
 typedef std::vector<signed int> intVec;
 
-/*============================================================================*/
-mtRand::MTRand randGen;
-
-//! choose a random double
-inline double randDouble(){
-    return randGen();
-}
-
-//! Pick a random direction on the unit sphere
-inline void randDirection(std::vector<double>& v){
-    double phi = tranSupport::constants::TWOPI*randDouble();
-    Require(v.size() == 3);
-    
-    v[0] = 2*randDouble() - 1;
-    double mu = std::sqrt(1 - v[0]*v[0]);
-    v[1] = mu*std::cos(phi);
-    v[2] = mu*std::sin(phi);
-}
-
-//! Pick a random position in our geometry
-inline void randPosition(   const std::vector<double> bounds,
-                            const std::vector<double> subtract,
-                            std::vector<double>& position )
-{
-    Require(bounds.size() == 3);
-    Require(subtract.size() == 3);
-    Require(position.size() == 3);
-    // choose x in (-2,2)   y in (0,4)  z in (-2, 2)
-    //
-    for(int i = 0; i < 3; i++){
-        position[i] = bounds[i] * randDouble() - subtract[i];
-    }
-}
 /*============================================================================*/
 void transport(MCGeometry& theGeom, unsigned int oldCellIndex,
                doubleVec& position, doubleVec& direction)
@@ -136,7 +103,7 @@ void testAmrGeometry()
 
     // throw around a bunch of particles to hopefully make sure there are
     // no dead spots, and to build the connectivity 
-    cout << "********** throwing particles around"
+    cout << "********** printing surfaces"
          << endl;
     doubleVec bounds(3, 4.0);
     doubleVec subtract;
@@ -144,20 +111,8 @@ void testAmrGeometry()
     subtract.push_back(0.0);
     subtract.push_back(2.0);
 
-    doubleVec    newPosition;
-    unsigned int newCellIndex;
-    double       distance;
-    MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
+    visualizeSurfaces(theGeom, "amrOut.txt", bounds, subtract);
 
-    for (int i = 0; i < 10000; i++) {
-        randDirection(direction);
-        randPosition(bounds, subtract, position);
-        oldCellIndex = theGeom.findCell(position);
-
-        theGeom.findDistance(position, direction, oldCellIndex, distance);
-        theGeom.findNewCell(position, direction,
-                            newPosition, newCellIndex, returnStatus);
-    }
 //    theGeom.debugPrint();
 }
 /*============================================================================*/
@@ -246,28 +201,11 @@ void testMeshGeometry() {
     transport(geom2, oldCellIndex, position, direction);
 
     // throw particles around
-    cout << "********** throwing particles around"
+    cout << "********** printing surfaces"
          << endl;
-    doubleVec    newPosition(3, 0.0);
-    unsigned int newCellIndex;
-    double       distance;
-    MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
-
     doubleVec bounds(3, numSides);
     doubleVec subtract(3, 0.0);
-
-    for (int i = 0; i < 10000; i++) {
-        randDirection(direction);
-        randPosition(bounds, subtract, position);
-
-        oldCellIndex = geom2.findCell(position);
-
-        geom2.findDistance(position, direction, oldCellIndex, distance);
-        geom2.findNewCell( position, direction,
-                           newPosition, newCellIndex, returnStatus);
-    }
-
-//    geom2.debugPrint();
+    visualizeSurfaces(geom2, "meshOut.txt", bounds, subtract);
 }
 /*============================================================================*/
 void testSphereGeometry() {
@@ -355,14 +293,8 @@ void testSphereGeometry() {
 //         << geom3.getUserIdFromCellIndex(geom3.findCell(position)) << endl;
 
     // throw particles around
-    cout << "********** throwing particles around"
+    cout << "********** printing surfaces"
          << endl;
-    doubleVec    newPosition(3, 0.0);
-    unsigned int newCellIndex;
-    double       distance;
-    MCGeometry::ReturnStatus returnStatus = MCGeometry::NORMAL;
-    unsigned int surfaceCrossId;
-    double       dotProduct;
 
     doubleVec bounds(3, 0.0);
     doubleVec subtract(3, 0.0);
@@ -370,29 +302,20 @@ void testSphereGeometry() {
     bounds[1] = 2.0; subtract[1] = 1.0;
     bounds[2] = 2.0; subtract[2] = 1.0;
 
-    std::fstream outFile;
+    visualizeSurfaces(geom3, "sphereOut.txt", bounds, subtract);
 
-    outFile.open("sphereOut.txt", std::fstream::out);
-
-    for (int i = 0; i < 50000; i++) {
-        randDirection(direction);
-
-        do {
-            randPosition(bounds, subtract, position);
-            oldCellIndex = geom3.findCell(position);
-        } while ( geom3.isDeadCell(oldCellIndex) );
-
-        geom3.findDistance(position, direction, oldCellIndex, distance);
-        geom3.findNewCell( position, direction,
-                           newPosition, newCellIndex, returnStatus);
-        geom3.getSurfaceCrossing( newPosition, direction, surfaceCrossId,
-                dotProduct);
-
-        outFile << surfaceCrossId << "\t" << newPosition[0] << "\t"
-                << newPosition[1] << "\t" << newPosition[2] << endl;
-    }
-    outFile.close();
 //    geom3.debugPrint();
+}
+
+void printComplexGeometry()
+{
+    MCGeometry geo;
+    createComplexGeometry(geo);
+
+    doubleVec bounds(3, 6.0);
+    doubleVec subtract(3, 3.0);
+
+    visualizeSurfaces(geo, "complexOut.txt", bounds, subtract);
 }
 /*============================================================================*/
 int main(int argc, char *argv[]) {
@@ -408,6 +331,8 @@ int main(int argc, char *argv[]) {
         cout << "================== TRICKY GEOMETRY (CURVES)=================="
              << endl;
         testSphereGeometry();
+
+        printComplexGeometry();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "FAILURE: CAUGHT ERROR" << endl
