@@ -101,7 +101,6 @@ inline double vectorNorm( const std::vector<double> &a) {
 // (square root of sum of squares)
 inline double vectorNorm3( const std::vector<double> &a) {
     Require(a.size() == 3);
-    Require(b.size() == 3);
 
     double theSum = 0.0;
     for (unsigned int i = 0; i < 3; ++i) {
@@ -117,7 +116,7 @@ inline double distance( const std::vector<double> &a,
                         const std::vector<double> &b)
 {
     Require(a.size() == 3);
-    Require(a.size() == 3);
+    Require(b.size() == 3);
     double theSum = 0.0;
     double tempDiff;
 
