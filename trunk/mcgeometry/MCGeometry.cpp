@@ -3,7 +3,8 @@
  * \brief MCGeometry class
  * \author Seth R. Johnson
  * 
- * MCGeometry holds the bulk of the .
+ * MCGeometry holds the bulk of the code to interface with the user. Putting it
+ * in a cpp file allows isolation from other parts of the user's code.
  */
 
 #include <utility>

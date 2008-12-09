@@ -79,9 +79,7 @@ private:
     const std::vector<double> _axis;
     //! cylinder radius
     const double _radius;
-
 };
-
 /*----------------------------------------------------------------------------*/
 // Equation: (X-P)^2 - [(X-P).U]^2 - R^2 = 0
 //      X = position 
@@ -188,23 +186,24 @@ template<unsigned int axis>
 class CylinderNormal : public Surface {
 public:
     //! User-called constructor.
-    CylinderNormal( double radius )
-        : _radius(radius) 
+    CylinderNormal( const std::vector<double>& point,
+                    double radius )
+        : _pointOnAxis(point), _radius(radius) 
     {
         Require( _radius > 0.0 );
     }
 
     //! Copy the surface with a new user ID.
-    CylinderNormal(const CylinderNormal& oldCylinder,
+    CylinderNormal(const CylinderNormal<axis>& oldCylinder,
                    const UserSurfaceIdType& newId)
-        : Surface(newId),
+        : Surface(oldCylinder, newId),
           _radius(oldCylinder._radius)
     { /* * */ }
 
 
     //! Create a "new" copy of the surface.
     Surface* clone(const UserSurfaceIdType& newId) const {
-        return new CylinderNormal(*this, newId);
+        return new CylinderNormal<axis>(*this, newId);
     }
 
     ~CylinderNormal() { /* * */ }
@@ -231,46 +230,52 @@ private:
     //! cylinder radius
     const double _radius;
 
+    //! Return unrolled (x .* x) for vector x tailored to this axis
+    double _dotProduct( const std::vector<double>& x,
+                        const std::vector<double>& y) const;
 };
 /*----------------------------------------------------------------------------*/
-template<>
-inline bool CylinderNormal<0>::hasPosSense(
-                const std::vector<double>& position) const
+template<unsigned int axis>
+inline double CylinderNormal<axis>::_dotProduct(
+                        const std::vector<double>& x,
+                        const std::vector<double>& y) const
 {
-    Require(position.size() == 3);
-
-    double eval = 
-              position[1] * position[1]
-            + position[2] * position[2] 
-            - _radius * _radius;
-
-    return _hasPosSense( eval );
+    Insist(0, "You, sir, are a failure.");
+    return -1.0;
 }
 
 template<>
-inline bool CylinderNormal<1>::hasPosSense(
-                const std::vector<double>& position) const
+inline double CylinderNormal<0>::_dotProduct(
+                        const std::vector<double>& x,
+                        const std::vector<double>& y) const
 {
-    Require(position.size() == 3);
-
-    return _hasPosSense(
-              position[0] * position[0]
-            + position[2] * position[2] 
-            - _radius * _radius
-            );
+    return x[1] * y[1] + x[2] * y[2];
 }
 
 template<>
-inline bool CylinderNormal<2>::hasPosSense(
+inline double CylinderNormal<1>::_dotProduct(
+                        const std::vector<double>& x,
+                        const std::vector<double>& y) const
+{
+    return x[0] * y[0] +  x[2] * y[2];
+}
+
+template<>
+inline double CylinderNormal<2>::_dotProduct(
+                        const std::vector<double>& x,
+                        const std::vector<double>& y) const
+{
+    return x[0] * y[0] +  x[1] * y[1];
+}
+
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline bool CylinderNormal<axis>::hasPosSense(
                 const std::vector<double>& position) const
 {
     Require(position.size() == 3);
 
-    return _hasPosSense(
-            position[0] * position[0]
-            + position[1] * position[1] 
-            - _radius * _radius
-            );
+    return _hasPosSense( _dotProduct(position, position) - _radius * _radius);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
@@ -280,42 +285,57 @@ inline void CylinderNormal<axis>::intersect(
                 const bool posSense,
                 bool& hit, double& distance) const
 {
-    Insist(0, "Not yet implemented.");
-    return _calcQuadraticIntersect(0.0, 0.0, 0.0, posSense, hit, distance);
-}
-
-template<>
-inline void CylinderNormal<2>::intersect(
-                const std::vector<double>& position, 
-                const std::vector<double>& direction,
-                const bool posSense,
-                bool& hit, double& distance) const
-{
     Require(direction.size() == 3);
     Require(position.size() == 3);
 
-    double A = direction[0] * direction[0]
-             + direction[1] * direction[1];
+    //temporary for now
+    Insist(softEquiv(_pointOnAxis, std::vector<double>(3,0.0)),
+            "As of now, CylinderNormal must be on the axis.");
 
-    double B = direction[0] * position[0]
-             + direction[1] * position[1];
+    double A = _dotProduct(direction, direction);
 
-    double C = direction[0] * direction[0]
-             + direction[1] * direction[1]
-             - _radius * _radius;
+    double B = _dotProduct(direction, position);
+
+    double C = _dotProduct(position, position) - _radius*_radius;
 
     return _calcQuadraticIntersect(A, B, C, posSense,
                                    hit, distance);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-inline std::ostream& CylinderNormal<axis>::_output( std::ostream& os ) const
+inline void CylinderNormal<axis>::normalAtPoint(
+                        const std::vector<double>& position,
+                        std::vector<double>& unitNormal) const
 {
-    os  << "[ CYL  Axis: " << std::setw(10) << axis 
+    Require(position.size() == 3);
+
+    Insist(0, "Not yet implemented.");
+
+    Ensure(softEquiv(tranSupport::vectorNorm(unitNormal), 1.0));
+}
+/*----------------------------------------------------------------------------*/
+template<>
+inline std::ostream& CylinderNormal<0>::_output( std::ostream& os ) const
+{
+    os  << "[ CYLX: "
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
-/*============================================================================*/
+/*----------------------------------------------------------------------------*/
+template<>
+inline std::ostream& CylinderNormal<1>::_output( std::ostream& os ) const
+{
+    os  << "[ CYLY: "
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}/*----------------------------------------------------------------------------*/
+template<>
+inline std::ostream& CylinderNormal<2>::_output( std::ostream& os ) const
+{
+    os  << "[ CYLZ: "
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}/*============================================================================*/
 
 //! provide typedefs for user interaction
 typedef CylinderNormal<0> CylinderX;

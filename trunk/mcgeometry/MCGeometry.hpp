@@ -3,11 +3,10 @@
  * \brief Geometry class
  * \author Seth R. Johnson et al.
  * 
- *
  * Copyright (c) 2008, Seth R. Johnson, Jeremy L. Conlin
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
+ */ 
+/* Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
  *     * Redistributions of source code must retain the above copyright notice,
@@ -88,10 +87,10 @@ public:
 
     //! ReturnStatus indicates whether it interacted with a special geometry.
     enum ReturnStatus {
-        NORMAL    = 0,
-        DEADCELL,
-        REFLECTED,
-        LOST  // God help us all if this is ever returned!
+        NORMAL    = 0,  //! Business as usual in the particle world
+        DEADCELL,       //! New cell is a dead cell
+        REFLECTED,      //! Particle hit a reflecting surface
+        LOST            //! God help us all if this is ever returned!
     };
 
     //! Vector of signed integers that are passed in by the user and parsed
