@@ -15,6 +15,7 @@
 #include <vector>
 #include <cmath>
 #include "transupport/dbc.hpp"
+#include "transupport/constants.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
 //#include "transupport/VectorPrint.hpp"
@@ -225,12 +226,47 @@ void runTestC() {
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 }
 /*============================================================================*/
+// test some surface normal stuff
+void runTestD() {
+    /* * * create cylinder 45 degrees in xy plane* * */
+    double radius = 1.0;
+    doubleVec center(3,0.0);
+    doubleVec axis(3,0.0);
+
+    axis[0] = tranSupport::constants::SQRTHALF;
+    axis[1] = tranSupport::constants::SQRTHALF;
+
+    Cylinder theCylinder(center, axis, radius);
+
+    doubleVec particleLoc(3,0.0);
+
+    particleLoc[0] = -tranSupport::constants::SQRTHALF;
+    particleLoc[1] =  tranSupport::constants::SQRTHALF;
+    particleLoc[2] = 0.0;
+
+    doubleVec expectedNormal(3,0.0);
+    expectedNormal[0] = -tranSupport::constants::SQRTHALF;
+    expectedNormal[1] =  tranSupport::constants::SQRTHALF;
+    expectedNormal[2] = 0.0;
+
+
+    doubleVec returnedNormal;
+    theCylinder.normalAtPoint(particleLoc, returnedNormal);
+    TESTER_CHECKFORPASS(softEquiv(returnedNormal, expectedNormal, 1.e-14));
+
+    particleLoc[0] += 2.0;
+    particleLoc[1] += 2.0;
+    theCylinder.normalAtPoint(particleLoc, returnedNormal);
+    TESTER_CHECKFORPASS(softEquiv(returnedNormal, expectedNormal, 1.e-14));
+}
+/*============================================================================*/
 int main(int argc, char *argv[]) {
     TESTER_INIT("Cylinder");
     try {
         runTestA();
         runTestB();
         runTestC();
+        runTestD();
     }
     catch (tranSupport::tranError &theErr) {
         cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl

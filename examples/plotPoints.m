@@ -1,6 +1,6 @@
 % amrOut.txt complexOut.txt meshOut.txt sphereOut.txt
 
-readData = readtext('../sphereOut.txt', '\t', '', '"','numeric-empty2zero');
+readData = readtext('../complexOut.txt', '\t', '', '"','numeric-empty2zero');
 
 figure(1)
 clf
