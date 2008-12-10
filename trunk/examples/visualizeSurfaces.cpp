@@ -76,14 +76,16 @@ void visualizeSurfaces( mcGeometry::MCGeometry& geo,
     MCGeometry::ReturnStatus returnStatus;
     unsigned int surfaceCrossId;
     double       dotProduct;
+    unsigned int j = 0;
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; (i < 10000) && (j < 20000); i++) {
         randDirection(direction);
 
         do {
             randPosition(bounds, subtract, position);
             oldCellIndex = geo.findCell(position);
-        } while ( geo.isDeadCell(oldCellIndex) );
+            j++;
+        } while ( geo.isDeadCell(oldCellIndex) && (j < 20000));
 
         returnStatus = MCGeometry::NORMAL;
         while (returnStatus != MCGeometry::DEADCELL)
@@ -100,6 +102,8 @@ void visualizeSurfaces( mcGeometry::MCGeometry& geo,
 
             oldCellIndex = newCellIndex;
             position = newPosition;
+
+            j++;
         }
     }
     outFile.close();
