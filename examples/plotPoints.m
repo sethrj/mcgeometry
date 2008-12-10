@@ -1,6 +1,6 @@
 % amrOut.txt complexOut.txt meshOut.txt sphereOut.txt
 
-readData = readtext('../complexOut.txt', '\t', '', '"','numeric-empty2zero');
+readData = readtext('../sphereOut.txt', '\t', '', '"','numeric-empty2zero');
 
 figure(1)
 clf
@@ -19,9 +19,10 @@ colorLen = length(colors);
 for i = 1:highestSurface
    indices = readData(:,1) == i;
    plot3(readData(indices,2),readData(indices,3),readData(indices,4),...
-      'MarkerEdgeColor',colors{mod(i - 1,colorLen) + 1},'Marker','.','MarkerSize',6,...
+      'MarkerEdgeColor',colors{mod(i - 1,colorLen) + 1},'Marker','.','MarkerSize',4,...
       'LineStyle','none')
    hold on
 end
 hold off
 axis equal
+view(2)

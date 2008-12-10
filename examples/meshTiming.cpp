@@ -70,7 +70,12 @@ int main(int argc, char* argv[]){
     TIMER_START("4 Run with full neighborhood (second full sweep)");
     MeshTiming(N, Geo, true);
     TIMER_STOP("4 Run with full neighborhood (second full sweep)");
-    
+
+    cout << "Running full sweep once more..." << endl;
+    TIMER_START("5 Run with full neighborhood (third full sweep)");
+    MeshTiming(N, Geo, true);
+    TIMER_STOP("5 Run with full neighborhood (third full sweep)");    
+
     TIMER_PRINT();
     return 0;
 }

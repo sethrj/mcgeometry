@@ -6,6 +6,7 @@
  * Copyright (c) 2008, Seth R. Johnson, Jeremy L. Conlin
  * All rights reserved.
  */ 
+
 /* Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
@@ -87,10 +88,10 @@ public:
 
     //! ReturnStatus indicates whether it interacted with a special geometry.
     enum ReturnStatus {
-        NORMAL    = 0,  //! Business as usual in the particle world
-        DEADCELL,       //! New cell is a dead cell
-        REFLECTED,      //! Particle hit a reflecting surface
-        LOST            //! God help us all if this is ever returned!
+        NORMAL    = 0,  //!< Business as usual in the particle world
+        DEADCELL,       //!< New cell is a dead cell
+        REFLECTED,      //!< Particle hit a reflecting surface
+        LOST            //!< God help us all if this is ever returned!
     };
 
     //! Vector of signed integers that are passed in by the user and parsed
@@ -128,6 +129,15 @@ public:
      *  \param[in]  direction    Current particle direction.
      *  \param[in]  oldCellIndex Current particle internal cell index.
      *  \param[out] distance     Distance to intersecting a surface.
+     *  
+     *  This function loops over every surface inside the old cell, and finds
+     *  the surface that is the smallest distance away. It caches this closest
+     *  surface and distance for later, and returns to the user the closest
+     *  distance.
+     *
+     *  If the geometry is completely defined (i.e. there are no missing gaps
+     *  and the outside is properly defined with "dead cells"), it will always
+     *  return a finite distance.
      */
     void findDistance(      const std::vector<double>& position,
                             const std::vector<double>& direction,
@@ -142,15 +152,58 @@ public:
      *  \param[out] newPosition  Particle's new position at the surface.
      *  \param[out] newCellIndex Internal cell index of the new cell.
      *  \param[out] returnStatus Extra information about the transport.
+     *
+     *  Using the cached \c oldCellIndex and \c hitSurface from \c
+     *  findDistance(),  we find the cell on the other side of the hit surface.
+     *
+     *  First, we
+     *  check to see if the surface we hit is reflecting: if so, no further
+     *  work is necessary, and we set the returnStatus to
+     *  \c MCGeometry::REFLECTED .
+     *
+     *  Next, we ask the old cell for the "neighborhood" of cells that it knows
+     *  are on the other side of that surface. We loop for each of those,
+     *  calling \c CellT::isPointInside(), passing the surface that the
+     *  particle just crossed. 
+     *  \note
+     *  We \e never check the surface that a particle
+     *  crossed, partly because it requires extra computational effort, and
+     *  partly because being exactly on that surface may cause a cell to
+     *  wrongly believe the particle is outside it, depending on how the
+     *  surface normal is defined.
+     *
+     *  If the particle is inside one of these cells, we return.
+     *
+     *  If not, we loop over every cell in \c _surfToCellConnectivity that
+     *  corresponds to the hit surface in the opposite surface sense that the
+     *  old cell has. (To restate, any cell on the other side of the current
+     *  cell \e must have the opposite surface sense of the crossed surface.)
+     *  We call \c CellT::isPointInside() on each one of these, and eventually
+     *  find the new cell. When this occurs, we \c push_back a pointer to the
+     *  new cell onto the old cell's neighborhood list, and we \c push_back a
+     *  pointer to the old cell on the new cell's neighborhood list.
+     *
+     *  Depending on how complex the geometry is, there is an O(epsilon) chance
+     *  of hitting a point that is inside a cell which is "indirectly" connected
+     *  to the current cell. (See \c examples/trickyGeometry.cpp in the case of
+     *  streaming upward into a tangent sphere/plane/cylinder.) In this case,
+     *  before declaring a particle lost, we do a global search on the
+     *  particle's new position.
+     *
+     *  If that turns up nothing, then the user's geometry is most certainly
+     *  flawed.
+     *
+     *  This function is ONLY valid after calling findDistance to calculate the
+     *  surface crossing in a given transport iteration. The position and
+     *  direction are expected to be unchanged between calling findDistance and
+     *  findNewCell. Although this is checked when \c DBC is 7, it is not
+     *  checked with debug code off.
      */
     void findNewCell(       const std::vector<double>& position,
                             const std::vector<double>& direction,
                             std::vector<double>& newPosition,
                             unsigned int& newCellIndex,
                             ReturnStatus& returnStatus);
-
-    // we may have to add further code to pass back a surface ID for a surface
-    // tally, for example
 
     //!\brief Calculate distance to next cell *and* do the next-cell calculation
     //! in one go.
@@ -175,6 +228,7 @@ public:
      *  \param[in]  oldDirection Particle direction before reflecting
      *  \param[out] newDirection Direction after reflecting
      *
+     *  This function is ONLY valid after calling findDistance.
      */
     void reflectDirection(  const std::vector<double>& newPosition,
                             const std::vector<double>& oldDirection,

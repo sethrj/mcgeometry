@@ -235,15 +235,6 @@ private:
                         const std::vector<double>& y) const;
 };
 /*----------------------------------------------------------------------------*/
-template<unsigned int axis>
-inline double CylinderNormal<axis>::_dotProduct(
-                        const std::vector<double>& x,
-                        const std::vector<double>& y) const
-{
-    Insist(0, "You, sir, are a failure.");
-    return -1.0;
-}
-
 template<>
 inline double CylinderNormal<0>::_dotProduct(
                         const std::vector<double>& x,
@@ -257,7 +248,7 @@ inline double CylinderNormal<1>::_dotProduct(
                         const std::vector<double>& x,
                         const std::vector<double>& y) const
 {
-    return x[0] * y[0] +  x[2] * y[2];
+    return x[0] * y[0] + x[2] * y[2];
 }
 
 template<>
@@ -265,7 +256,7 @@ inline double CylinderNormal<2>::_dotProduct(
                         const std::vector<double>& x,
                         const std::vector<double>& y) const
 {
-    return x[0] * y[0] +  x[1] * y[1];
+    return x[0] * y[0] + x[1] * y[1];
 }
 
 /*----------------------------------------------------------------------------*/
