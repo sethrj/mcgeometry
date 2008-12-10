@@ -1,0 +1,19 @@
+#import os
+
+Import('env')
+e = env.Clone()
+
+sourceFiles = Glob('*.cpp')
+
+#Compile all the source files together into a library
+lib = e.StaticLibrary(target = 'transupport', source = sourceFiles)
+Default(lib)
+
+#Install header files, optionally
+Import('installHeaders')
+Import('installLibrary')
+installHeaders(e, Glob('*.hpp'))
+installLibrary(e, lib)
+
+#compile unit tests
+SConscript('tests/SConscript')

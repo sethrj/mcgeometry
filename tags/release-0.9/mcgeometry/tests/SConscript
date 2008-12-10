@@ -1,0 +1,21 @@
+import re
+
+Import('env')
+Import('useLibrary')
+e = env.Clone()
+
+useLibrary(e, 'transupport')
+useLibrary(e, 'mcgeometry')
+
+Import('outputDirPath')
+testDirPath     = outputDirPath + 'test/mcgeometry/'
+
+################## SET UP REAL WORK ##################
+# Compile test executables
+sourceFiles = Glob('*.cpp', strings=True)
+
+for file in sourceFiles:
+	execName = re.sub(r'\.cpp$','',file)
+	if (execName != "tTemplate"):
+		prog = e.Program(testDirPath + execName, file)
+		Alias('test',prog)
