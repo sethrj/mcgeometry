@@ -14,7 +14,7 @@ worthless.
 
  ============================= 0.9 (revision 81) =============================
     [ 2.4 GHz Intel Core 2 Duo, 4 GB 667 MHz DDR2 SDRAM, Mac OS X 10.5.5
-	   gcc 4.0.1 (apple-compiled ]
+	   gcc 4.0.1 (apple-compiled) ]
 
 bin/meshComparison 50 10000000 0
 ---------------------------------------------------------------------------

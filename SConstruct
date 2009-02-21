@@ -52,6 +52,10 @@ install:  copy libraries and headers to prefix directory
 test:     build unit tests
 examples: build example binaries
 all:      make libraries, unit tests, and examples
+
+Setting up an install directory:
+			scons prefix=/Users/Shared/_local/
+			scons install
 """)
 
 #### print detailed build log?
@@ -121,8 +125,3 @@ SConscript('examples/SConscript',variant_dir=(buildDir + 'examples'))
 
 #print "BUILD_TARGETS is", map(str, BUILD_TARGETS)
 
-## automatically run unit tests with 'test' target
-#doRun = env.Command(buildDir + 'testout.txt', \
-#					 	  outputDirPath + 'test/runTests.py', \
-#						  'python $SOURCE > $TARGET') 
-#Alias('test',doRun)

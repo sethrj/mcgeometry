@@ -6,11 +6,12 @@
 ## Run each unit test inside the /bin/test/ folder
 ## 
 
-import sys, os, glob, re
+import sys, os, subprocess, glob, re
 
 ##! Path name to the current directory
 pathName = os.path.dirname(sys.argv[0])
 if (len(sys.argv) > 1):
+	print "Current directory: ", os.getcwd()
 	pathName = sys.argv[1];
 
 
@@ -40,11 +41,17 @@ for file in testFiles:
 		passedCount = 0
 		failedCount = 0
 
-		results = os.popen(file).readlines();
+		results = subprocess.Popen(file, \
+						stdout=subprocess.PIPE, \
+						stderr=subprocess.STDOUT).communicate()[0];
+
 		OUTPUT.writelines(results)
-		for line in results:
+		for line in results.split('\n'):
 			if re.match('  PASSED:', line):
 				passedCount += 1
+			if re.match('Segmentation fault', line):
+				failedCount += 1
+				print '  /---- Unit test %s segfaulted!' % file
 			if re.match('  FAILED:', line):
 				failedCount += 1
 				print '  /---- Unit test %s failed' % file
