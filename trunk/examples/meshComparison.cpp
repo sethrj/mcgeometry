@@ -293,10 +293,10 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
 // one non-zero term the dot products are just the product of two numbers
 inline double distanceToPlane(int cellIndex, double x, double v)
 {
-    if( v > 0 ){    // Moving in positive direction
+    if ( v > 0 ) {    // Moving in positive direction
         return (cellIndex + 1.0 - x)/v;
     }
-    else{
+    else {
         //return (x - cellIndex)/fabs(v);
         return (cellIndex - x) / v;
     }
