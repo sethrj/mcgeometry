@@ -113,6 +113,22 @@ bool SuperTimer::resetTimer(string timerName) {
 
     return true;
 }
+/*----------------------------------------------------------------------------*/
+void SuperTimer::resetAllTimers()
+{
+    TimerMap::iterator it;
+
+    bool success = true;
+    for (it = theTimers.begin(); it != theTimers.end(); it++) {
+        Timer& curTimer = *(it->second);
+        success = success && curTimer.reset();
+    }
+
+    if (!success) {
+        cout << "An error occurred while resetting the timers." << endl;
+    }
+}
+
 
 /*----------------------------------------------------------------------------*/
 double SuperTimer::getTimeForTimer(string timerName) {

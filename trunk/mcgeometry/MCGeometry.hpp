@@ -86,6 +86,10 @@ public:
     //! We only use one kind of templated cell.
     typedef Cell<UserCellIDType> CellT;
 
+    //! Vector of signed integers that are passed in by the user and parsed
+    //! into surfaces and sense.
+    typedef std::vector<signed int>                 IntVec;
+
     //! ReturnStatus indicates whether it interacted with a special geometry.
     enum ReturnStatus {
         NORMAL    = 0,  //!< Business as usual in the particle world
@@ -94,9 +98,9 @@ public:
         LOST            //!< God help us all if this is ever returned!
     };
 
-    //! Vector of signed integers that are passed in by the user and parsed
-    //! into surfaces and sense.
-    typedef std::vector<signed int>                 IntVec;
+    /*------------------------------------------------------------*/
+    //! \name Geometry setup
+    //\{
 
     /*!
      * \brief Add a new \c Surface to our geometry, with an associated user ID.
@@ -119,6 +123,10 @@ public:
     //! Do optimization after input is finished, check geometry for duplicate
     //! surfaces, etc.
     void completedGeometryInput();
+
+    //\}
+    //! \name Particle transport
+    //\{
 
     /*!
      * \brief Find the distance to the closest geometry interaction.
@@ -250,28 +258,36 @@ public:
                                 UserSurfaceIDType& surfaceCrossingUserId,
                                 double&       dotProduct);
 
+    //\}
+    /*------------------------------------------------------------*/
+    //! \name Problem information
+    //\{
+    
     //! Find a cell given an arbitrary point in the problem.
     unsigned int findCell(const std::vector<double>& position) const;
 
     //! See whether a given cell is a dead cell.
     bool isDeadCell(const unsigned int cellIndex) const;
 
-    //! Print a user-readable copy of all our geometry information.
-    void debugPrint() const;
-
     //! Return the number of cells we have stored.
     unsigned int getNumCells() const {
         return _cells.size();
     }
 
-    //! Returns the number of surfaces we have stored.
+    //! \brief Return the number of surfaces we have stored.
     //!
     //! This will not necessarily be the number of surfaces that are used.
     unsigned int getNumSurfaces() const {
         return _surfaces.size();
     }
 
-    // ======= user ID to internal index translation ======= //
+    //! Print a user-readable copy of all our geometry information.
+    void debugPrint() const;
+
+    //\}
+    /*------------------------------------------------------------*/
+    //! \name User ID to internal index translation
+    //\{
 
     //! Get an internal index for a cell from a user ID.
     unsigned int getCellIndexFromUserId(
@@ -288,6 +304,8 @@ public:
     //! Get a user ID for a surface from a surface internal index.
     UserSurfaceIDType getUserIdFromSurfaceIndex(
                     const unsigned int index) const;
+    //\}
+    /*------------------------------------------------------------*/
 
     //! Constructor.
     MCGeometry();
