@@ -1,6 +1,6 @@
 /*!
  * \file <+TODO+>
- * \brief Unit tests for <+TODO+>
+ * \brief Unit tests for \c <+TODO+>
  * \author Seth R. Johnson
  */
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
    catch (tranSupport::tranError &theErr) {
       cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl
          << theErr.what() << endl;
-      TESTER_CHECKFORPASS(false);
+      TESTER_CHECKFORPASS(CAUGHT_UNEXPECTED_EXCEPTION);
    }
 
    TESTER_PRINTRESULT();

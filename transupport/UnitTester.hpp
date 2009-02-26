@@ -72,8 +72,6 @@ private:
 }
 /*============================================================================*/
 
-#ifndef CHECKFORPASS
-
 //! initialize unit tester
 #define TESTER_INIT(name) \
    tranSupport::UnitTester::Instance().setName((name));
@@ -91,8 +89,8 @@ private:
 #define TESTER_PRINTRESULT() \
    tranSupport::UnitTester::Instance().printResult();
 
-#endif
-
+//! so that the output is more legible if we fail in the catch block
+#define CAUGHT_UNEXPECTED_EXCEPTION false
 
 /*----------------------------------------------------------------------------*/
 #endif

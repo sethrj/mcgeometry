@@ -16,8 +16,6 @@
 #include <map>
 #include <ctime>
 
-using std::string;
-
 namespace tranSupport {
 
 /*----------------------------------------------------------------------------*/
@@ -65,7 +63,7 @@ private:
 
 /*----------------------------------------------------------------------------*/
 
-//! a singleton class that contains a string-referenced map of many timers
+//! a singleton class that contains a std::string-referenced map of many timers
 class SuperTimer {
 
 public:
@@ -77,16 +75,19 @@ public:
     }
 
     //! start a timer; return success
-    bool startTimer(string timerName);
+    bool startTimer(std::string timerName);
 
     //! stop a timer; return success
-    bool stopTimer(string timerName);
+    bool stopTimer(std::string timerName);
 
     //! reset a timer; return success
-    bool resetTimer(string timerName);
+    bool resetTimer(std::string timerName);
+
+    //! Reset all the timers
+    void resetAllTimers();
 
     //! get the time from a timer in second
-    double getTimeForTimer(string timerName);
+    double getTimeForTimer(std::string timerName);
 
     //! print all the timers
     void printTimers();
@@ -100,8 +101,8 @@ private:
     //! disallow assignment
     SuperTimer& operator=(SuperTimer const&) { /* * */ return *this; }
 
-    //! Translate string to an actual timer.
-    typedef std::map<string, Timer* >  TimerMap;
+    //! Translate std::string to an actual timer.
+    typedef std::map<std::string, Timer* >  TimerMap;
 
     //! All the timers in the problem.
     TimerMap theTimers;

@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     catch (tranSupport::tranError &theErr) {
         cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl
             << theErr.what() << endl;
-        TESTER_CHECKFORPASS(false);
+        TESTER_CHECKFORPASS( CAUGHT_UNEXPECTED_EXCEPTION );
     }
 
     TESTER_PRINTRESULT();
