@@ -229,9 +229,11 @@ void MCGeometry::findNewCell(
 
     // TODO: when looping through the other cells in the problem, exclude the
     // ones that we already checked in the cell's hood; means more loops but
-    // fewer flops in the "is inside" method calls
+    // fewer flops in the "is inside" method calls ??
 
-    newCellIndex = -1;
+    // at this point, particle is LOST. We pretend it's in the same cell as it
+    // was?
+    newCellIndex = _findCache.oldCellIndex;
     returnStatus = LOST;
 
     _failGeometry("Ruh-roh, new cell not found!",

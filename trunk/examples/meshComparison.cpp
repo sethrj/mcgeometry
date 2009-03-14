@@ -129,7 +129,7 @@ int main(int argc, char* argv[]){
 void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
 {
 
-    double numCells = size*size*size;    // Number of cells in mesh
+    unsigned int numCells = size*size*size;    // Number of cells in mesh
     PLTally.resize(numCells);
 
     std::vector<double> position(3,0.0);
@@ -153,7 +153,7 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
         source(size, position, direction);
         
         for (int i = 0; i < 3; i++)
-            cellIndex[i] = std::floor(position[i]);
+            cellIndex[i] = static_cast<int>(position[i]); // floors it
 
         while( isInside(size, cellIndex) ){
 
@@ -228,7 +228,7 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
                     TallyVec& PLTally)
 {
 
-    double numCells = size*size*size;    // Number of cells in mesh
+    unsigned int numCells = size*size*size;    // Number of cells in mesh
     PLTally.resize(numCells);
 
     std::vector<double> position(3,0.0);
@@ -357,8 +357,12 @@ inline double getXsn(const int cell) {
 inline unsigned int getCell(const std::vector<double>& position, const int size)
 {
     Require(position.size() == 3);
-    return std::floor(position[0]) + (size)*std::floor(position[1])
-                 + (size*size)*std::floor(position[2]);
+    Require(position[0] >= 0.0);
+    Require(position[1] >= 0.0);
+    Require(position[2] >= 0.0);
+    return static_cast<unsigned int>(position[0])
+        + (size)*static_cast<unsigned int>(position[1])
+        + (size*size)*static_cast<unsigned int>(position[2]);
 }
 mtRand::MTRand randGen;
 
