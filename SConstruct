@@ -36,10 +36,18 @@ vars = Variables(['variables.cache'])
 vars.Add(ListVariable('DBC',  'Design by contract', 7, map(str, range(8)) ))
 vars.Add(BoolVariable('DEBUG','Turn optimization off', True))
 vars.Add(BoolVariable('VERBOSE','Show all compiling info', False))
+vars.Add(BoolVariable('USEENV','Import the local environment variables', False))
 vars.Add(PathVariable('prefix','Optional install location for libraries and header files','.'))
 
 # create a new "Environment" from which everything is built
 env = Environment(variables = vars)
+# if we're supposed to use the shell environment variables, we have to create a
+# new Environment object and pass in those variables, since otherwise we'll use
+# the original path for all of the tools
+if env['USEENV'] == True:
+    import os
+    env = Environment(ENV = os.environ, variables = vars) 
+    print "NOTICE: Setting environment variables to those of parent shell."
 
 # save the variables as new defaults in a cache
 vars.Save('variables.cache', env)
@@ -71,7 +79,6 @@ print env.subst("Using C++ compiler $CXX version $CXXVERSION")
 print env.subst("Using design by contract options DBC=${DBC}")
 
 env.Append(CPPDEFINES = {'DBC' : '${DBC}'} )
-
 
 buildDir = "#build/"
 outputDirPath = "#bin/"

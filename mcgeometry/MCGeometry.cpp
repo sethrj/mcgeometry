@@ -8,6 +8,7 @@
  */
 
 #include <utility>
+#include <limits>
 #include <map>
 #include <vector>
 
