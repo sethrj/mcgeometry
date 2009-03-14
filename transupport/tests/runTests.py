@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 ## \file runTests.py
 ## \brief Execute all the unit tests in TranSupport.
 ## \author Seth R. Johnson
@@ -12,7 +12,7 @@ import sys, os, subprocess, glob, re
 pathName = os.path.dirname(sys.argv[0])
 if (len(sys.argv) > 1):
 	print "Current directory: ", os.getcwd()
-	pathName = sys.argv[1];
+	pathName = sys.argv[1]
 
 
 outputFileName = 'testresults.txt'
@@ -43,7 +43,7 @@ for file in testFiles:
 
 		results = subprocess.Popen(file, \
 						stdout=subprocess.PIPE, \
-						stderr=subprocess.STDOUT).communicate()[0];
+						stderr=subprocess.STDOUT).communicate()[0]
 
 		OUTPUT.writelines(results)
 		for line in results.split('\n'):
