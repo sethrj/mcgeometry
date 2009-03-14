@@ -26,10 +26,20 @@ namespace tranSupport {
  * It knows the startClock, and subtracts the ending computer clock whenever
  * "stop" is called.
  *
+ * Note that on some systems, std::clock() returns a number relative to the
+ * start of the program, and the timing resolution may be arbitrarily coarse, so
+ * a timer started at the beginning and stopped soon after may show a startClock
+ * of zero and a total time of zero, even though it's actually been run.
+ *
  */
 class Timer {
     friend std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& theTimer);
 
+public:
+    enum TimerStatus {
+        NOTYETRUN = 0, 
+        RUNNING,
+        FINISHED};
 public:
     //! Start the timer. This fails if it has already run or is running.
     bool start();
@@ -43,8 +53,13 @@ public:
         return elapsedTime;
     }
 
+    //! return the run status
+    TimerStatus getRunStatus() const {
+        return runStatus;
+    }
+
     //! constructor: initialize the timer
-    Timer() : isRunning(false), startClock(0), elapsedTime(0)
+    Timer() : runStatus(NOTYETRUN), startClock(0), elapsedTime(0)
         { /* * */ }
 
     //! Return the estimated minimum timing resolution.
@@ -54,7 +69,7 @@ public:
 
 private:
     //! Are we running?
-    bool             isRunning;
+    Timer::TimerStatus runStatus;
     //! What time did we start?
     std::clock_t     startClock;
     //! Elapsed time in seconds.

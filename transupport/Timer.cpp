@@ -184,7 +184,7 @@ SuperTimer::~SuperTimer() {
 /*============================================================================*/
 bool Timer::start() {
 
-    if (isRunning) {
+    if (runStatus) {
         // can't start it while it's running!
 
         return false;
@@ -195,19 +195,19 @@ bool Timer::start() {
         return false;
     }
 
-    isRunning = true;
+    runStatus = RUNNING;
     startClock = std::clock();
 
     return true;
 }
 
 bool Timer::stop() {
-    if (isRunning) {
+    if (runStatus == RUNNING) {
         std::clock_t stopClock = std::clock();
 
         elapsedTime = (stopClock - startClock) / (1.0 * CLOCKS_PER_SEC);
 
-        isRunning = false;
+        runStatus = FINISHED;
     } else {
     //    cout << "Whoops, tried to stop a timer that was already stopped." 
     //          << endl;
@@ -217,21 +217,20 @@ bool Timer::stop() {
 }
 
 bool Timer::reset() {
-    if (isRunning) {
+    if (runStatus == RUNNING ) {
         // should not be called during run, but reset it anyway
         // and return false to let someone know we're not happy
-        isRunning  = false;
+        runStatus  = NOTYETRUN;
         startClock = 0;
         elapsedTime = 0.0;
 
         return false;
-    } else if (startClock == 0 && elapsedTime == 0.0) {
-        // it looks like the thing has never been run
-        // so return false
-
+    } else if (runStatus == NOTYETRUN) {
+        // something's wrong if we try to reset a timer that's never been run
         return false;
     }
 
+    runStatus  = NOTYETRUN;
     startClock = 0;
     elapsedTime = 0.0;
         
@@ -240,9 +239,9 @@ bool Timer::reset() {
 
 std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& t)
 {
-    if (t.isRunning) {
+    if (t.getRunStatus() == tranSupport::Timer::RUNNING) {
         os << "STILL RUNNING";
-    } else if (t.startClock == 0) {
+    } else if (t.getRunStatus() == tranSupport::Timer::NOTYETRUN) {
         os << "NOT YET RUN";
     } else {
         // need to make an intermediate string in case we had just done
@@ -250,7 +249,7 @@ std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& t)
         ostringstream temp;
 
         temp << std::setprecision(3) << std::setiosflags(std::ios::fixed)
-              << t.elapsedTime * 1000 << "ms";
+              << t.getElapsedTime() * 1000 << "ms";
 
         os << temp.str();
     }
