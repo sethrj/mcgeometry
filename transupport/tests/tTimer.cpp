@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 	bool successfulTrial = true;
 
 	TIMER_START("Reset");
-	wait(0.001);
+	wait(0.01);
 	TIMER_STOP("Reset");
 
 	try {
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 	}
 	TESTER_CHECKFORPASS(successfulTrial);
 
-	TESTER_CHECKFORPASS(theTimer.getTimeForTimer("Reset") == 0.0);
+	TESTER_CHECKFORPASS(theTimer.getTimeForTimer("Reset") == -1.0);
 
 	// ===== try to stop a nonexistent timer  ===== //
 	caughtError = false;
