@@ -9,7 +9,6 @@
 #include "transupport/<+header+>.hpp"
 
 #include <iostream>
-#include <vector>
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
