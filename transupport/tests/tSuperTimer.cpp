@@ -1,12 +1,12 @@
 /*!
- * \file tTimer.cpp
- * \brief Unit tests for the Timer class.
+ * \file tSuperTimer.cpp
+ * \brief Unit tests for the SuperTimer class.
  * \author Seth R. Johnson
  */
 
 /*----------------------------------------------------------------------------*/
 
-#include "transupport/Timer.hpp"
+#include "transupport/SuperTimer.hpp"
 
 #include <iostream>
 #include <ctime>
@@ -19,17 +19,18 @@ using std::cout;
 using std::endl;
 using tranSupport::softEquiv;
 
-void wait( double seconds ) {
-	using std::clock;
-	std::clock_t endwait;
-	endwait = clock() + static_cast<std::clock_t>(seconds * CLOCKS_PER_SEC);
+using tranSupport::SuperTimer;
 
-	while (clock() < endwait) {
+/*----------------------------------------------------------------------------*/
+void waitTime( double seconds ) {
+	using std::clock;
+	std::clock_t endwaitTime;
+	endwaitTime = clock() + static_cast<std::clock_t>(seconds * CLOCKS_PER_SEC);
+
+	while (clock() < endwaitTime) {
 		;
 	}
 }
-
-using tranSupport::SuperTimer;
 
 /*----------------------------------------------------------------------------*/
 /* 
@@ -52,9 +53,8 @@ void someSubroutine() {
 }
 
 /*----------------------------------------------------------------------------*/
-int main(int argc, char *argv[]) {
-	TESTER_INIT("Timer");
-
+void runTests ()
+{
 	// get a reference to the global timer object
 	SuperTimer &theTimer = SuperTimer::Instance();
 	double timeTolerance = tranSupport::Timer::TimeResolution()*1000.0;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
 	// ===== check that a second is roughly a second ===== //
 	theTimer.startTimer("FifthSecond");
-	wait(0.2);
+	waitTime(0.2);
 	theTimer.stopTimer("FifthSecond");
 	TESTER_CHECKFORPASS(
 			softEquiv(theTimer.getTimeForTimer("FifthSecond"),
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 	bool successfulTrial = true;
 
 	TIMER_START("Reset");
-	wait(0.01);
+	waitTime(0.01);
 	TIMER_STOP("Reset");
 
 	try {
@@ -126,19 +126,29 @@ int main(int argc, char *argv[]) {
 
 	try {
 		TIMER_STOP("Nonexistent");
-	} 
-	catch (tranSupport::tranError &theErr) {
-		//cout 	<< "Caught error:" << endl
-		//		<< theErr.what();
-		caughtError = true;
-	}
-	TESTER_CHECKFORPASS(caughtError);
-
-	// ===== make sure the timer is global ===== //
-	someSubroutine();
-
-	TESTER_PRINTRESULT();
-
-	return 0;
+    } 
+    catch (tranSupport::tranError &theErr) {
+        caughtError = true;
+    }
+    TESTER_CHECKFORPASS(caughtError);
 }
-/*----------------------------------------------------------------------------*/
+/*============================================================================*/
+int main(int argc, char *argv[]) {
+    TESTER_INIT("SuperTimer");
+    try {
+        runTests();
+
+        // ===== make sure the timer is global ===== //
+        someSubroutine();
+    }
+    catch (tranSupport::tranError &theErr) {
+        cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl
+            << theErr.what() << endl;
+        TESTER_CHECKFORPASS(CAUGHT_UNEXPECTED_EXCEPTION);
+    }
+
+    TESTER_PRINTRESULT();
+
+    return 0;
+}
+

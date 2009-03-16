@@ -15,7 +15,7 @@
 #include <iostream>
 #include <vector>
 #include "transupport/VectorPrint.hpp"
-#include "transupport/Timer.hpp"
+#include "transupport/SuperTimer.hpp"
 
 using std::cout;
 using std::endl;
