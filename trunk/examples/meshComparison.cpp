@@ -18,8 +18,8 @@
 #include <algorithm>
 #include <sstream>
 #include "transupport/VectorPrint.hpp"
+#include "transupport/SuperTimer.hpp"
 #include "transupport/constants.hpp"
-#include "transupport/Timer.hpp"
 #include "extra/BasicTally.hpp"
 
 #include "extra/mtrand.h"
