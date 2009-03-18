@@ -7,13 +7,13 @@
 #ifndef MCG_CELL_I_HPP
 #define MCG_CELL_I_HPP
 
-#include <list>
-#include <map>
+#include "Cell.hpp"
+#include "Surface.hpp"
+
 #include <utility>
 #include <limits>
 
 #include <blitz/tinyvec.h>
-#include "Surface.hpp"
 #include "transupport/dbc.hpp"
 
 //#include <iostream>

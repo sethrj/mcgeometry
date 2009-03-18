@@ -1,14 +1,13 @@
 /*!
- * \file Sphere.hpp
- * \brief Sphere surface
- * \author Jeremy L. Conlin
+ * \file   Sphere.hpp
+ * \brief  Sphere surface
+ * \author Seth R. Johnson
  * 
  */
 
 #ifndef MCG_SPHERE_HPP
 #define MCG_SPHERE_HPP
 
-#include <vector>
 #include <cmath>
 #include <iostream>
 #include <blitz/tinyvec.h>
@@ -49,14 +48,17 @@ public:
         return new Sphere(*this, newId);
     }
 
+    //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
+    //! Determine distance to intersection with the surface.  
     void intersect( const TVecDbl& position, 
                     const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
+    //! Calculate the surface normal at a point
     void normalAtPoint( const TVecDbl& position,
                         TVecDbl& unitNormal) const;
 
@@ -99,14 +101,17 @@ public:
         return new SphereO(*this, newId);
     }
 
+    //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
+    //! Determine distance to intersection with the surface.  
     void intersect( const TVecDbl& position, 
                     const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
+    //! Calculate the surface normal at a point
     void normalAtPoint( const TVecDbl& position,
                         TVecDbl& unitNormal) const;
 
