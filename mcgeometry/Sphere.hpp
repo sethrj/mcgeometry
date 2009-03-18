@@ -11,10 +11,8 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
-#include "transupport/VectorPrint.hpp"
-#include "transupport/VectorMath.hpp"
+#include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
-#include "transupport/SoftEquiv.hpp"
 
 #include "Surface.hpp"
 
@@ -28,8 +26,12 @@ namespace mcGeometry {
  */
 class Sphere : public Surface {
 public:
+    //! Blitz++ TinyVector of length D stores position/direction/etc.
+    typedef blitz::TinyVector<double, 3> TVecDbl; 
+    
+public:
     //! User-called constructor.
-    Sphere(std::vector<double>& C, double R)
+    Sphere(TVecDbl& C, double R)
         : _center(C), _radius(R)
     { 
         Insist(R > 0, "Sphere must have positive radius.");
@@ -47,16 +49,16 @@ public:
         return new Sphere(*this, newId);
     }
 
-    bool hasPosSense(const std::vector<double>& position) const;
+    bool hasPosSense(const TVecDbl& position) const;
 
-    void intersect( const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
-    void normalAtPoint( const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const;
+    void normalAtPoint( const TVecDbl& position,
+                        TVecDbl& unitNormal) const;
 
     ~Sphere() { /* * */ };
 
@@ -66,7 +68,7 @@ protected:
 
 private:
     //! Center point of the sphere.
-    const std::vector<double> _center;
+    const TVecDbl _center;
     //! Radius of the sphere.
     const double _radius;
 };
@@ -97,16 +99,16 @@ public:
         return new SphereO(*this, newId);
     }
 
-    bool hasPosSense(const std::vector<double>& position) const;
+    bool hasPosSense(const TVecDbl& position) const;
 
-    void intersect( const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
-    void normalAtPoint( const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const;
+    void normalAtPoint( const TVecDbl& position,
+                        TVecDbl& unitNormal) const;
 
     ~SphereO() { /* * */ };
 

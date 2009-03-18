@@ -1,6 +1,6 @@
 /*!
  * \file <+TODO+>
- * \brief Unit tests for <+TODO+>
+ * \brief Unit tests for \c <+TODO+>
  * \author Seth R. Johnson
  */
 
@@ -9,7 +9,6 @@
 #include "mcgeometry/<+header+>.hpp"
 
 #include <iostream>
-#include <vector>
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
@@ -34,7 +33,7 @@ int main(int argc, char *argv[]) {
     catch (tranSupport::tranError &theErr) {
         cout << "UNEXPECTED ERROR IN UNIT TEST: " << endl
             << theErr.what() << endl;
-        TESTER_CHECKFORPASS( CAUGHT_UNEXPECTED_EXCEPTION );
+        TESTER_CHECKFORPASS(CAUGHT_UNEXPECTED_EXCEPTION);
     }
 
     TESTER_PRINTRESULT();

@@ -9,10 +9,10 @@
 
 #include <vector>
 #include <cmath>
+#include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
 #include "transupport/SoftEquiv.hpp"
-#include "transupport/VectorMath.hpp"
-#include "transupport/VectorPrint.hpp"
+#include "transupport/blitzStuff.hpp"
 
 #include "Surface.hpp"
 
@@ -26,17 +26,19 @@ namespace mcGeometry {
  */
 class Cylinder : public Surface {
 public:
+    //! Blitz++ TinyVector of length D stores position/direction/etc.
+    typedef blitz::TinyVector<double, 3> TVecDbl; 
+    
+public:
     //! User-called constructor.
-    Cylinder(const std::vector<double>& point,
-             const std::vector<double>& axis,
+    Cylinder(const TVecDbl& point,
+             const TVecDbl& axis,
              double radius)
         : _pointOnAxis(point), _axis(axis), _radius(radius) 
     {
         // we only live in 3-space
-        Require( _pointOnAxis.size() == 3 );
-        Require( _axis.size() == 3 );
         // require unit normal 
-        Require(softEquiv(tranSupport::vectorNorm(_axis), 1.0));
+        Require(tranSupport::checkDirectionVector(_axis));
         Require( _radius > 0.0 );
     }
 
@@ -56,25 +58,25 @@ public:
 
     ~Cylinder() { /* * */ }
 
-    bool hasPosSense(const std::vector<double>& position) const;
+    bool hasPosSense(const TVecDbl& position) const;
 
-    void intersect( const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
-    void normalAtPoint( const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const;
+    void normalAtPoint( const TVecDbl& position,
+                        TVecDbl& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
 
 private:
     //! some point through which the cylinder's axis passes
-    const std::vector<double> _pointOnAxis;
+    const TVecDbl _pointOnAxis;
     //! axis about which the cylinder is centered
-    const std::vector<double> _axis;
+    const TVecDbl _axis;
     //! cylinder radius
     const double _radius;
 };
@@ -88,7 +90,7 @@ template<unsigned int axis>
 class CylinderNormal : public Surface {
 public:
     //! User-called constructor.
-    CylinderNormal( const std::vector<double>& point,
+    CylinderNormal( const TVecDbl& point,
                     double radius )
         : _pointOnAxis(point), _radius(radius) 
     {
@@ -110,53 +112,53 @@ public:
 
     ~CylinderNormal() { /* * */ }
 
-    bool hasPosSense(const std::vector<double>& position) const;
+    bool hasPosSense(const TVecDbl& position) const;
 
-    void intersect( const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
-    void normalAtPoint( const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const;
+    void normalAtPoint( const TVecDbl& position,
+                        TVecDbl& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
 
 private:
     //! some point through which the cylinder's axis passes
-    const std::vector<double> _pointOnAxis;
+    const TVecDbl _pointOnAxis;
     //! axis about which the cylinder is centered
-    const std::vector<double> _axis;
+    const TVecDbl _axis;
     //! cylinder radius
     const double _radius;
 
     //! Return unrolled (x .* x) for vector x tailored to this axis
-    double _dotProduct( const std::vector<double>& x,
-                        const std::vector<double>& y) const;
+    double _dotProduct( const TVecDbl& x,
+                        const TVecDbl& y) const;
 };
 /*----------------------------------------------------------------------------*/
 template<>
 inline double CylinderNormal<0>::_dotProduct(
-                        const std::vector<double>& x,
-                        const std::vector<double>& y) const
+                        const TVecDbl& x,
+                        const TVecDbl& y) const
 {
     return x[1] * y[1] + x[2] * y[2];
 }
 
 template<>
 inline double CylinderNormal<1>::_dotProduct(
-                        const std::vector<double>& x,
-                        const std::vector<double>& y) const
+                        const TVecDbl& x,
+                        const TVecDbl& y) const
 {
     return x[0] * y[0] + x[2] * y[2];
 }
 
 template<>
 inline double CylinderNormal<2>::_dotProduct(
-                        const std::vector<double>& x,
-                        const std::vector<double>& y) const
+                        const TVecDbl& x,
+                        const TVecDbl& y) const
 {
     return x[0] * y[0] + x[1] * y[1];
 }

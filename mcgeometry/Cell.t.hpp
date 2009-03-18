@@ -7,18 +7,18 @@
 #ifndef MCG_CELL_T_HPP
 #define MCG_CELL_T_HPP
 
-#include <vector>
 #include <list>
 #include <map>
 #include <utility>
 #include <limits>
+
+#include <blitz/tinyvec.h>
 #include "Surface.hpp"
 #include "transupport/dbc.hpp"
 
-#include "transupport/VectorPrint.hpp"
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
@@ -64,7 +64,7 @@ Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
 }
 /*----------------------------------------------------------------------------*/
 template <typename UserIdType>
-bool Cell<UserIdType>::isPointInside(const std::vector<double>& position,
+bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
                                      const Surface* surfaceToSkip) const
 {
     if (_flags & NEGATED) {
@@ -131,19 +131,12 @@ bool Cell<UserIdType>::isPointInside(const std::vector<double>& position,
 /*----------------------------------------------------------------------------*/
 template <typename UserIdType>
 void Cell<UserIdType>::intersect(
-                    const std::vector<double>& position,
-                    const std::vector<double>& direction,
+                    const TVecDbl& position,
+                    const TVecDbl& direction,
                     Surface*& hitSurface,
                     bool&     quadricSense,
                     double&   distance) const
 {
-    //since we only *pass* these variables to the lower level and don't actually
-    //base anything on their properties in this function; let the lower level
-    //handle the input checking instead of being redundant by including it here
-    //and at MCGeometry
-//    Require(position.size() == 3);
-//    Require(direction.size() == 3);
-
     hitSurface   = NULL;
     quadricSense = false;
     distance     = std::numeric_limits<double>::infinity();

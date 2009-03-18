@@ -108,7 +108,7 @@ void runTests()
 	waitTime(0.01);
 	TIMER_STOP(TIMERNAME_Reset);
 
-    TIMER_PRINT();
+    //TIMER_PRINT();
 	try {
 		TIMER_RESET(TIMERNAME_Reset);
 	} 

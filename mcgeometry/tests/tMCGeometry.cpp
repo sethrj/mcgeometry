@@ -15,25 +15,24 @@
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-#include "transupport/VectorPrint.hpp"
 
 using namespace mcGeometry;
 
 using std::cout;
 using std::endl;
 
-typedef std::vector<double> doubleVec;
+typedef blitz::TinyVector<double, 3> TVecDbl;
 typedef std::vector<signed int> intVec;
 
 void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     /* * * create sphere * * */
-    doubleVec center(3,0.0);
+    TVecDbl center(0.0);
     double      sphRadius = 3.0;
 
     Sphere    theSphere(center, sphRadius);
 
     /* * * create planes * * */
-    doubleVec normal(3,0.0);
+    TVecDbl normal(0.0);
 
     normal[1] = 1.0;
 
@@ -46,8 +45,8 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     center[1] = -1.0;
     Plane plane3(normal, center);
 
-    normal.assign(3,0.0);
-    center.assign(3,0.0);
+    normal = 0.0;
+    center = 0.0;
     normal[0] = 1.0;
     center[0] = 0.0;
     Plane plane4(normal, center);
@@ -124,7 +123,7 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
 void testGeometryErrorChecking()
 {
     intVec theSurfaces(1, 0);
-    doubleVec center(3,0.0);
+    TVecDbl center(0.0);
 
     Sphere aSphere(center, 2.0);
 
@@ -195,13 +194,13 @@ void testMainGeometry() {
 
     // ==== test a variety of locations and directions
     unsigned int numLocs = 8;
-    std::vector< doubleVec > locations(numLocs);
-    std::vector< doubleVec > directions(4);
+    std::vector< TVecDbl > locations(numLocs);
+    std::vector< TVecDbl > directions(4);
 
     int index = 0;
     for (unsigned int j = 0; j < numLocs/2; j++) {
         for (unsigned int i = 0; i < 2; i++) {
-            locations[index].assign(3, 0.0);
+            locations[index] = 0.0;
             locations[index][0] = -0.5 + i * 1.0;
             locations[index][1] = -1.5 + j * 1.0;
 
@@ -213,7 +212,7 @@ void testMainGeometry() {
     index = 0;
     for (int j = 0; j < 2; j++) {
         for (unsigned int i = 0; i < 2; i++) {
-            directions[index].assign(3, 0.0);
+            directions[index] = 0.0;
             directions[index][i] = (1.0 - 2*j);
 //            cout << "Direction " << index << ": " << directions[index] << endl;
             index++;
@@ -256,7 +255,7 @@ void testMainGeometry() {
     bool correctEndingCells  = true;
     bool correctReturnStatus = true;
 
-    doubleVec    newPosition;
+    TVecDbl    newPosition;
     unsigned int newCellIndex;
     double       distance;
     MCGeometry::ReturnStatus returnStatus;
@@ -302,7 +301,7 @@ void testMainGeometry() {
 /*============================================================================*/
 void createReflectingGeometry( MCGeometry& theGeom) {
     /* * * create sphere * * */
-    doubleVec center(3,0.0);
+    TVecDbl center(0.0);
     double    sphRadius = 3.0;
 
     Sphere    theSphere(center, sphRadius);
@@ -352,8 +351,8 @@ void testReflectingGeometry() {
 //    theGeom.debugPrint();
 
     // - - - - - - - - - - - - - - - - - - - -
-    doubleVec position(3, 0.0);
-    doubleVec direction(3, 0.0);
+    TVecDbl position(0.0);
+    TVecDbl direction(0.0);
 
     // particle at (-1, 1, 0) moving in -X direction
     position[0] = -1.0;
@@ -364,7 +363,7 @@ void testReflectingGeometry() {
     TESTER_CHECKFORPASS(theGeom.findCell(position) == 1);
 
     // move a particle, yay!
-    doubleVec    newPosition;
+    TVecDbl    newPosition;
     unsigned int newCellIndex;
     double       distance;
     MCGeometry::ReturnStatus returnStatus;
@@ -380,24 +379,23 @@ void testReflectingGeometry() {
     TESTER_CHECKFORPASS(returnStatus == MCGeometry::REFLECTED);
     TESTER_CHECKFORPASS(newCellIndex == 1);
 
-    doubleVec expectedPosition(3, 0.0);
+    TVecDbl expectedPosition(0.0);
     expectedPosition[0] = -3.0 * 0.707106781186548;
     expectedPosition[1] = 3.0 * 0.707106781186548;
     TESTER_CHECKFORPASS(softEquiv(newPosition, expectedPosition, 1e-14));
 
     // reflect it
-    doubleVec newDirection;
+    TVecDbl newDirection;
 
     theGeom.reflectDirection(newPosition, direction, newDirection);
     
-    doubleVec expectedDirection(3, 0.0);
+    TVecDbl expectedDirection(0.0);
     expectedDirection[1] = -1.0;
     TESTER_CHECKFORPASS(softEquiv(newDirection, expectedDirection, 1e-14));
 
     // - - - - - -
-    position.assign(3, 0.0);
-    direction.assign(3, 0.0);
-    direction[2] = 1.0;
+    position = 0.0;
+    direction = 0.0, 0.0, 1.0;
 
     // find the distance to the boundary
     theGeom.findDistance(position, direction, 1, distance);
@@ -409,14 +407,14 @@ void testReflectingGeometry() {
     TESTER_CHECKFORPASS(returnStatus == MCGeometry::REFLECTED);
     TESTER_CHECKFORPASS(newCellIndex == 1);
 
-    expectedPosition.assign(3, 0.0);
+    expectedPosition = 0.0;
     expectedPosition[2] = 3.0;
     TESTER_CHECKFORPASS(softEquiv(newPosition, expectedPosition));
 
     // reflect it
     theGeom.reflectDirection(newPosition, direction, newDirection);
     
-    expectedDirection.assign(3, 0.0);
+    expectedDirection = 0.0;
     expectedDirection[2] = -1.0;
     TESTER_CHECKFORPASS(softEquiv(newDirection, expectedDirection));
 

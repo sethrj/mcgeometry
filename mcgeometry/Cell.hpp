@@ -11,6 +11,7 @@
 #include <list>
 #include <map>
 #include <utility>
+#include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
 
 //#include <iostream>
@@ -38,6 +39,10 @@ class Surface;
  */
 template <typename UserIdType>
 class Cell {
+public:
+    //! Blitz++ TinyVector of length D stores position/direction/etc.
+    typedef blitz::TinyVector<double, 3> TVecDbl; 
+    
 public:
     //! bit flags with details about the cells
     //  use bitwise 'and' & to check for their being set
@@ -113,7 +118,7 @@ public:
      * We check by comparing the "sense" of each of our surface to what the
      * surface says about the position's sense relative to it.
      */
-    bool isPointInside(const std::vector<double>& position,
+    bool isPointInside(const TVecDbl& position,
                        const Surface* surfaceToSkip = NULL) const;
 
     /*! \brief Find the nearest surface to a point in a given direction.
@@ -124,8 +129,8 @@ public:
      * \param[out] hitSense   The surface sense of the intersected surface
      * \param[out] distance   The distance to the nearest surface
      */
-    void intersect( const std::vector<double>& position,
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position,
+                    const TVecDbl& direction,
                     Surface*& hitSurface,
                     bool&     hitSense,
                     double&   distance) const;

@@ -41,6 +41,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <blitz/tinyvec.h>
 
 #include "Cell.hpp"
 
@@ -86,6 +87,9 @@ public:
     //! We only use one kind of templated cell.
     typedef Cell<UserCellIDType> CellT;
 
+    //! Blitz++ TinyVector of length D stores position/direction/etc.
+    typedef blitz::TinyVector<double, 3> TVecDbl; 
+    
     //! Vector of signed integers that are passed in by the user and parsed
     //! into surfaces and sense.
     typedef std::vector<signed int>                 IntVec;
@@ -147,8 +151,8 @@ public:
      *  and the outside is properly defined with "dead cells"), it will always
      *  return a finite distance.
      */
-    void findDistance(      const std::vector<double>& position,
-                            const std::vector<double>& direction,
+    void findDistance(      const TVecDbl& position,
+                            const TVecDbl& direction,
                             const unsigned int oldCellIndex,
                             double& distance);
 
@@ -207,18 +211,18 @@ public:
      *  findNewCell. Although this is checked when \c DBC is 7, it is not
      *  checked with debug code off.
      */
-    void findNewCell(       const std::vector<double>& position,
-                            const std::vector<double>& direction,
-                            std::vector<double>& newPosition,
+    void findNewCell(       const TVecDbl& position,
+                            const TVecDbl& direction,
+                            TVecDbl& newPosition,
                             unsigned int& newCellIndex,
                             ReturnStatus& returnStatus);
 
     //!\brief Calculate distance to next cell *and* do the next-cell calculation
     //! in one go.
-    void findNewCell(       const std::vector<double>& position,
-                            const std::vector<double>& direction,
+    void findNewCell(       const TVecDbl& position,
+                            const TVecDbl& direction,
                             const unsigned int oldCellIndex,
-                            std::vector<double>& newPosition,
+                            TVecDbl& newPosition,
                             unsigned int& newCellIndex,
                             double& distanceTraveled,
                             ReturnStatus& returnStatus)
@@ -238,9 +242,9 @@ public:
      *
      *  This function is ONLY valid after calling findDistance.
      */
-    void reflectDirection(  const std::vector<double>& newPosition,
-                            const std::vector<double>& oldDirection,
-                            std::vector<double>& newDirection);
+    void reflectDirection(  const TVecDbl& newPosition,
+                            const TVecDbl& oldDirection,
+                            TVecDbl& newDirection);
 
     /*!
      * \brief Return information about a crossed surface.
@@ -253,8 +257,8 @@ public:
      *  \param[out] dotProduct   Omega dot n (use for surface current tally)
      *
      */
-    void getSurfaceCrossing(    const std::vector<double>& newPosition,
-                                const std::vector<double>& oldDirection,
+    void getSurfaceCrossing(    const TVecDbl& newPosition,
+                                const TVecDbl& oldDirection,
                                 UserSurfaceIDType& surfaceCrossingUserId,
                                 double&       dotProduct);
 
@@ -264,7 +268,7 @@ public:
     //\{
     
     //! Find a cell given an arbitrary point in the problem.
-    unsigned int findCell(const std::vector<double>& position) const;
+    unsigned int findCell(const TVecDbl& position) const;
 
     //! See whether a given cell is a dead cell.
     bool isDeadCell(const unsigned int cellIndex) const;
@@ -386,7 +390,7 @@ private:
         bool            oldSurfaceSense;
         double          distanceToSurface;
 
-        IfDbc(std::vector<double> position; std::vector<double> direction;)
+        IfDbc(TVecDbl position; TVecDbl direction;)
 
     } _findCache;
 
@@ -408,16 +412,16 @@ private:
 
     //! Print some kind of warning during findNewCell.
     void _warnGeometry(             const std::string& shortMessage,
-                                    const std::vector<double>& position,
-                                    const std::vector<double>& direction,
+                                    const TVecDbl& position,
+                                    const TVecDbl& direction,
                                     const CellT* oldCell,
                                     const std::string& longMessage) const;
 
     //! Print geometry failure message.
     void _failGeometry(            const std::string failureMessage,
                                    const unsigned int currentCellIndex,
-                                   const std::vector<double>& position,
-                                   const std::vector<double>& direction) const;
+                                   const TVecDbl& position,
+                                   const TVecDbl& direction) const;
 };
 /*----------------------------------------------------------------------------*/
 } // end namespace mcGeometry

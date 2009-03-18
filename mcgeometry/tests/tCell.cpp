@@ -22,20 +22,20 @@ using namespace mcGeometry;
 using std::cout;
 using std::endl;
 
-typedef std::vector<double> doubleVec;
+typedef blitz::TinyVector<double, 3> TVecDbl;
 typedef Cell<unsigned int> CellT;
 
 /*============================================================================*/
 void runTests() {   
 
     /* * * create sphere * * */
-    doubleVec center(3,0.0);
+    TVecDbl center;
     double    sphRadius = 2.0;
 
     Sphere    theSphere(center, sphRadius);
 
     /* * * create plane * * */
-    doubleVec normal(3,0.0);
+    TVecDbl normal;
 
     normal[0] = 1.0;
 
@@ -58,7 +58,7 @@ void runTests() {
     TESTER_CHECKFORPASS(theCell.isDeadCell() == false);
 
     /* * * CHECK VARIOUS POINTS * * */
-    doubleVec particleLoc(3,0.0);
+    TVecDbl particleLoc(0.0);
 
     particleLoc[0] = 1.5;
     TESTER_CHECKFORPASS(theCell.isPointInside(particleLoc) == true);
@@ -73,7 +73,7 @@ void runTests() {
     particleLoc[0] = 1.5;
     particleLoc[1] = 0.0;
 
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleDir(0.0);
 
     particleDir[0] = -1.0;
 
@@ -119,7 +119,7 @@ void runTests() {
     TESTER_CHECKFORPASS(invCell.isDeadCell() == true);
     TESTER_CHECKFORPASS(invCell.isNegated() == true);
 
-    particleLoc.assign(3,0.0);
+    particleLoc = 0.0;
     particleLoc[0] = 2.5;
     TESTER_CHECKFORPASS(invCell.isPointInside(particleLoc) == true);
 

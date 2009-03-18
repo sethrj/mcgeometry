@@ -7,7 +7,6 @@
 #ifndef MCG_CYLINDER_T_HPP
 #define MCG_CYLINDER_T_HPP
 
-#include <vector>
 #include <cmath>
 #include "transupport/dbc.hpp"
 #include "transupport/SoftEquiv.hpp"
@@ -25,25 +24,20 @@ namespace mcGeometry {
 /*============================================================================*/
 template<unsigned int axis>
 bool CylinderNormal<axis>::hasPosSense(
-                const std::vector<double>& position) const
+                const TVecDbl& position) const
 {
-    Require(position.size() == 3);
-
     return _hasPosSense( _dotProduct(position, position) - _radius * _radius);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
 void CylinderNormal<axis>::intersect(
-                const std::vector<double>& position, 
-                const std::vector<double>& direction,
+                const TVecDbl& position, 
+                const TVecDbl& direction,
                 const bool posSense,
                 bool& hit, double& distance) const
 {
-    Require(direction.size() == 3);
-    Require(position.size() == 3);
-
     //temporary for now
-    Insist(softEquiv(_pointOnAxis, std::vector<double>(3,0.0)),
+    Insist(softEquiv(_pointOnAxis, TVecDbl(0.0)),
             "As of now, CylinderNormal must be on the axis.");
 
     double A = _dotProduct(direction, direction);
@@ -58,14 +52,12 @@ void CylinderNormal<axis>::intersect(
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
 void CylinderNormal<axis>::normalAtPoint(
-                        const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const
+                        const TVecDbl& position,
+                        TVecDbl& unitNormal) const
 {
-    Require(position.size() == 3);
-
     Insist(0, "Not yet implemented.");
 
-    Ensure(softEquiv(tranSupport::vectorNorm(unitNormal), 1.0));
+    Ensure(tranSupport::checkDirectionVector(unitNormal));
 }
 /*----------------------------------------------------------------------------*/
 template<>
