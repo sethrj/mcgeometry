@@ -1,0 +1,61 @@
+ ============================== ABOUT THIS FILE ==============================
+
+At major revisions, timing tests (i.e. in the examples file) should be run to
+assess whether the performance has changed significantly between revisions.
+Since the purpose of this library is for scientific computing, execution speed
+is of the highest priority.
+
+meshTiming is a good test of the overhead inherent in the geometry code itself,
+and meshComparison is a good test of a real monte carlo code.
+
+Variations in the system between one run and another should prevent these
+results from being more accurate than maybe 10%, so they are probably nearly
+worthless.
+
+ ============================= 0.9 (revision 81) =============================
+    [ 2.4 GHz Intel Core 2 Duo, 4 GB 667 MHz DDR2 SDRAM, Mac OS X 10.5.5
+	   gcc 4.0.1 (apple-compiled) ]
+
+bin/meshComparison 50 10000000 0
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                  Creating the combinatorial mesh.                339.621ms
+            First transport in combinatorial mesh.             363497.497ms
+           Second transport in combinatorial mesh.             314368.367ms
+                  Transport in deterministic mesh.              71806.684ms
+---------------------------------------------------------------------------
+
+bin/meshComparison 50 500000 0
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                  Creating the combinatorial mesh.                349.498ms
+            First transport in combinatorial mesh.              63406.194ms
+           Second transport in combinatorial mesh.              15697.360ms
+                  Transport in deterministic mesh.               3532.035ms
+---------------------------------------------------------------------------
+
+bin/meshTiming 50
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                 0 Create the mesh                347.267ms
+          1 Run without neighborhood (first sweep)              25946.501ms
+       2 Run with full neighborhood (second sweep)                 87.797ms
+   3 Run with most neighborhood (first full sweep)                228.522ms
+  4 Run with full neighborhood (second full sweep)                196.210ms
+   5 Run with full neighborhood (third full sweep)                194.274ms
+---------------------------------------------------------------------------
+
+bin/meshTiming 40
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                 0 Create the mesh                174.616ms
+          1 Run without neighborhood (first sweep)               8203.072ms
+       2 Run with full neighborhood (second sweep)                 45.919ms
+   3 Run with most neighborhood (first full sweep)                113.054ms
+  4 Run with full neighborhood (second full sweep)                101.302ms
+   5 Run with full neighborhood (third full sweep)                 99.954ms
+---------------------------------------------------------------------------
