@@ -66,8 +66,8 @@ void MCGeometry::findNewCell(
                             ReturnStatus& returnStatus)
 {
 //    cout << "unmatched surface count: " << _unMatchedSurfaces << endl;
-    Require(position  == _findCache.position);
-    Require(direction == _findCache.direction);
+    Require( blitz::all(position  == _findCache.position) );
+    Require( blitz::all(direction == _findCache.direction) );
     Require(_findCache.oldCellIndex < getNumCells());
 
     // a reference to the pointer to the old cell
@@ -284,7 +284,7 @@ void MCGeometry::reflectDirection(const TVecDbl& newPosition,
                                   const TVecDbl& oldDirection,
                                   TVecDbl& newDirection)
 {
-    Require(oldDirection == _findCache.direction);
+    Require( blitz::all(oldDirection == _findCache.direction));
     // law of reflection: omega = omega - 2 (n . omega) n
     TVecDbl surfaceNormal;
 
@@ -314,7 +314,7 @@ void MCGeometry::getSurfaceCrossing(
                                               surfaceCrossingUserId,
                             double&       dotProduct)
 {
-    Require(oldDirection == _findCache.direction);
+    Require(blitz::all(oldDirection == _findCache.direction));
     Require(tranSupport::checkDirectionVector(oldDirection));
 
     TVecDbl surfaceNormal;

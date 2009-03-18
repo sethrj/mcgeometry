@@ -17,6 +17,7 @@
 #include <cmath>
 #include <algorithm>
 #include <sstream>
+#include <blitz/tinyvec-et.h>
 #include "transupport/VectorPrint.hpp"
 #include "transupport/SuperTimer.hpp"
 #include "transupport/constants.hpp"
@@ -29,16 +30,21 @@ using std::endl;
 
 typedef std::vector<monteCarlo::BasicTally<double> > TallyVec;
 
-void    SimulateMCComb(const int, const int, mcGeometry::MCGeometry&, TallyVec&);
+//! Blitz++ TinyVector of length D stores position/direction/etc.
+typedef blitz::TinyVector<double, 3> TVecDbl; 
+
+//===== function declarations
+void    SimulateMCComb(const int, const int, mcGeometry::MCGeometry&,
+        TallyVec&);
 void    SimulateMCDet(int, int, TallyVec&);
 double  randDouble();
 bool isInside(const int size, const std::vector<int>& index);
-void source(const int size, std::vector<double>& position,
-                    std::vector<double>& direction);
-void    randDirection(std::vector<double>&);
-void    randPosition(double, std::vector<double>&);
+void source(const int size, TVecDbl& position,
+                    TVecDbl& direction);
+void    randDirection(TVecDbl&);
+void    randPosition(double, TVecDbl&);
 double  getXsn(const int cell);
-unsigned int getCell(const std::vector<double>& position, const int size);
+unsigned int getCell(const TVecDbl& position, const int size);
 double  distanceToPlane(int, double, double);
 void    printPLTallies(int, const TallyVec&, const TallyVec&);
 void    diffTallies(int, const TallyVec&, const TallyVec& );
@@ -132,14 +138,14 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
     unsigned int numCells = size*size*size;    // Number of cells in mesh
     PLTally.resize(numCells);
 
-    std::vector<double> position(3,0.0);
-    std::vector<double> new_position(3,0.0);
-    std::vector<double> direction(3,0.0);
+    TVecDbl position(0.0);
+    TVecDbl new_position(0.0);
+    TVecDbl direction(0.0);
 
     double d;           // Distance traveled
-    std::vector<double> point;       // Point on plane
+    TVecDbl point;       // Point on plane
 
-    std::vector<double> dPlane(3, 0.0); //distance to each plane
+    TVecDbl dPlane(0.0); //distance to each plane
 
     double xT;    // Total cross section
     unsigned int cellNumber;
@@ -231,9 +237,9 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
     unsigned int numCells = size*size*size;    // Number of cells in mesh
     PLTally.resize(numCells);
 
-    std::vector<double> position(3,0.0);
-    std::vector<double> new_position(3,0.0);
-    std::vector<double> direction(3,0.0);
+    TVecDbl position(0.0);
+    TVecDbl new_position(0.0);
+    TVecDbl direction(0.0);
     unsigned int cell;
     unsigned int new_cell;
     mcGeometry::MCGeometry::ReturnStatus returnStatus;
@@ -311,8 +317,8 @@ inline bool isInside(const int size, const std::vector<int>& index)
     return true;
 }
 
-inline void source(const int size, std::vector<double>& position,
-                    std::vector<double>& direction)
+inline void source(const int size, TVecDbl& position,
+                    TVecDbl& direction)
 {
     // source along one face in normal direction, should result in each 
     // cell having 1/(size^2) tally result
@@ -332,7 +338,7 @@ inline void source(const int size, std::vector<double>& position,
 }
 
 //! Pick a random direction on the unit sphere
-inline void randDirection(std::vector<double>& v){
+inline void randDirection(TVecDbl& v){
     double phi = tranSupport::constants::TWOPI*randDouble();
     
     v[0] = 2*randDouble() - 1;
@@ -341,11 +347,9 @@ inline void randDirection(std::vector<double>& v){
     v[2] = mu*std::sin(phi);
 }
 
-inline void randPosition( double size, std::vector<double>& position){
-    std::vector<double>::iterator vecIter;
-    for(vecIter = position.begin(); vecIter != position.end(); ++vecIter){
-        *vecIter = size*randDouble();
-    }
+inline void randPosition( double size, TVecDbl& position){
+    position = randDouble(), randDouble(), randDouble();
+    position *= size;
 }
 
 inline double getXsn(const int cell) {
@@ -354,12 +358,9 @@ inline double getXsn(const int cell) {
     return 1.0;
 }
 
-inline unsigned int getCell(const std::vector<double>& position, const int size)
+inline unsigned int getCell(const TVecDbl& position, const int size)
 {
-    Require(position.size() == 3);
-    Require(position[0] >= 0.0);
-    Require(position[1] >= 0.0);
-    Require(position[2] >= 0.0);
+    Require(blitz::all(position >= 0.0));
     return static_cast<unsigned int>(position[0])
         + (size)*static_cast<unsigned int>(position[1])
         + (size*size)*static_cast<unsigned int>(position[2]);

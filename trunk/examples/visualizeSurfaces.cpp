@@ -11,8 +11,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <cmath>
+#include <blitz/tinyvec-et.h>
 #include "transupport/constants.hpp"
 #include "extra/mtrand.h"
 
@@ -21,8 +21,8 @@ using namespace mcGeometry;
 using std::cout;
 using std::endl;
 
-typedef std::vector<double> doubleVec;
-typedef std::vector<signed int> intVec;
+//! Blitz++ TinyVector of length D stores position/direction/etc.
+typedef blitz::TinyVector<double, 3> TVecDbl; 
 
 /*============================================================================*/
 mtRand::MTRand randGen;
@@ -33,9 +33,8 @@ inline double randDouble(){
 }
 
 //! Pick a random direction on the unit sphere
-inline void randDirection(std::vector<double>& v){
+inline void randDirection(TVecDbl& v){
     double phi = tranSupport::constants::TWOPI*randDouble();
-    Require(v.size() == 3);
     
     v[0] = 2*randDouble() - 1;
     double mu = std::sqrt(1 - v[0]*v[0]);
@@ -44,31 +43,26 @@ inline void randDirection(std::vector<double>& v){
 }
 
 //! Pick a random position in our geometry
-inline void randPosition(   const std::vector<double> bounds,
-                            const std::vector<double> subtract,
-                            std::vector<double>& position )
+inline void randPosition(   const TVecDbl& bounds,
+                            const TVecDbl& subtract,
+                            TVecDbl& position )
 {
-    Require(bounds.size() == 3);
-    Require(subtract.size() == 3);
-    Require(position.size() == 3);
-    // choose x in (-2,2)   y in (0,4)  z in (-2, 2)
-    //
-    for(int i = 0; i < 3; i++){
-        position[i] = bounds[i] * randDouble() - subtract[i];
-    }
+    position = randDouble(), randDouble(), randDouble();
+    position *= bounds;
+    position -= subtract;
 }
 /*============================================================================*/
 void visualizeSurfaces( mcGeometry::MCGeometry& geo,
                         const std::string& fileName,
-                        const std::vector<double> bounds,
-                        const std::vector<double> subtract)
+                        const TVecDbl& bounds,
+                        const TVecDbl& subtract)
 {
     std::fstream outFile;
 
     outFile.open(fileName.c_str(), std::fstream::out);
-    doubleVec    direction(3, 0.0);
-    doubleVec    position(3, 0.0);
-    doubleVec    newPosition(3, 0.0);
+    TVecDbl    direction(0.0);
+    TVecDbl    position(0.0);
+    TVecDbl    newPosition(0.0);
 
     unsigned int oldCellIndex;
     unsigned int newCellIndex;
