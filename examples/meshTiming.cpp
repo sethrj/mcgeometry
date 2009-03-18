@@ -20,6 +20,10 @@
 using std::cout;
 using std::endl;
 
+//! Blitz++ TinyVector of length D stores position/direction/etc.
+typedef blitz::TinyVector<double, 3> TVecDbl; 
+
+
 void MeshTiming(int, mcGeometry::MCGeometry&, bool);
 
 int main(int argc, char* argv[]){
@@ -89,14 +93,14 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
     mcGeometry::MCGeometry::UserCellIDType newID(0);
     mcGeometry::MCGeometry::ReturnStatus RS;
 
-    std::vector<double> position(3,0.0);
-    std::vector<double> newPos(3,0.0);
+    TVecDbl position(0.0);
+    TVecDbl newPos(0.0);
     double distance;
 
 
     // Create possible directions
-    std::vector<double> dir(3,0.0);
-    std::vector<std::vector<double> > directions;
+    TVecDbl dir(0.0);
+    std::vector< TVecDbl > directions;
     dir[0] = 1.0;                   // Positive x-direction
     directions.push_back(dir);
     dir[0] = 0.0; dir[1] = 1.0;    // Positive y-direction
@@ -105,7 +109,7 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
     directions.push_back(dir);
 
     if (fullDirections == true) {
-        dir.assign(3,0.0);
+        dir = 0.0;
 
         // add the other half of the unit sphere
         dir[0] = -1.0;                   // Negative x-direction
@@ -117,7 +121,7 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
     }
 
 
-    std::vector<std::vector<double> >::iterator dirIter;
+    std::vector< TVecDbl >::iterator dirIter;
     for( int k = 0; k < N; ++k ){
         position[2] = k + 0.5;
         for( int j = 0; j < N; ++j ){

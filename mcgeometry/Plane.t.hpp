@@ -54,7 +54,7 @@ void PlaneNormal<axis>::normalAtPoint( const TVecDbl& position,
                                        TVecDbl& unitNormal) const
 {
     // "position" should be on the surface
-    Require(softEquiv(position[axis] - _coordinate, TVecDbl()));
+    Require(softEquiv(position[axis] - _coordinate, 0.0));
 
     unitNormal = 0.0;
     unitNormal[axis] = 1.0;

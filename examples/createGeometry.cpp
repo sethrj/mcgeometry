@@ -15,19 +15,24 @@
 #include "mcgeometry/Cylinder.hpp"
 
 #include <vector>
+#include <blitz/tinyvec.h>
 #include <iostream>
 
 using std::cout;
 using std::endl;
 using namespace mcGeometry;
 
+//! Blitz++ TinyVector of length D stores position/direction/etc.
+typedef blitz::TinyVector<double, 3> TVecDbl; 
+
+
 //! Mesh will create and use a retangular mesh using N planes spaced 1.0 units
 // apart
 void CreateMesh(int N, MCGeometry& Geo){
     // Normal vectors to planes perpendicular to axes
-    std::vector<double> xNorm(3, 0.0);  xNorm[0] = 1.0;
-    std::vector<double> yNorm(3, 0.0);  yNorm[1] = 1.0;
-    std::vector<double> zNorm(3, 0.0);  zNorm[2] = 1.0;
+    TVecDbl xNorm(0.0);  xNorm[0] = 1.0;
+    TVecDbl yNorm(0.0);  yNorm[1] = 1.0;
+    TVecDbl zNorm(0.0);  zNorm[2] = 1.0;
 
 
     const unsigned int minXId = 1;
@@ -152,13 +157,13 @@ void CreateMesh(int N, MCGeometry& Geo){
 //  Create the sphere with planes used in the first unit test
 void createComplexGeometry( MCGeometry& theGeom) {
     /* * * create sphere * * */
-    std::vector<double> center(3,0.0);
+    TVecDbl center(0.0);
     double      sphRadius = 3.0;
 
     Sphere    theSphere(center, sphRadius);
 
     /* * * create planes * * */
-    std::vector<double> normal(3,0.0);
+    TVecDbl normal(0.0);
 
     normal[1] = 1.0;
 
@@ -171,8 +176,8 @@ void createComplexGeometry( MCGeometry& theGeom) {
     center[1] = -1.0;
     Plane plane3(normal, center);
 
-    normal.assign(3,0.0);
-    center.assign(3,0.0);
+    normal = 0.0;
+    center = 0.0;
     normal[0] = 1.0;
     center[0] = 0.0;
     Plane plane4(normal, center);
@@ -313,9 +318,9 @@ void createTrickyGeometry(mcGeometry::MCGeometry& geo)
 //  Two spheres with surrounding cylinder
 void createAnotherTrickyGeometry(mcGeometry::MCGeometry& geo)
 {
-    std::vector<double> xNorm(3, 0.0);  xNorm[0] = 1.0;
+    TVecDbl xNorm(0.0);  xNorm[0] = 1.0;
 
-    std::vector<double> position(3, 0.0);
+    TVecDbl position(0.0);
 
     position[0] = -1.0;
     geo.addSurface(1, Sphere(position, 1.0));

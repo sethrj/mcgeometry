@@ -3,7 +3,10 @@
 
 #include "mcgeometry/MCGeometry.hpp"
 #include <string>
-#include <vector>
+#include <blitz/tinyvec.h>
+
+//! Blitz++ TinyVector of length D stores position/direction/etc.
+typedef blitz::TinyVector<double, 3> TVecDbl; 
 
 /*!
  * \brief Print out where surface crossings happen and what surface they cross
@@ -15,6 +18,6 @@
  */
 void visualizeSurfaces( mcGeometry::MCGeometry& geo,
                         const std::string& fileName,
-                        const std::vector<double> bounds,
-                        const std::vector<double> subtract);
+                        const TVecDbl& bounds,
+                        const TVecDbl& subtract);
 #endif

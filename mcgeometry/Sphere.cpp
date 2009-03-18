@@ -75,7 +75,7 @@ void Sphere::normalAtPoint(
         TVecDbl& unitNormal ) const
 {
     // (position is on the outer edge of the sphere, we hope)
-    Require(softEquiv(tranSupport::distance(position,_center),_radius));
+    Require(softEquiv(tranSupport::vectorNorm(position - _center),_radius));
 
     // for a sphere, normal is a line from "position" to the origin
     unitNormal = position - _center;
@@ -159,7 +159,7 @@ void SphereO::normalAtPoint(
     }
 
     // make sure it actually is a normal vector
-    Ensure(tranSupport::checkDirectionVector(direction));
+    Ensure(tranSupport::checkDirectionVector(unitNormal));
 }
 /*----------------------------------------------------------------------------*/
 //! output a stream which prints the SphereO's characteristics

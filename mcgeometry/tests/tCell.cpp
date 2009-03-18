@@ -29,13 +29,13 @@ typedef Cell<unsigned int> CellT;
 void runTests() {   
 
     /* * * create sphere * * */
-    TVecDbl center;
+    TVecDbl center(0.0);
     double    sphRadius = 2.0;
 
     Sphere    theSphere(center, sphRadius);
 
     /* * * create plane * * */
-    TVecDbl normal;
+    TVecDbl normal(0.0);
 
     normal[0] = 1.0;
 

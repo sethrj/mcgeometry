@@ -48,7 +48,9 @@ void Plane::intersect(
 //      p = position
 //      p0 = point on plane
 bool Plane::hasPosSense(const TVecDbl& position) const{
-    double eval = blitz::sum( _normal * position - _normal * _coordinate);
+//    double eval = blitz::sum( _normal * position - _normal * _coordinate);
+    double eval = blitz::dot(_normal, position)
+                 - blitz::dot(_normal, _coordinate);
 
     return _hasPosSense(eval);
 }
@@ -57,7 +59,8 @@ void Plane::normalAtPoint(  const TVecDbl& position,
                             TVecDbl& unitNormal) const
 {
     // "position" should be on the surface
-    Require(softEquiv(_normal * position - _normal * _coordinate, 0.0));
+    Require(softEquiv(blitz::dot(_normal, position)
+                        - blitz::dot(_normal, _coordinate), 0.0));
     
     unitNormal = _normal;
 }
