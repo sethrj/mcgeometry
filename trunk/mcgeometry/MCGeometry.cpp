@@ -1,18 +1,16 @@
 /*!
- * \file  MCGeometry.cpp
+ * \file   MCGeometry.cpp
  * \brief  Contains implementation for the \c MCGeometry class
  * \author Seth R. Johnson
  */
 
+#include "MCGeometry.hpp"
+
 #include <utility>
-#include <limits>
-#include <map>
-#include <vector>
 
 #include "transupport/dbc.hpp"
 #include "transupport/blitzStuff.hpp"
 
-#include "MCGeometry.hpp"
 #include "Surface.hpp"
 #include "Cell.hpp"
 
@@ -30,9 +28,9 @@ namespace mcGeometry {
  * and/or otherwise interface with the user ID
 \*============================================================================*/
 
-unsigned int MCGeometry::addSurface( const MCGeometry::UserSurfaceIDType
-                                                             userSurfaceId,
-                                     const Surface& inSurface)
+unsigned int MCGeometry::addSurface(
+        const MCGeometry::UserSurfaceIDType userSurfaceId,
+        const Surface& inSurface)
 {
     // this is ONLY if we are using MCNP-type input definitions
     Insist(userSurfaceId > 0, "Things will break if surfaceId = 0 is allowed.");
@@ -66,9 +64,10 @@ unsigned int MCGeometry::addSurface( const MCGeometry::UserSurfaceIDType
 /*----------------------------------------------------------------------------*/
 //! basically, parse a list of unsigned ints with +/- into surfaces and senses,
 //  and add the cell
-unsigned int MCGeometry::addCell(const UserCellIDType& userCellId,
-                                 const IntVec& surfaceIds,
-                                 const CellT::CellFlags flags)
+unsigned int MCGeometry::addCell(
+        const UserCellIDType& userCellId,
+        const IntVec& surfaceIds,
+        const CellT::CellFlags flags)
 {
     CellT::SASVec boundingSurfaces;
 
@@ -220,7 +219,7 @@ unsigned int MCGeometry::getSurfaceIndexFromUserId(
 /*============================================================================*\
  * other internal-use code
 \*============================================================================*/
-/*----------------------------------------------------------------------------*/
+//! \cond
 void MCGeometry::_warnGeometry( const std::string& shortMessage,
                                 const TVecDbl& position,
                                 const TVecDbl& direction,
@@ -248,10 +247,11 @@ void MCGeometry::_warnGeometry( const std::string& shortMessage,
 }
                                
 /*----------------------------------------------------------------------------*/
-void MCGeometry::_failGeometry(const std::string failureMessage,
-                               const unsigned int currentCellIndex,
-                               const TVecDbl& position,
-                               const TVecDbl& direction) const
+void MCGeometry::_failGeometry(
+        const std::string& failureMessage,
+        const unsigned int currentCellIndex,
+        const TVecDbl& position,
+        const TVecDbl& direction) const
 {
     cout << "ERROR IN GEOMETRY: " << failureMessage << endl;
     
@@ -290,6 +290,7 @@ void MCGeometry::_failGeometry(const std::string failureMessage,
     Insist(0, "Geometry failure.");
 }
 
+//! \endcond
 /*----------------------------------------------------------------------------*/
 void MCGeometry::debugPrint() const
 {

@@ -55,18 +55,21 @@ public:
 
     ~Cylinder() { /* * */ }
 
+    //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
+    //! Determine distance to intersection with the surface.  
     void intersect( const TVecDbl& position, 
                     const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
+    //! Calculate the surface normal at a point
     void normalAtPoint( const TVecDbl& position,
                         TVecDbl& unitNormal) const;
 protected:
-    //! output to a stream
+    //! Output to a stream
     std::ostream& _output( std::ostream& os ) const;
 
 private:
@@ -109,19 +112,26 @@ public:
 
     ~CylinderNormal() { /* * */ }
 
+    //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
+    //! Determine distance to intersection with the surface.  
     void intersect( const TVecDbl& position, 
                     const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
+    //! Calculate the surface normal at a point
     void normalAtPoint( const TVecDbl& position,
                         TVecDbl& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
+private:
+    //! Return unrolled (x .* x) for vector x tailored to this axis
+    double _dotProduct( const TVecDbl& x,
+                        const TVecDbl& y) const;
 
 private:
     //! some point through which the cylinder's axis passes
@@ -130,35 +140,7 @@ private:
     const TVecDbl _axis;
     //! cylinder radius
     const double _radius;
-
-    //! Return unrolled (x .* x) for vector x tailored to this axis
-    double _dotProduct( const TVecDbl& x,
-                        const TVecDbl& y) const;
 };
-/*----------------------------------------------------------------------------*/
-template<>
-inline double CylinderNormal<0>::_dotProduct(
-                        const TVecDbl& x,
-                        const TVecDbl& y) const
-{
-    return x[1] * y[1] + x[2] * y[2];
-}
-
-template<>
-inline double CylinderNormal<1>::_dotProduct(
-                        const TVecDbl& x,
-                        const TVecDbl& y) const
-{
-    return x[0] * y[0] + x[2] * y[2];
-}
-
-template<>
-inline double CylinderNormal<2>::_dotProduct(
-                        const TVecDbl& x,
-                        const TVecDbl& y) const
-{
-    return x[0] * y[0] + x[1] * y[1];
-}
 
 /*============================================================================*/
 

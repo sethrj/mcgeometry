@@ -7,16 +7,15 @@
 #ifndef MCG_SPHERE_I_HPP
 #define MCG_SPHERE_I_HPP
 
-#include <vector>
-#include <cmath>
 #include <iostream>
 #include <blitz/tinyvec-et.h>
+
 #include "transupport/dbc.hpp"
 #include "transupport/blitzStuff.hpp"
 #include "transupport/SoftEquiv.hpp"
 
-#include "Surface.hpp"
 #include "Sphere.hpp"
+#include "Surface.i.hpp"
 
 namespace mcGeometry {
 /*============================================================================*/

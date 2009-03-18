@@ -1,6 +1,6 @@
 /*!
- * \file Plane.hpp
- * \brief Plane surface
+ * \file   Plane.hpp
+ * \brief  Plane surfaces
  * \author Seth R. Johnson
  * A regular Plane, and PlaneNormal to an axis, templated on that axis.
  */
@@ -8,10 +8,9 @@
 #ifndef MCG_PLANE_HPP
 #define MCG_PLANE_HPP
 
-#include <vector>
-#include <algorithm>
 #include <iostream>
 #include <blitz/tinyvec.h>
+
 #include "transupport/dbc.hpp"
 #include "transupport/blitzStuff.hpp"
 
@@ -101,14 +100,17 @@ public:
 
     ~PlaneNormal() { /* * */} 
 
+    //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
+    //! Determine distance to intersection with the surface.  
     void intersect( const TVecDbl& position, 
                     const TVecDbl& direction,
                     const bool posSense,
                     bool& hit,
                     double& distance) const;
 
+    //! Calculate the surface normal at a point
     void normalAtPoint( const TVecDbl& position,
                         TVecDbl& unitNormal) const;
 

@@ -1,6 +1,6 @@
 /*!
- * \file MCGeometry.hpp
- * \brief Geometry class
+ * \file   MCGeometry.hpp
+ * \brief  Geometry class
  * \author Seth R. Johnson et al.
  * 
  * Copyright (c) 2008, Seth R. Johnson, Jeremy L. Conlin
@@ -44,6 +44,7 @@
 #include <blitz/tinyvec.h>
 
 #include "Cell.hpp"
+#include "transupport/dbc.hpp"
 
 namespace mcGeometry {
 
@@ -418,7 +419,7 @@ private:
                                     const std::string& longMessage) const;
 
     //! Print geometry failure message.
-    void _failGeometry(            const std::string failureMessage,
+    void _failGeometry(            const std::string& failureMessage,
                                    const unsigned int currentCellIndex,
                                    const TVecDbl& position,
                                    const TVecDbl& direction) const;

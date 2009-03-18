@@ -7,15 +7,13 @@
 #ifndef MCG_CYLINDER_I_HPP
 #define MCG_CYLINDER_I_HPP
 
-#include <cmath>
+#include <iostream>
+
 #include "transupport/dbc.hpp"
 #include "transupport/SoftEquiv.hpp"
 
 #include "Cylinder.hpp"
-
-#include <iostream>
-using std::cout;
-using std::endl;
+#include "Surface.i.hpp"
 
 namespace mcGeometry {
 /*============================================================================*/
@@ -122,6 +120,33 @@ inline void CylinderNormal<axis>::normalAtPoint(
     Ensure(tranSupport::checkDirectionVector(unitNormal));
 }
 /*----------------------------------------------------------------------------*/
+
+//! \cond
+template<>
+inline double CylinderNormal<0>::_dotProduct(
+                        const TVecDbl& x,
+                        const TVecDbl& y) const
+{
+    return x[1] * y[1] + x[2] * y[2];
+}
+
+template<>
+inline double CylinderNormal<1>::_dotProduct(
+                        const TVecDbl& x,
+                        const TVecDbl& y) const
+{
+    return x[0] * y[0] + x[2] * y[2];
+}
+
+template<>
+inline double CylinderNormal<2>::_dotProduct(
+                        const TVecDbl& x,
+                        const TVecDbl& y) const
+{
+    return x[0] * y[0] + x[1] * y[1];
+}
+//! \endcond
+/*----------------------------------------------------------------------------*/
 template<>
 inline std::ostream& CylinderNormal<0>::_output( std::ostream& os ) const
 {
@@ -129,7 +154,7 @@ inline std::ostream& CylinderNormal<0>::_output( std::ostream& os ) const
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
-/*----------------------------------------------------------------------------*/
+
 template<>
 inline std::ostream& CylinderNormal<1>::_output( std::ostream& os ) const
 {
@@ -137,7 +162,7 @@ inline std::ostream& CylinderNormal<1>::_output( std::ostream& os ) const
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
-/*----------------------------------------------------------------------------*/
+
 template<>
 inline std::ostream& CylinderNormal<2>::_output( std::ostream& os ) const
 {

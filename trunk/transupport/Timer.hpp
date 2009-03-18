@@ -31,10 +31,11 @@ namespace tranSupport {
  */
 class Timer {
 public:
+    //! Possible values for the status of the timer
     enum TimerStatus {
-        NOTYETRUN = 0, 
-        RUNNING,
-        FINISHED
+        NOTYETRUN = 0,  //!< Timer hasn't yet been run
+        RUNNING,  //!< Timer is now running
+        FINISHED  //!< Timer has run and stopped
     };
 public:
 

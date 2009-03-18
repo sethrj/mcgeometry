@@ -11,8 +11,8 @@
 #include <list>
 #include <map>
 #include <utility>
+
 #include <blitz/tinyvec.h>
-#include "transupport/dbc.hpp"
 
 //#include <iostream>
 //using std::cout;
@@ -61,10 +61,17 @@ public:
     //! A vector of Surface/sense pairs (e.g. for bounding surfaces)
     typedef std::vector<SurfaceAndSense>       SASVec;
 
-    //! A container of pointers to Cells for neighborhood connectivity.
-    //! A std::list is used because this will be continually modified, and the
-    //! cost of reallocation is high.
-    typedef std::list< Cell<UserIdType> * >    CellContainer;
+    /*! \brief A container of pointers to Cells for neighborhood connectivity.
+     *
+     * A std::list is used because this will be continually modified, and the
+     * cost of reallocation is high.
+     */
+    typedef std::list< Cell<UserIdType>* > CellContainer;
+
+    //! Map our surfaces to vectors of other cells attached to that surface.
+    typedef std::map< Surface*, CellContainer > HoodMap;
+
+public:
     /*******************************/
     //! Static function to make flag generation easier.
     static CellFlags generateFlags(
@@ -91,8 +98,6 @@ public:
     }
 
     //! Get a writeable list of known cell neighbors for a quadric.
-    //  non-const so that whatever we pass can add to it
-    //  TODO possibly poor design here?
     CellContainer& getNeighbors(Surface* surface) {
 //        typename HoodMap::iterator findResult = _hood.find(surface);
 //        Require(findResult != _hood.end());
@@ -106,6 +111,7 @@ public:
     const unsigned int& getIndex() const {
         return _internalIndex;
     }
+
     //! Return the user ID.
     const UserIdType& getUserId() const {
         return _userId;
@@ -145,9 +151,6 @@ public:
         return (_flags & NEGATED);
     }
 private:
-    //! Map our surfaces to vectors of other cells attached to that surface.
-    typedef std::map< Surface*, CellContainer > HoodMap;
-
     //! A vector of surfaces and senses that define this Cell.
     const SASVec _boundingSurfaces;
 

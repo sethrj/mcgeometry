@@ -13,9 +13,10 @@ Current capabilities:
  - Completely lossless particle transport with no "soft equivalence" checking
  - Constant-time operation after geometry is connected (no global searching)
  - Uses zero-based `unsigned int` internal index to refer to cells for
-	constant-time connectivity with whatever cross section/tally code the
-	developer wishes to use, but translates the internal index to "User ID"s
-	which are arbitrary `unsigned int`s but may be any arbitrary object.
+   constant-time connectivity with whatever cross section/tally code the
+   developer wishes to use, but translates the internal index to "User ID"s
+   which are arbitrary `unsigned int`s but may be any arbitrary object.
+ - Uses the Blitz++ TinyVector class for directions/positions for speed
 
 MCGeometry is built with both speed and flexibility in mind. For interaction
 with the rest of a developer's Monte Carlo code, the "internal index" should be
@@ -26,9 +27,11 @@ the User IDs be used.
 
 Currently, compilation of the MCGeometry library requires installation of
 the scons build system, available at http://www.scons.org/ . Use <tt>scons
---help</tt> in the main directory to view build options.
+--help</tt> in the main directory to view build options. The Blitz++ library is 
+also required.
 
-The code has only been tested with <tt>gcc 4.0.1</tt>, but it should be
+The code has been tested with <tt>gcc 4.0.1</tt>, <tt>gcc 3.4.6</tt>, and 
+<tt>gcc 4.3.1</tt>, but it should be
 standards-compliant and compatible with any modern compiler. It produces no
 warnings when compiled with <tt>g++ -Wall</tt>.
 

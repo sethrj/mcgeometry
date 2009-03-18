@@ -15,10 +15,12 @@
 namespace tranSupport {
 /*============================================================================*/
 
+//! Return the norm of a vector (the square root of the sum of the squares)
 inline double vectorNorm(const blitz::TinyVector<double, 3>& v)
 {
     return std::sqrt(blitz::dot(v, v));
 }
+
 /*! \brief Validate direction vectors in 3-D 
  *
  *  Three-D vectors must have $\norm{\vec{\Omega}} = 1$
