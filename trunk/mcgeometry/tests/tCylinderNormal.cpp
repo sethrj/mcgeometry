@@ -10,6 +10,8 @@
 #include "mcgeometry/Cylinder.hpp"
 #include "mcgeometry/Surface.hpp"
 
+#include "mcgeometry/Cylinder.i.hpp"
+
 #include <iostream>
 #include <iomanip>
 #include <vector>

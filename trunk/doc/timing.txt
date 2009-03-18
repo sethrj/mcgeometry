@@ -95,7 +95,7 @@ TIMING DATA:                             Name                          Time
    5 Run with full neighborhood (third full sweep)                105.456ms
 ---------------------------------------------------------------------------
 
- ============================= 0.9 (revision 92) =============================
+ ======================= changed to blitz (revision 92) =======================
 bin/meshComparison 50 500000 0
 ---------------------------------------------------------------------------
 TIMING DATA:                             Name                          Time
@@ -128,5 +128,40 @@ TIMING DATA:                             Name                          Time
    3 Run with most neighborhood (first full sweep)                112.996ms
   4 Run with full neighborhood (second full sweep)                 99.988ms
    5 Run with full neighborhood (third full sweep)                 99.664ms
+---------------------------------------------------------------------------
+
+ ======================= inlined (revision 93) ========================
+bin/meshComparison 50 500000 0
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                  Creating the combinatorial mesh.                359.584ms
+            First transport in combinatorial mesh.              55928.236ms
+           Second transport in combinatorial mesh.              12747.447ms
+                  Transport in deterministic mesh.               4346.722ms
+---------------------------------------------------------------------------
+
+bin/meshTiming 50
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                 0 Create the mesh                357.895ms
+          1 Run without neighborhood (first sweep)              26384.049ms
+       2 Run with full neighborhood (second sweep)                 86.522ms
+   3 Run with most neighborhood (first full sweep)                221.632ms
+  4 Run with full neighborhood (second full sweep)                181.253ms
+   5 Run with full neighborhood (third full sweep)                179.222ms
+---------------------------------------------------------------------------
+
+bin/meshTiming 40
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                 0 Create the mesh                179.215ms
+          1 Run without neighborhood (first sweep)               7933.805ms
+       2 Run with full neighborhood (second sweep)                 42.597ms
+   3 Run with most neighborhood (first full sweep)                104.013ms
+  4 Run with full neighborhood (second full sweep)                 90.410ms
+   5 Run with full neighborhood (third full sweep)                 90.641ms
 ---------------------------------------------------------------------------
  

@@ -10,6 +10,10 @@
 #include "mcgeometry/Plane.hpp"
 #include "mcgeometry/Sphere.hpp"
 
+#include "mcgeometry/MCGeometry.i.hpp"
+#include "mcgeometry/Plane.i.hpp"
+#include "mcgeometry/Sphere.i.hpp"
+
 #include <iostream>
 #include <vector>
 #include "transupport/dbc.hpp"

@@ -10,6 +10,8 @@
 #include "mcgeometry/Plane.hpp"
 #include "mcgeometry/Surface.hpp"
 
+#include "mcgeometry/Plane.i.hpp"
+
 #include <iostream>
 #include <iomanip>
 #include <vector>

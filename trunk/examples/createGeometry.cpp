@@ -14,6 +14,8 @@
 #include "mcgeometry/Sphere.hpp"
 #include "mcgeometry/Cylinder.hpp"
 
+#include "mcgeometry/_MCGeometry.hpp"
+
 #include <vector>
 #include <blitz/tinyvec.h>
 #include <iostream>

@@ -1,0 +1,151 @@
+/*!
+ * \file   Cylinder.i.hpp
+ * \brief  Contains inline implementation for \c Cylinder
+ * \author Seth R. Johnson
+ */
+
+#ifndef MCG_CYLINDER_I_HPP
+#define MCG_CYLINDER_I_HPP
+
+#include <cmath>
+#include "transupport/dbc.hpp"
+#include "transupport/SoftEquiv.hpp"
+
+#include "Cylinder.hpp"
+
+#include <iostream>
+using std::cout;
+using std::endl;
+
+namespace mcGeometry {
+/*============================================================================*/
+/*----------------------------------------------------------------------------*/
+// Equation: (X-P)^2 - [(X-P).U]^2 - R^2 = 0
+//      X = position 
+//      P = point on axis of cylinder
+//      U = direction vector of cylinder axis
+inline bool Cylinder::hasPosSense(const TVecDbl& position) const
+{
+    TVecDbl trPos(position - _pointOnAxis); // x - P
+
+    double b = blitz::dot(trPos, _axis);
+
+    double eval = blitz::dot(trPos, trPos) - b*b - _radius*_radius;
+
+    return _hasPosSense(eval);
+}
+/*----------------------------------------------------------------------------*/
+inline void Cylinder::intersect(
+        const TVecDbl& position, 
+        const TVecDbl& direction,
+        const bool posSense,
+        bool& hit, double& distance) const
+{
+    Require(tranSupport::checkDirectionVector(direction));
+
+    double temp = blitz::dot(direction, _axis);
+
+    double A = 1 - temp * temp;
+
+    TVecDbl trPos(position - _pointOnAxis);
+
+    double B = blitz::dot(direction,
+            trPos - _axis * blitz::dot(trPos, _axis));
+
+
+    temp = blitz::dot(trPos, _axis);
+    double C = blitz::dot(trPos, trPos) - temp*temp - _radius*_radius;
+
+    _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
+}
+/*----------------------------------------------------------------------------*/
+inline void Cylinder::normalAtPoint(
+                const TVecDbl& position,
+                TVecDbl& unitNormal) const
+{
+    // "unitNormal" is now particle location translated to cylinder
+    unitNormal = position - _pointOnAxis;
+
+    double cosTheta = blitz::dot(unitNormal, _axis);
+
+    // make "unitNormal" the un-normalized difference to the axis (position
+    // minus projection)
+    unitNormal -= _axis * cosTheta;
+
+    unitNormal /= _radius;
+
+    Ensure(tranSupport::checkDirectionVector(unitNormal));
+}
+/*----------------------------------------------------------------------------*/
+inline std::ostream& Cylinder::_output( std::ostream& os ) const {
+    os  << "[ CYL   Point:  " << std::setw(10) << _pointOnAxis
+        << " Axis: " << std::setw(10) << _axis 
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}
+/*============================================================================*/
+template<unsigned int axis>
+inline bool CylinderNormal<axis>::hasPosSense(
+                const TVecDbl& position) const
+{
+    return _hasPosSense( _dotProduct(position, position) - _radius * _radius);
+}
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline void CylinderNormal<axis>::intersect(
+                const TVecDbl& position, 
+                const TVecDbl& direction,
+                const bool posSense,
+                bool& hit, double& distance) const
+{
+    //temporary for now
+    Insist(softEquiv(_pointOnAxis, TVecDbl(0.0)),
+            "As of now, CylinderNormal must be on the axis.");
+
+    double A = _dotProduct(direction, direction);
+
+    double B = _dotProduct(direction, position);
+
+    double C = _dotProduct(position, position) - _radius*_radius;
+
+    return _calcQuadraticIntersect(A, B, C, posSense,
+                                   hit, distance);
+}
+/*----------------------------------------------------------------------------*/
+template<unsigned int axis>
+inline void CylinderNormal<axis>::normalAtPoint(
+                        const TVecDbl& position,
+                        TVecDbl& unitNormal) const
+{
+    Insist(0, "Not yet implemented.");
+
+    Ensure(tranSupport::checkDirectionVector(unitNormal));
+}
+/*----------------------------------------------------------------------------*/
+template<>
+inline std::ostream& CylinderNormal<0>::_output( std::ostream& os ) const
+{
+    os  << "[ CYLX: "
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}
+/*----------------------------------------------------------------------------*/
+template<>
+inline std::ostream& CylinderNormal<1>::_output( std::ostream& os ) const
+{
+    os  << "[ CYLY: "
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}
+/*----------------------------------------------------------------------------*/
+template<>
+inline std::ostream& CylinderNormal<2>::_output( std::ostream& os ) const
+{
+    os  << "[ CYLZ: "
+        << " Radius: " << std::setw(5) << _radius << " ]";
+    return os;
+}
+/*============================================================================*/
+} // end namespace mcGeometry
+#endif
+

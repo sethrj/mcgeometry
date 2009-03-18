@@ -7,11 +7,8 @@
 #ifndef MCG_CYLINDER_HPP
 #define MCG_CYLINDER_HPP
 
-#include <vector>
-#include <cmath>
 #include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
-#include "transupport/SoftEquiv.hpp"
 #include "transupport/blitzStuff.hpp"
 
 #include "Surface.hpp"

@@ -9,6 +9,7 @@
 #include "createGeometry.hpp"
 
 #include "mcgeometry/MCGeometry.hpp"
+#include "mcgeometry/_MCGeometry.hpp"
 
 #include <iostream>
 #include <vector>
