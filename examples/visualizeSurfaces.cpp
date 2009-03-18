@@ -8,6 +8,7 @@
 
 #include "createGeometry.hpp"
 #include "mcgeometry/MCGeometry.hpp"
+#include "mcgeometry/MCGeometry.i.hpp"
 
 #include <iostream>
 #include <fstream>

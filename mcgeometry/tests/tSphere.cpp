@@ -10,6 +10,8 @@
 #include "mcgeometry/Sphere.hpp"
 #include "mcgeometry/Surface.hpp"
 
+#include "mcgeometry/Sphere.i.hpp"
+
 #include <iostream>
 #include <iomanip>
 #include <vector>

@@ -1,11 +1,11 @@
 /*!
- * \file   Cell.t.hpp
- * \brief  Contains templated methods for Cell
+ * \file   Cell.i.hpp
+ * \brief  Contains inline implementation for \c Cell
  * \author Seth R. Johnson
  */
 
-#ifndef MCG_CELL_T_HPP
-#define MCG_CELL_T_HPP
+#ifndef MCG_CELL_I_HPP
+#define MCG_CELL_I_HPP
 
 #include <list>
 #include <map>
@@ -24,7 +24,7 @@ namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
 //! Static function to make flag generation easier.
 template <typename UserIdType>
-typename Cell<UserIdType>::CellFlags Cell<UserIdType>::generateFlags(
+inline typename Cell<UserIdType>::CellFlags Cell<UserIdType>::generateFlags(
                                 bool isDeadCell, bool isNegated  )
 {
     CellFlags flags = NONE;
@@ -38,7 +38,7 @@ typename Cell<UserIdType>::CellFlags Cell<UserIdType>::generateFlags(
 /*============================================================================*/
 //! constructor requires an immutable bounding surface
 template <typename UserIdType>
-Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
+inline Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
         const UserIdType userId,
         const unsigned int internalIndex,
         const CellFlags flags) 
@@ -64,7 +64,7 @@ Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
 }
 /*----------------------------------------------------------------------------*/
 template <typename UserIdType>
-bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
+inline bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
                                      const Surface* surfaceToSkip) const
 {
     if (_flags & NEGATED) {
@@ -130,7 +130,7 @@ bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
 }
 /*----------------------------------------------------------------------------*/
 template <typename UserIdType>
-void Cell<UserIdType>::intersect(
+inline void Cell<UserIdType>::intersect(
                     const TVecDbl& position,
                     const TVecDbl& direction,
                     Surface*& hitSurface,

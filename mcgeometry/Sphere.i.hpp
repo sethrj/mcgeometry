@@ -1,8 +1,11 @@
 /*!
- * \file   Sphere.cpp
- * \brief  Non-inlined code for spheres
- * \author Jeremy L. Conlin
+ * \file   Sphere.i.hpp
+ * \brief  Contains inline implementation for the \c Sphere class
+ * \author Seth R. Johnson
  */
+
+#ifndef MCG_SPHERE_I_HPP
+#define MCG_SPHERE_I_HPP
 
 #include <vector>
 #include <cmath>
@@ -22,7 +25,7 @@ namespace mcGeometry {
 // Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
 //      (x,y,z) = center of sphere
 //      (x0,y0,z0) = position
-bool Sphere::hasPosSense(const TVecDbl& position) const
+inline bool Sphere::hasPosSense(const TVecDbl& position) const
 {
     double eval = 0.0;
     double temp;
@@ -42,35 +45,26 @@ bool Sphere::hasPosSense(const TVecDbl& position) const
 }
 
 /*----------------------------------------------------------------------------*/
-void Sphere::intersect(
+inline void Sphere::intersect(
         const TVecDbl& position, 
         const TVecDbl& direction, const bool posSense,
         bool& hit, double& distance ) const
 {
     Require(tranSupport::checkDirectionVector(direction));
 
-    double selfDot = 0.0;
-    double B = 0.0;
-    double movedLoc;
-    
-    // subtract out the center of the sphere
-    for (int i = 0; i < 3; ++i) {
-        movedLoc = (position[i] - _center[i]);
-        B +=  movedLoc * direction[i]; 
-        selfDot += movedLoc * movedLoc;
-    }
+    TVecDbl trLoc(position - _center);
 
     // find distance and whether it intercepts
     _calcQuadraticIntersect(
             1,  // A
-            B,  // B
-            (selfDot - _radius * _radius), //C
+            blitz::dot(trLoc, direction),  // B
+            (blitz::dot(trLoc, trLoc) - _radius * _radius), //C
             posSense,
             hit, distance
             );
 }
 /*----------------------------------------------------------------------------*/
-void Sphere::normalAtPoint(
+inline void Sphere::normalAtPoint(
         const TVecDbl& position,
         TVecDbl& unitNormal ) const
 {
@@ -89,7 +83,8 @@ void Sphere::normalAtPoint(
 
 /*----------------------------------------------------------------------------*/
 //! output a stream which prints the Sphere's characteristics
-std::ostream& Sphere::_output( std::ostream& os ) const {
+inline std::ostream& Sphere::_output( std::ostream& os ) const
+{
     os  << "[ SPHERE Center: " << std::setw(10) << _center
         << " Radius: " << std::setw(5) << _radius
         << " ]";
@@ -102,68 +97,47 @@ std::ostream& Sphere::_output( std::ostream& os ) const {
 // Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
 //      (x,y,z) = center of sphere
 //      (x0,y0,z0) = position
-bool SphereO::hasPosSense(
+inline bool SphereO::hasPosSense(
         const TVecDbl& position ) const
 {
     return _hasPosSense(
-              position[0]*position[0]
-            + position[1]*position[1]
-            + position[2]*position[2] 
-                - _radius*_radius);
+              blitz::dot(position, position) - _radius*_radius);
 }
 
 /*----------------------------------------------------------------------------*/
-void SphereO::intersect(
+inline void SphereO::intersect(
         const TVecDbl& position, 
         const TVecDbl& direction, const bool posSense,
         bool& hit, double& distance ) const
 {
     Require(tranSupport::checkDirectionVector(direction));
 
-    double selfDot = 0.0;
-    double B = 0.0;
-    
-    // subtract out the center of the sphere
-    for (int i = 0; i < 3; ++i) {
-        B +=  position[i] * direction[i]; 
-        selfDot += position[i] * position[i];
-    }
-
     // find distance and whether it intercepts
     _calcQuadraticIntersect(
             1,  // A
-            B,  // B
-            (selfDot - _radius * _radius), //C
+            blitz::dot(position, direction),  // B
+            (blitz::dot(position, position) - _radius * _radius), //C
             posSense,
             hit, distance
             );
 }
 /*----------------------------------------------------------------------------*/
-void SphereO::normalAtPoint(
+inline void SphereO::normalAtPoint(
         const TVecDbl& position,
         TVecDbl& unitNormal ) const
 {
     // (position is on the outer edge of the sphere, we hope)
     Require(softEquiv(tranSupport::vectorNorm(position),_radius));
 
-    // for a sphere, normal is a line from "position" to the origin
-    double normValue = 0.0;
-    for (unsigned int i = 0; i < 3; ++i) {
-        unitNormal[i] = position[i];
-        normValue += unitNormal[i] * unitNormal[i];
-    }
-
-    // normalize it
-    for (unsigned int i = 0; i < 3; ++i) {
-        unitNormal[i] /= normValue;
-    }
+    unitNormal = position / blitz::dot(position, position);
 
     // make sure it actually is a normal vector
     Ensure(tranSupport::checkDirectionVector(unitNormal));
 }
 /*----------------------------------------------------------------------------*/
 //! output a stream which prints the SphereO's characteristics
-std::ostream& SphereO::_output( std::ostream& os ) const {
+inline std::ostream& SphereO::_output( std::ostream& os ) const
+{
     os  << "[ SPHEREO Radius: " << std::setw(5) << _radius
         << " ]";
     return os;
@@ -171,4 +145,5 @@ std::ostream& SphereO::_output( std::ostream& os ) const {
 
 /*============================================================================*/
 } // end namespace mcGeometry
+#endif
 
