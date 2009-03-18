@@ -30,7 +30,7 @@ namespace tranSupport {
  *  For example, considering an IMC problem with or without timers around
  *  every particle lifespan (300000 particles):
  *   - With SuperTimer: ~17 seconds
- *   - With FastTimer: ~9 seconds
+ *   - With FastTimer: ~13 seconds
  *   - Without timers: ~3  seconds
  */
 class FastTimer {

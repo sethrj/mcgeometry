@@ -17,7 +17,6 @@
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-// #include "transupport/VectorPrint.hpp"
 
 using mcGeometry::Sphere;
 using mcGeometry::Surface;
@@ -26,12 +25,12 @@ using std::cout;
 using std::endl;
 
 
-typedef std::vector<double> doubleVec;
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 /*============================================================================*/
 void runTests() {
     /* * * create sphere * * */
-    doubleVec center(3,0.0);
+    TVecDbl center(0.0);
     double      sphRadius = 2.0;
 
     center[0] = 1.0;
@@ -42,8 +41,8 @@ void runTests() {
 //    cout << theSphere << endl;
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
     particleLoc[0] = 1.5;
     particleDir[1] = 1.0;
@@ -67,13 +66,9 @@ void runTests() {
     TESTER_CHECKFORPASS(softEquiv(distance, 1.936491673103709));
 
     /********************/
-    particleLoc[0] = -1;
-    particleLoc[1] = -1;
-    particleLoc[2] = 0.5;
+    particleLoc = -1, -1, 0.5;
 
-    particleDir[0] = 0.707106781186547;
-    particleDir[1] = 0.707106781186547;
-    particleDir[2] = 0.0;
+    particleDir = 0.707106781186547, 0.707106781186547, 0.0;
 
 //    cout << "particle loc: " << particleLoc
 //         << " direction: " << particleDir << endl;
@@ -88,9 +83,7 @@ void runTests() {
 
     /********************/
 
-    particleDir[0] = 0.707106781186547;
-    particleDir[1] = -0.707106781186547;
-    particleDir[2] = 0.0;
+    particleDir = 0.707106781186547, -0.707106781186547, 0.0;
 
     theSphere.intersect(particleLoc, particleDir, true,
         didHit, distance);

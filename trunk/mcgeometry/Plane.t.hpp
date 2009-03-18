@@ -10,10 +10,10 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <blitz/tinyvec-et.h>
 #include "transupport/dbc.hpp"
+#include "transupport/blitzStuff.hpp"
 #include "transupport/SoftEquiv.hpp"
-#include "transupport/VectorMath.hpp"
-#include "transupport/VectorPrint.hpp"
 
 #include "Surface.hpp"
 
@@ -21,22 +21,19 @@ namespace mcGeometry {
 /*============================================================================*/
 template<unsigned int axis>
 bool PlaneNormal<axis>::hasPosSense(
-                    const std::vector<double>& position) const
+                    const TVecDbl& position) const
 {
-    Require(position.size() == 3);
     return _hasPosSense(position[axis] - _coordinate);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
 void PlaneNormal<axis>::intersect(
-                    const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+                    const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool posSense,
                     bool& hit, double& distance) const
 {
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
+    Require(tranSupport::checkDirectionVector(direction));
 
     // default to "does not hit" values
     hit = false;
@@ -53,14 +50,13 @@ void PlaneNormal<axis>::intersect(
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
-void PlaneNormal<axis>::normalAtPoint( const std::vector<double>& position,
-                                       std::vector<double>& unitNormal) const
+void PlaneNormal<axis>::normalAtPoint( const TVecDbl& position,
+                                       TVecDbl& unitNormal) const
 {
     // "position" should be on the surface
-    Require(position.size() == 3);
-    Require(softEquiv(position[axis] - _coordinate, 0.0));
+    Require(softEquiv(position[axis] - _coordinate, TVecDbl()));
 
-    unitNormal.assign(3,0.0);
+    unitNormal = 0.0;
     unitNormal[axis] = 1.0;
 }
 

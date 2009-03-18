@@ -26,23 +26,23 @@ using namespace mcGeometry;
 using std::cout;
 using std::endl;
 
-typedef std::vector<double> doubleVec;
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 /*============================================================================*/
 // this test can use Bielajew's "ccylz" to test against to be really sure
 void runTestZ() {
     /* * * create cylinder * * */
     double radius(3.0);
-    doubleVec center(3,0.0);
-    doubleVec axis(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl axis(0.0);
 
     axis[2] = 1.0;    // Cylinder parallel to  z-axis
 
     CylinderZ theCylinder(center, radius);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
     particleLoc[0] = 1.5;
     particleDir[1] = 1.0;
@@ -60,13 +60,9 @@ void runTestZ() {
     TESTER_CHECKFORPASS(softEquiv(distance, 2.598076211353316));
 
     /********************/
-    particleLoc[0] = -1;
-    particleLoc[1] = -2;
-    particleLoc[2] = 0.5;
+    particleLoc = -1, -2, 0.5;
 
-    particleDir[0] = 0.707106781186547;
-    particleDir[1] = 0.707106781186547;
-    particleDir[2] = 0.0;
+    particleDir = 0.707106781186547, 0.707106781186547, 0.0;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
@@ -81,9 +77,7 @@ void runTestZ() {
 
     /********************/
 
-    particleDir[0] = 0.707106781186547;
-    particleDir[1] = -0.707106781186547;
-    particleDir[2] = 0.0;
+    particleDir = 0.707106781186547, -0.707106781186547, 0.0;
 
     theCylinder.intersect(particleLoc, particleDir, false,
         didHit, distance);
@@ -94,9 +88,7 @@ void runTestZ() {
     /********************/
     // make sure that it thinks a particle going along its axis never hits it
 
-    particleDir[0] = 0.0;
-    particleDir[1] = 0.0;
-    particleDir[2] = 1.0;
+    particleDir = 0.0, 0.0, 1.0;
 
     theCylinder.intersect(particleLoc, particleDir, false,
         didHit, distance);
@@ -105,30 +97,22 @@ void runTestZ() {
 
     /********************/
     // make sure it can check "outside" correctly
-    particleLoc[0] = -3;
-    particleLoc[1] = -3;
-    particleLoc[2] = 0.0;
+    particleLoc = -3.0, -3.0, 0.0;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == true);
 
     radius = 1.0;
     CylinderZ anotherCylinder(center, radius);
 
-    particleLoc[0] = -0.7;
-    particleLoc[1] = 0.5;
-    particleLoc[2] = 0.0;
+    particleLoc = -0.7, 0.5, 0.0;
 
     TESTER_CHECKFORPASS(anotherCylinder.hasPosSense(particleLoc) == false);
 
-    particleLoc[0] = -0.79317;
-    particleLoc[1] = 0.544158;
-    particleLoc[2] = -0.726551;
+    particleLoc = -0.79317, 0.544158, -0.726551;
 
     TESTER_CHECKFORPASS(anotherCylinder.hasPosSense(particleLoc) == false);
     
-    particleLoc[0] = 0.79317;
-    particleLoc[1] = 0.544158;
-    particleLoc[2] = 0.;
+    particleLoc = 0.79317,  0.544158, 0.0;
 
     TESTER_CHECKFORPASS(anotherCylinder.hasPosSense(particleLoc) == false);
 }

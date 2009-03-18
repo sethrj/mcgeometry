@@ -17,7 +17,6 @@
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-// #include "transupport/VectorPrint.hpp"
 
 using namespace mcGeometry;
 
@@ -25,13 +24,13 @@ using std::cout;
 using std::endl;
 
 
-typedef std::vector<double> doubleVec;
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 /*============================================================================*/
 void testPlane() {
     /* * * create plane * * */
-    doubleVec center(3,0.0);
-    doubleVec normal(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl normal(0.0);
 
     normal[0] = 0.707106781186547;
     normal[1] = 0.707106781186547;
@@ -43,8 +42,8 @@ void testPlane() {
 
     TESTER_CHECKFORPASS(thePlane.isReflecting() == false);
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
 
     particleLoc[0] = 2.01;
@@ -107,8 +106,8 @@ void testPlane() {
 /*============================================================================*/
 void testReflPlane() {
     /* * * create plane * * */
-    doubleVec center(3,0.0);
-    doubleVec normal(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl normal(0.0);
 
     normal[0] = 0.707106781186547;
     normal[1] = 0.707106781186547;
@@ -121,7 +120,7 @@ void testReflPlane() {
 
     TESTER_CHECKFORPASS(thePlane.isReflecting() == true);
 
-    doubleVec returnedNormalVector;
+    TVecDbl returnedNormalVector;
     thePlane.normalAtPoint(center, returnedNormalVector);
     TESTER_CHECKFORPASS( softEquiv(returnedNormalVector, normal) );
 
@@ -139,8 +138,8 @@ void testPlaneX() {
     PlaneX thePlane(1.0);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
 
     particleLoc[0] = 0.9;
@@ -187,8 +186,8 @@ void testPlaneY() {
     PlaneY thePlane(1.0);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
 
     particleLoc[1] = 0.9;
@@ -207,13 +206,8 @@ void testPlaneY() {
     TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
-    particleLoc[1] = 1.5;
-    particleLoc[2] = -1;
-    particleLoc[0] = 0.5;
-
-    particleDir[1] = -0.894427190999916;
-    particleDir[2] = 0.447213595499958;
-    particleDir[0] = 0.0;
+    particleLoc = 0.5, 1.5, -1;
+    particleDir = 0.0, -0.894427190999916, 0.447213595499958 ;
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
 
@@ -235,8 +229,8 @@ void testPlaneZ() {
     PlaneZ thePlane(1.0);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
 
     particleLoc[2] = 0.9;
@@ -255,13 +249,9 @@ void testPlaneZ() {
     TESTER_CHECKFORPASS(didHit == false);
 
     /********************/
-    particleLoc[2] = 1.5;
-    particleLoc[0] = -1;
-    particleLoc[1] = 0.5;
+    particleLoc = -1, 0.5, 1.5;
 
-    particleDir[2] = -0.894427190999916;
-    particleDir[0] = 0.447213595499958;
-    particleDir[1] = 0.0;
+    particleDir = 0.447213595499958, 0.0, -0.894427190999916;
 
     TESTER_CHECKFORPASS(thePlane.hasPosSense(particleLoc) == true);
 

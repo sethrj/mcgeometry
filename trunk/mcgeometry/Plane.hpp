@@ -11,9 +11,9 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
-#include "transupport/SoftEquiv.hpp"
-#include "transupport/VectorMath.hpp"
+#include "transupport/blitzStuff.hpp"
 
 #include "Surface.hpp"
 
@@ -25,16 +25,17 @@ namespace mcGeometry {
  */
 class Plane : public Surface {
 public:
+    //! Blitz++ TinyVector of length D stores position/direction/etc.
+    typedef blitz::TinyVector<double, 3> TVecDbl; 
+    
+public:
     //! User-called constructor.
-    Plane( const std::vector<double>& normal,
-           const std::vector<double>& coord) 
+    Plane( const TVecDbl& normal,
+           const TVecDbl& coord) 
                                     : _normal(normal), _coordinate(coord)
     {
-        // we only live in 3-space
-        Require(_normal.size() == 3);
-        Require(_coordinate.size() == 3);
         // require unit normal 
-        Require(softEquiv(tranSupport::vectorNorm(_normal), 1.0));
+        Require(tranSupport::checkDirectionVector(_normal));
     }
 
     //! Copy the surface with a new user ID.
@@ -51,25 +52,25 @@ public:
 
     ~Plane() { /* * */} 
 
-    bool hasPosSense(const std::vector<double>& position) const;
+    bool hasPosSense(const TVecDbl& position) const;
 
-    void intersect( const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
                     double& distance) const;
 
-    void normalAtPoint( const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const;
+    void normalAtPoint( const TVecDbl& position,
+                        TVecDbl& unitNormal) const;
 protected:
     //! output to a stream
     std::ostream& _output( std::ostream& os ) const;
 
 private:
     //! Unit normal to the plane for a positive sense.
-    const std::vector<double> _normal;
+    const TVecDbl _normal;
     //! Some coordinate through which the plane passes.
-    const std::vector<double> _coordinate;
+    const TVecDbl _coordinate;
 };
 /*============================================================================*/
 /*!
@@ -100,16 +101,16 @@ public:
 
     ~PlaneNormal() { /* * */} 
 
-    bool hasPosSense(const std::vector<double>& position) const;
+    bool hasPosSense(const TVecDbl& position) const;
 
-    void intersect( const std::vector<double>& position, 
-                    const std::vector<double>& direction,
+    void intersect( const TVecDbl& position, 
+                    const TVecDbl& direction,
                     const bool posSense,
                     bool& hit,
                     double& distance) const;
 
-    void normalAtPoint( const std::vector<double>& position,
-                        std::vector<double>& unitNormal) const;
+    void normalAtPoint( const TVecDbl& position,
+                        TVecDbl& unitNormal) const;
 
     //! return the index along which we are oriented
     unsigned int getAxis() const {

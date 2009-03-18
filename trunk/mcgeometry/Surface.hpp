@@ -12,6 +12,7 @@
 #include <utility>
 #include <cmath>
 #include <iostream>
+#include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
 
 //using std::cout;
@@ -30,28 +31,21 @@ namespace mcGeometry {
 
 // template <typename UserSurfaceIdType>
 class Surface {
-protected:
-    //! This might be replaced with a template later.
-    typedef unsigned int UserSurfaceIdType;
-
-private:
     //! Output a Surface to a stream.
     friend std::ostream& operator<<( std::ostream&, const Surface& );
 public:
+    //! Blitz++ TinyVector of length D stores position/direction/etc.
+    typedef blitz::TinyVector<double, 3> TVecDbl; 
+    
+    //! This might be replaced with a template later.
+    typedef unsigned int UserSurfaceIdType;
 
+public:
     //! Extra information about surfaces (i.e. is it reflecting)
     enum SurfaceFlags {
         NONE       = 0,
         REFLECTING = 1
     };
-
-//    //! surface types for volume calculation
-//    enum SurfaceKind {
-//        SK_OTHER       = 0,
-//        SK_PLANENORMAL = 1,
-//        SK_SPHERE      = 2,
-//        SK_CYLINDER    = 3
-//    }
 
     /*!
      * \brief Determine distance to intersection with the surface.  
@@ -60,22 +54,22 @@ public:
      * intersects the surface; pass back whether it hits and what the distance
      * is.
      */
-    virtual void intersect(const std::vector<double>& position, 
-                           const std::vector<double>& direction,
+    virtual void intersect(const TVecDbl& position, 
+                           const TVecDbl& direction,
                            const bool PosSense,
                            bool& hit,
                            double& distance) const = 0;
 
     //! Calculate whether a point has a positive sense to this surface without
     //!  doing all the distance calculations
-    virtual bool hasPosSense(const std::vector<double>& position) const = 0;
+    virtual bool hasPosSense(const TVecDbl& position) const = 0;
 
     //! \brief Calculate the surface normal at a point, necessary for reflection
     //!
     //!  The value returned is the surface normal with a direction in the
     //!  "positive" sense of the surface.
-    virtual void normalAtPoint( const std::vector<double>& position,
-                                std::vector<double>& unitNormal) const = 0;
+    virtual void normalAtPoint( const TVecDbl& position,
+                                TVecDbl& unitNormal) const = 0;
                 
     //! Create a "new" copy of ourself, so that a user-created surface can be
     //! retained by MCGeometry.

@@ -18,7 +18,6 @@
 #include "transupport/constants.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-//#include "transupport/VectorPrint.hpp"
 
 
 
@@ -27,14 +26,14 @@ using namespace mcGeometry;
 using std::cout;
 using std::endl;
 
-typedef std::vector<double> doubleVec;
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 /*============================================================================*/
 void runTestA() {
     /* * * create cylinder * * */
     double radius(3.0);
-    doubleVec center(3,0.0);
-    doubleVec axis(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl axis(0.0);
 
     axis[0] = 1.0;    // Cylinder parallel to  x-axis
 
@@ -44,8 +43,8 @@ void runTestA() {
     Cylinder theCylinder(center, axis, radius);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
 
     particleLoc[0] = 1.5;
@@ -114,16 +113,16 @@ void runTestA() {
 void runTestB() {
     /* * * create cylinder * * */
     double radius(3.0);
-    doubleVec center(3,0.0);
-    doubleVec axis(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl axis(0.0);
 
     axis[2] = 1.0;    // Cylinder parallel to  z-axis
 
     Cylinder theCylinder(center, axis, radius);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
-    doubleVec particleDir(3,0.0);
+    TVecDbl particleLoc(0.0);
+    TVecDbl particleDir(0.0);
 
     particleLoc[0] = 1.5;
     particleDir[1] = 1.0;
@@ -141,13 +140,9 @@ void runTestB() {
     TESTER_CHECKFORPASS(softEquiv(distance, 2.598076211353316));
 
     /********************/
-    particleLoc[0] = -1;
-    particleLoc[1] = -2;
-    particleLoc[2] = 0.5;
+    particleLoc = -1, -2, 0.5;
 
-    particleDir[0] = 0.707106781186547;
-    particleDir[1] = 0.707106781186547;
-    particleDir[2] = 0.0;
+    particleDir = 0.707106781186547, 0.707106781186547, 0.0;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
@@ -197,31 +192,25 @@ void runTestB() {
 void runTestC() {
     /* * * create cylinder * * */
     double radius = 1.0;
-    doubleVec center(3,0.0);
-    doubleVec axis(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl axis(0.0);
 
     axis[0] = 1.0;    // Cylinder parallel to x-axis
 
     Cylinder theCylinder(center, axis, radius);
 
     /* * * create "particle" * * */
-    doubleVec particleLoc(3,0.0);
+    TVecDbl particleLoc(0.0);
 
-    particleLoc[0] = 0.0;
-    particleLoc[1] = -0.7;
-    particleLoc[2] = 0.5;
+    particleLoc = 0.0, -0.7, 0.5;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 
-    particleLoc[0] = -0.726551;
-    particleLoc[1] = -0.79317;
-    particleLoc[2] = 0.544158;
+    particleLoc = -0.726551, -0.79317, 0.544158;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
     
-    particleLoc[0] = 0.;
-    particleLoc[1] = 0.79317;
-    particleLoc[2] = 0.544158;
+    particleLoc = 0., 0.79317, 0.544158;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
 }
@@ -230,27 +219,27 @@ void runTestC() {
 void runTestD() {
     /* * * create cylinder 45 degrees in xy plane* * */
     double radius = 1.0;
-    doubleVec center(3,0.0);
-    doubleVec axis(3,0.0);
+    TVecDbl center(0.0);
+    TVecDbl axis(0.0);
 
     axis[0] = tranSupport::constants::SQRTHALF;
     axis[1] = tranSupport::constants::SQRTHALF;
 
     Cylinder theCylinder(center, axis, radius);
 
-    doubleVec particleLoc(3,0.0);
+    TVecDbl particleLoc(0.0);
 
     particleLoc[0] = -tranSupport::constants::SQRTHALF;
     particleLoc[1] =  tranSupport::constants::SQRTHALF;
     particleLoc[2] = 0.0;
 
-    doubleVec expectedNormal(3,0.0);
+    TVecDbl expectedNormal(0.0);
     expectedNormal[0] = -tranSupport::constants::SQRTHALF;
     expectedNormal[1] =  tranSupport::constants::SQRTHALF;
     expectedNormal[2] = 0.0;
 
 
-    doubleVec returnedNormal;
+    TVecDbl returnedNormal;
     theCylinder.normalAtPoint(particleLoc, returnedNormal);
     TESTER_CHECKFORPASS(softEquiv(returnedNormal, expectedNormal, 1.e-14));
 

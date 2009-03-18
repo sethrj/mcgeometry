@@ -12,10 +12,11 @@
 #include <map>
 #include <vector>
 
+#include <blitz/tinyvec-et.h>
+
 #include "transupport/dbc.hpp"
-#include "transupport/VectorPrint.hpp"
-#include "transupport/VectorMath.hpp"
 #include "transupport/SoftEquiv.hpp"
+#include "transupport/blitzStuff.hpp"
 
 #include "MCGeometry.hpp"
 #include "Surface.hpp"
@@ -32,14 +33,12 @@ namespace mcGeometry {
  * subroutines that the user calls while running their monte carlo code
 \*============================================================================*/
 void MCGeometry::findDistance(
-                            const std::vector<double>& position,
-                            const std::vector<double>& direction,
+                            const TVecDbl& position,
+                            const TVecDbl& direction,
                             const unsigned int oldCellIndex,
                             double& distanceTraveled)
 {
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
+    Require(tranSupport::checkDirectionVector(direction));
     Require(oldCellIndex < getNumCells());
 
     // call intersect on the old cell to find the surface and distance that it
@@ -60,9 +59,9 @@ void MCGeometry::findDistance(
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::findNewCell(
-                            const std::vector<double>& position,
-                            const std::vector<double>& direction,
-                            std::vector<double>& newPosition,
+                            const TVecDbl& position,
+                            const TVecDbl& direction,
+                            TVecDbl& newPosition,
                             unsigned int& newCellIndex,
                             ReturnStatus& returnStatus)
 {
@@ -76,7 +75,6 @@ void MCGeometry::findNewCell(
 
     // ===== calculate transported position on the boundary of our new cell
     //  (necessary for finding which cell the point belongs to)
-    newPosition.resize(3);
 
     // if the distance to the next surface is zero, we may be stuck at a corner!
     // move the particle so that instead of 
@@ -90,8 +88,9 @@ void MCGeometry::findNewCell(
     // (i.e. pretty much JUST on fabricated problems)
     //  THIS IS A RARE CASE OF WHAT COULD HAPPEN
     if (_findCache.distanceToSurface == 0.0) {
-        _findCache.distanceToSurface = tranSupport::vectorNorm(position)
-                                * 2 * std::numeric_limits<double>::epsilon();
+        _findCache.distanceToSurface
+            = tranSupport::vectorNorm(position)
+                * 2 * std::numeric_limits<double>::epsilon();
         _findCache.distanceToSurface = std::max(_findCache.distanceToSurface,
                                     std::numeric_limits<double>::epsilon());
 
@@ -101,12 +100,8 @@ void MCGeometry::findNewCell(
         _warnGeometry("Bumping the particle", position, direction, &oldCell,
                       message.str());
     }
-
-    for (int i = 0; i < 3; i++) {
-        // transport the particle
-        newPosition[i] = position[i] +
-            _findCache.distanceToSurface * direction[i];
-    }
+    // transport the particle
+    newPosition = position + _findCache.distanceToSurface * direction;
 
     // ===== if we're reflecting, just return the reflected status
     if ( _findCache.hitSurface->isReflecting() ) {
@@ -285,52 +280,44 @@ inline void MCGeometry::_updateConnectivity(
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 /*----------------------------------------------------------------------------*/
-void MCGeometry::reflectDirection(const std::vector<double>& newPosition,
-                                  const std::vector<double>& oldDirection,
-                                  std::vector<double>& newDirection)
+void MCGeometry::reflectDirection(const TVecDbl& newPosition,
+                                  const TVecDbl& oldDirection,
+                                  TVecDbl& newDirection)
 {
     Require(oldDirection == _findCache.direction);
     // law of reflection: omega = omega - 2 (n . omega) n
-    std::vector<double> surfaceNormal;
+    TVecDbl surfaceNormal;
 
     // find the surface normal at the point of intersection
     _findCache.hitSurface->normalAtPoint(newPosition, surfaceNormal);
-    Require(surfaceNormal.size() == 3);
 
     // returned normal is with respect to the "positive" sense of the
     // surface, so reverse if necessary
     if (_findCache.oldSurfaceSense == false)
     {
-        for (unsigned int i = 0; i < 3; i++) {
-            surfaceNormal[i] = -surfaceNormal[i];
-        }
+        surfaceNormal = -surfaceNormal;
     }
 
     double doubleProjection 
-        = 2 * tranSupport::vectorDot3(oldDirection, surfaceNormal);
+        = 2 * blitz::dot(oldDirection, surfaceNormal);
 
     // calculate the new direction
-    newDirection.resize(3,0.0);
-    for (unsigned int i = 0; i < 3; i++) {
-        newDirection[i] = oldDirection[i] - doubleProjection * surfaceNormal[i];
-    }
+    newDirection = oldDirection - doubleProjection * surfaceNormal;
 
-    Ensure(newDirection.size() == 3);
-    Ensure(softEquiv(tranSupport::vectorNorm(newDirection), 1.0));
+    Ensure(tranSupport::checkDirectionVector(newDirection));
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::getSurfaceCrossing(
-                            const std::vector<double>& newPosition,
-                            const std::vector<double>& oldDirection,
+                            const TVecDbl& newPosition,
+                            const TVecDbl& oldDirection,
                             MCGeometry::UserSurfaceIDType&
                                               surfaceCrossingUserId,
                             double&       dotProduct)
 {
     Require(oldDirection == _findCache.direction);
-    Require(newPosition.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(oldDirection), 1.0));
+    Require(tranSupport::checkDirectionVector(oldDirection));
 
-    std::vector<double> surfaceNormal;
+    TVecDbl surfaceNormal;
 
     // find the surface normal at the point of intersection
     _findCache.hitSurface->normalAtPoint(newPosition, surfaceNormal);
@@ -339,19 +326,17 @@ void MCGeometry::getSurfaceCrossing(
     // surface, so reverse if necessary
     if (_findCache.oldSurfaceSense == false)
     {
-        for (unsigned int i = 0; i < 3; i++) {
-            surfaceNormal[i] = -surfaceNormal[i];
-        }
+        surfaceNormal = -surfaceNormal;
     }
 
-    Check(softEquiv(tranSupport::vectorNorm(surfaceNormal), 1.0));
-
     surfaceCrossingUserId = _findCache.hitSurface->getUserId();
-    dotProduct = tranSupport::vectorDot3(oldDirection, surfaceNormal);
+    dotProduct = blitz::dot(oldDirection, surfaceNormal);
+
+    Ensure(tranSupport::checkDirectionVector(surfaceNormal));
 }
 /*----------------------------------------------------------------------------*/
 unsigned int MCGeometry::findCell(
-                                const std::vector<double>& position) const
+                                const TVecDbl& position) const
 {
   //  // loop through all cells in problem
   //  for (CellVec::const_iterator itCel = _cells.begin();
@@ -369,7 +354,7 @@ unsigned int MCGeometry::findCell(
     }
 
     // return a status value or something instead of failing miserably?
-    _failGeometry("Could not find cell!", 0, position, std::vector<double>());
+    _failGeometry("Could not find cell!", 0, position, TVecDbl());
     return 0;
 }
 /*----------------------------------------------------------------------------*/
@@ -586,8 +571,8 @@ void MCGeometry::_completedConnectivity()
 }
 /*----------------------------------------------------------------------------*/
 void MCGeometry::_warnGeometry( const std::string& shortMessage,
-                                const std::vector<double>& position,
-                                const std::vector<double>& direction,
+                                const TVecDbl& position,
+                                const TVecDbl& direction,
                                 const CellT* oldCell,
                                 const std::string& longMessage) const
 {
@@ -614,8 +599,8 @@ void MCGeometry::_warnGeometry( const std::string& shortMessage,
 /*----------------------------------------------------------------------------*/
 void MCGeometry::_failGeometry(const std::string failureMessage,
                                const unsigned int currentCellIndex,
-                               const std::vector<double>& position,
-                               const std::vector<double>& direction) const
+                               const TVecDbl& position,
+                               const TVecDbl& direction) const
 {
     cout << "ERROR IN GEOMETRY: " << failureMessage << endl;
     

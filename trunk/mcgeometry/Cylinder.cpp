@@ -1,15 +1,12 @@
 /*!
  * \file   Cylinder.cpp
  * \brief  Code that, due to polymorphism, has no point in being inlined.
- * \author Jeremy L. Conlin and Seth R. Johnson
+ * \author Seth R. Johnson
  */
 
-#include <vector>
 #include <cmath>
 #include "transupport/dbc.hpp"
 #include "transupport/SoftEquiv.hpp"
-#include "transupport/VectorMath.hpp"
-#include "transupport/VectorPrint.hpp"
 
 #include "Surface.hpp"
 #include "Cylinder.hpp"
@@ -25,88 +22,57 @@ namespace mcGeometry {
 //      X = position 
 //      P = point on axis of cylinder
 //      U = direction vector of cylinder axis
-bool Cylinder::hasPosSense(const std::vector<double>& position) const
+bool Cylinder::hasPosSense(const TVecDbl& position) const
 {
-    Require(position.size() == 3);
-    double eval(0);
-    double diff(0);
-    double tmpValue(0);
+    TVecDbl trPos(position - _pointOnAxis); // x - P
 
-    for( int i = 0; i < 3; ++i ){
-        // Perform (X-P)^2
-        diff = position[i] - _pointOnAxis[i];
-        eval += diff*diff;
+    double b = blitz::dot(trPos, _axis);
 
-        // Perform [(X-P).U]^2
-        tmpValue += diff*_axis[i];
-    }
-
-    eval -= tmpValue*tmpValue + _radius*_radius;
+    double eval = blitz::dot(trPos, trPos) - b*b - _radius*_radius;
 
     return _hasPosSense(eval);
 }
 /*----------------------------------------------------------------------------*/
-// TODO: optimization needed here
 void Cylinder::intersect(
-        const std::vector<double>& position, 
-        const std::vector<double>& direction,
+        const TVecDbl& position, 
+        const TVecDbl& direction,
         const bool posSense,
         bool& hit, double& distance) const
 {
-    Require(position.size() == 3);
-    Require(direction.size() == 3);
-    Require(softEquiv(tranSupport::vectorNorm(direction), 1.0));
+    Require(tranSupport::checkDirectionVector(direction));
 
-    double A(0.0);   // 1-(direction._axis)^2
-    for( int i = 0; i < 3; ++i ){
-        A += direction[i]*_axis[i];
-    }
-    A = 1-A*A;
+    double temp = blitz::dot(direction, _axis);
 
-    double B(0.0);
-    double b(0.0);      // Temporary variable
-    std::vector<double> bvec(3,0.0);
-    std::vector<double> diff(position);
-    tranSupport::vectorMinusEq(diff, _pointOnAxis);
-    b = tranSupport::vectorDot3(diff, _axis);
-    for( int i = 0; i < 3; ++i ) bvec[i] = _axis[i]*b;
-    tranSupport::vectorMinusEq(diff, bvec);
-    B = tranSupport::vectorDot3(diff, direction);
+    double A = 1 - temp * temp;
 
-    double C(0.0);
-    double c(0.0);
-    diff = position;
-    tranSupport::vectorMinusEq(diff, _pointOnAxis);
-    c = tranSupport::vectorDot3(diff, _axis);
-    C = tranSupport::vectorDot3(diff, diff) - c*c - _radius*_radius;
+    TVecDbl trPos(position - _pointOnAxis);
+
+    double B = blitz::dot(direction,
+            trPos - _axis * blitz::dot(trPos, _axis));
+
+
+    temp = blitz::dot(trPos, _axis);
+    double C = blitz::dot(trPos, trPos) - temp*temp - _radius*_radius;
 
     _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
 }
 /*----------------------------------------------------------------------------*/
 void Cylinder::normalAtPoint(
-                const std::vector<double>& position,
-                std::vector<double>& unitNormal) const
+                const TVecDbl& position,
+                TVecDbl& unitNormal) const
 {
-    Require(position.size() == 3);
-
     // "unitNormal" is now particle location translated to cylinder
-    unitNormal = position;
-    tranSupport::vectorMinusEq(unitNormal, _pointOnAxis);
+    unitNormal = position - _pointOnAxis;
 
-    double cosTheta = tranSupport::vectorDot3(unitNormal, _axis);
+    double cosTheta = blitz::dot(unitNormal, _axis);
 
     // make "unitNormal" the un-normalized difference to the axis (position
     // minus projection)
-    for (int i = 0; i < 3; ++i)
-        unitNormal[i] -= _axis[i] * cosTheta;
+    unitNormal -= _axis * cosTheta;
 
-    // the vector length should now be just the radius, if we have done it right
-    Check(softEquiv(tranSupport::vectorNorm(unitNormal), _radius));
+    unitNormal /= _radius;
 
-    for (int i = 0; i < 3; ++i)
-        unitNormal[i] /= _radius;
-
-    Ensure(softEquiv(tranSupport::vectorNorm(unitNormal), 1.0));
+    Ensure(tranSupport::checkDirectionVector(unitNormal));
 }
 /*----------------------------------------------------------------------------*/
 std::ostream& Cylinder::_output( std::ostream& os ) const {
