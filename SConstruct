@@ -25,18 +25,18 @@ class EnvHelper:
     def installHeaders(self, files):
         if (self.checkForPrefix() == False): return
         installDir = os.path.join(EnvHelper.BaseEnv['prefix'],
-                        '/include/', self.__projectName)
+                        'include/', self.__projectName)
         self.env.Alias('install', self.env.Install(installDir, files))
 
     def installLibrary(self, files):
         if (self.checkForPrefix() == False): return
         installDir = os.path.join(EnvHelper.BaseEnv['prefix'],
-                        '/lib/')
+                        'lib/')
         self.env.Alias('install', self.env.Install(installDir, files))
 
     def installBinary(self, files):
         if (self.checkForPrefix() == False): return
-        installDir = EnvHelper.BaseEnv['prefix'] + '/bin/'
+        installDir = os.path.join(EnvHelper.BaseEnv['prefix'], 'bin/')
         self.env.Alias('install', self.env.Install(installDir, files))
 
     def useLibrary(self, libName):
