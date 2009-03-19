@@ -66,7 +66,8 @@ public:
         std::clock_t stopClock = std::clock();
 
         // += to increment the time; = to reset the time
-        elapsedTime += (stopClock - startClock) / (1.0 * CLOCKS_PER_SEC);
+        elapsedTime += (stopClock - startClock)
+                        / (static_cast<double>(CLOCKS_PER_SEC));
 
         runStatus = FINISHED;
     }

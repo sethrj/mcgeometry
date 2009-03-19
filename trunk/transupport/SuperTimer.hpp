@@ -145,6 +145,8 @@ inline void SuperTimer::printTimers() const
 
     cout << "----------------------------------------"
             "-----------------------------------" << endl;
+    cout << "[Reported time resolution: " << Timer::TimeResolution() * 1000
+         << " ms]" << endl;
     cout << "TIMING DATA:                             Name";
     cout.width(30);
     cout << "Time" << endl;
