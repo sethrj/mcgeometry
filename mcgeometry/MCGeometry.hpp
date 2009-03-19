@@ -130,6 +130,7 @@ public:
     void completedGeometryInput();
 
     //\}
+    /*------------------------------------------------------------*/
     //! \name Particle transport
     //\{
 

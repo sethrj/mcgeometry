@@ -1,21 +1,22 @@
 #import os
 
-Import('env')
-Import('includePath')
-e = env.Clone()
+Import('EnvHelper')
+Import('projectName')
 
-includePath(e, env['blitz'])
+envHelper = EnvHelper(projectName)
+e = envHelper.env
+
+envHelper.includePath(e['blitz'])
+
 sourceFiles = Glob('*.cpp')
 
 #Compile all the source files together into a library
 lib = e.StaticLibrary(target = 'mcgeometry', source = sourceFiles)
 Default(lib)
 
-#Install header files and library file, optionally
-Import('installHeaders')
-Import('installLibrary')
-installHeaders(e, Glob('*.hpp'))
-installLibrary(e, lib)
+#Install header files (if the user specifies it)
+envHelper.installHeaders(Glob('*.hpp'))
+envHelper.installLibrary(lib)
 
 #compile unit tests
 SConscript('tests/SConscript')
