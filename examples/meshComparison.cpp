@@ -111,7 +111,7 @@ void runProgram(int argc, char* argv[]){
 int main(int argc, char* argv[]){
 
     if (argc != 4) {
-        cout << "Syntax: meshComparsion numCells numparticles printFlag."
+        cout << "Syntax: meshComparsion numDivisions numParticles printFlag."
              << endl;
         return 1;
     }

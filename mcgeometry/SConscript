@@ -1,8 +1,10 @@
 #import os
 
 Import('env')
+Import('includePath')
 e = env.Clone()
 
+includePath(e, env['blitz'])
 sourceFiles = Glob('*.cpp')
 
 #Compile all the source files together into a library

@@ -32,7 +32,11 @@ void MeshTiming(int, mcGeometry::MCGeometry&, bool);
 
 int main(int argc, char* argv[]){
 
-    Insist( argc == 2, "Please input number of divisions along each axis." );
+    if (argc != 2) {
+        cout << "Syntax: meshTiming numDivisions."
+             << endl;
+        return 1;
+    }
 
     int N( std::atoi(argv[1]) );
 

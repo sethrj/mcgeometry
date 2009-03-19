@@ -2,10 +2,12 @@ import re
 
 Import('env')
 Import('useLibrary')
+Import('includePath')
 e = env.Clone()
 
 useLibrary(e, 'transupport')
 useLibrary(e, 'mcgeometry')
+includePath(e, env['blitz'])
 
 Import('outputDirPath')
 testDirPath     = outputDirPath + 'test/mcgeometry/'

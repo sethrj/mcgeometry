@@ -1,3 +1,5 @@
+import os.path
+
 #### for importing the mcgeometry library into 
 def useLibrary(env, libName):
 	theDir = Dir(buildDir + libName)
@@ -9,7 +11,7 @@ def installHeaders(env, files):
 		if 'install' in map(str, BUILD_TARGETS):
 			print "ERROR: set prefix option to use install target"
 		return
-	installDir = env['prefix'] + '/include/' + projectName
+	installDir = os.path.join(env['prefix'],'/include/', projectName)
 	env.Alias('install',env.Install(installDir, files))
 
 def installLibrary(env, files):
@@ -17,7 +19,7 @@ def installLibrary(env, files):
 		if 'install' in map(str, BUILD_TARGETS):
 			print "ERROR: set prefix option to use install target"
 		return
-	installDir = env['prefix'] + '/lib/'
+	installDir = os.path.join(env['prefix'],'/lib/')
 	env.Alias('install',env.Install(installDir, files))
 
 def installBinary(env, files):
@@ -27,6 +29,16 @@ def installBinary(env, files):
 		return
 	installDir = env['prefix'] + '/bin/'
 	env.Alias('install', env.Install(installDir, files))
+
+def includePath(env, basepath, lib=None):
+    if (basepath == "."):
+        return
+
+    env.AppendUnique(CPPPATH = [os.path.join(basepath, 'include/')])
+    env.AppendUnique(LIBPATH = [os.path.join(basepath, 'lib/')])
+    if lib:
+        env.AppendUnique(LIBS    = [lib])
+    
 ###############################################################################
 #                  MAIN FILE BEGINS HERE
 ###############################################################################
@@ -37,6 +49,7 @@ vars.Add(ListVariable('DBC',  'Design by contract', 7, map(str, range(8)) ))
 vars.Add(BoolVariable('DEBUG','Turn optimization off', True))
 vars.Add(BoolVariable('VERBOSE','Show all compiling info', False))
 vars.Add(BoolVariable('USEENV','Import the local environment variables', False))
+vars.Add(PathVariable('blitz','Location of Blitz library','.'))
 vars.Add(PathVariable('prefix','Optional install location for libraries and header files','.'))
 
 # create a new "Environment" from which everything is built
@@ -113,6 +126,7 @@ Export('useLibrary')
 Export('installHeaders')
 Export('installLibrary')
 Export('installBinary')
+Export('includePath')
 
 ### TARGET OPTIONS ###
 # default to not building all the tests etc.; manually add libraries
