@@ -1,43 +1,57 @@
 import os.path
 
-#### for importing the mcgeometry library into 
-def useLibrary(env, libName):
-	theDir = Dir(buildDir + libName)
-	env.Append(LIBPATH = [theDir])
-	env.Append(LIBS    = [libName])
+################################################################################
+class EnvHelper:
+    BaseEnv  = None
+    BuildDir = "#build/"
+    OutputDirPath = "#bin/"
 
-def installHeaders(env, files):
-	if env['prefix'] == '.':
-		if 'install' in map(str, BUILD_TARGETS):
-			print "ERROR: set prefix option to use install target"
-		return
-	installDir = os.path.join(env['prefix'],'/include/', projectName)
-	env.Alias('install',env.Install(installDir, files))
+    def __init__(self, projectName = ""):
+        self.env           = EnvHelper.BaseEnv.Clone()
+        self.__projectName = projectName
 
-def installLibrary(env, files):
-	if env['prefix'] == '.':
-		if 'install' in map(str, BUILD_TARGETS):
-			print "ERROR: set prefix option to use install target"
-		return
-	installDir = os.path.join(env['prefix'],'/lib/')
-	env.Alias('install',env.Install(installDir, files))
+        self.__isInstallTarget = ('install' in map(str, BUILD_TARGETS))
 
-def installBinary(env, files):
-	if env['prefix'] == '.':
-		if 'install' in map(str, BUILD_TARGETS):
-			print "ERROR: set prefix option to use install target"
-		return
-	installDir = env['prefix'] + '/bin/'
-	env.Alias('install', env.Install(installDir, files))
+    def checkForPrefix(self):
+        if self.__isInstallTarget:
+            if EnvHelper.BaseEnv['prefix'] == '.':
+                print "ERROR: set prefix option to use install target"
+                return False
+            else:
+                return True
+        else:
+            return False
 
-def includePath(env, basepath, lib=None):
-    if (basepath == "."):
-        return
+    def installHeaders(self, files):
+        if (self.checkForPrefix() == False): return
+        installDir = os.path.join(EnvHelper.BaseEnv['prefix'],
+                        '/include/', self.__projectName)
+        self.env.Alias('install', self.env.Install(installDir, files))
 
-    env.AppendUnique(CPPPATH = [os.path.join(basepath, 'include/')])
-    env.AppendUnique(LIBPATH = [os.path.join(basepath, 'lib/')])
-    if lib:
-        env.AppendUnique(LIBS    = [lib])
+    def installLibrary(self, files):
+        if (self.checkForPrefix() == False): return
+        installDir = os.path.join(EnvHelper.BaseEnv['prefix'],
+                        '/lib/')
+        self.env.Alias('install', self.env.Install(installDir, files))
+
+    def installBinary(self, files):
+        if (self.checkForPrefix() == False): return
+        installDir = EnvHelper.BaseEnv['prefix'] + '/bin/'
+        self.env.Alias('install', self.env.Install(installDir, files))
+
+    def useLibrary(self, libName):
+        theDir = Dir(self.BuildDir + libName)
+        self.env.Append(LIBPATH = [theDir])
+        self.env.Append(LIBS    = [libName])
+
+    def includePath(self, basepath, lib=None):
+        if (basepath == "."):
+            return
+
+        self.env.AppendUnique(CPPPATH = [os.path.join(basepath, 'include/')])
+        self.env.AppendUnique(LIBPATH = [os.path.join(basepath, 'lib/')])
+        if lib:
+            self.env.AppendUnique(LIBS    = [lib])
     
 ###############################################################################
 #                  MAIN FILE BEGINS HERE
@@ -53,20 +67,20 @@ vars.Add(PathVariable('blitz','Location of Blitz library','.'))
 vars.Add(PathVariable('prefix','Optional install location for libraries and header files','.'))
 
 # create a new "Environment" from which everything is built
-env = Environment(variables = vars)
+baseEnv = Environment(variables = vars)
 # if we're supposed to use the shell environment variables, we have to create a
 # new Environment object and pass in those variables, since otherwise we'll use
 # the original path for all of the tools
-if env['USEENV'] == True:
+if baseEnv['USEENV'] == True:
     import os
-    env = Environment(ENV = os.environ, variables = vars) 
+    baseEnv = Environment(ENV = os.environ, variables = vars) 
     print "NOTICE: Setting environment variables to those of parent shell."
 
 # save the variables as new defaults in a cache
-vars.Save('variables.cache', env)
+vars.Save('variables.cache', baseEnv)
 
 ### generate help text
-env.Help(vars.GenerateHelpText(env) + """
+baseEnv.Help(vars.GenerateHelpText(baseEnv) + """
 ----- TARGETS -----
 default:  build libraries
 install:  copy libraries and headers to prefix directory
@@ -75,58 +89,45 @@ examples: build example binaries
 all:      make libraries, unit tests, and examples
 
 Setting up an install directory:
-			scons prefix=/Users/Shared/_local/
-			scons install
+            scons prefix=/Users/Shared/_local/
+            scons install
 """)
 
 #### print detailed build log?
-if env['VERBOSE'] == False:
-	env['CCCOMSTR']   = "\tCompiling $TARGET with $CCC"
-	env['CXXCOMSTR']  = "\tCompiling $TARGET with $CXX"
-	env['LINKCOMSTR'] = "\tLinking $TARGET"
-	env['RANLIBCOMSTR'] = "\tIndexing $TARGET"
-	env['ARCOMSTR'] = "\tArchiving $TARGET"
-	env['INSTALLSTR'] = "\tInstalling <$SOURCE> as $TARGET"
+if baseEnv['VERBOSE'] == False:
+    baseEnv['CCCOMSTR']   = "\tCompiling $TARGET with $CCC"
+    baseEnv['CXXCOMSTR']  = "\tCompiling $TARGET with $CXX"
+    baseEnv['LINKCOMSTR'] = "\tLinking $TARGET"
+    baseEnv['RANLIBCOMSTR'] = "\tIndexing $TARGET"
+    baseEnv['ARCOMSTR'] = "\tArchiving $TARGET"
+    baseEnv['INSTALLSTR'] = "\tInstalling <$SOURCE> as $TARGET"
 
-print env.subst("Using C++ compiler $CXX version $CXXVERSION")
-print env.subst("Using design by contract options DBC=${DBC}")
+print baseEnv.subst("Using C++ compiler $CXX version $CXXVERSION")
+print baseEnv.subst("Using design by contract options DBC=${DBC}")
 
-env.Append(CPPDEFINES = {'DBC' : '${DBC}'} )
-
-buildDir = "#build/"
-outputDirPath = "#bin/"
+baseEnv.Append(CPPDEFINES = {'DBC' : '${DBC}'} )
 
 #### check to see whether to build optimized or not ####
 # and change the build or output directories
-if env['DEBUG'] == True:
-	print("Using debug mode")
-	#buildDir = '#build-debug/'
-	#outputDirPath = '#bin/'
+if baseEnv['DEBUG'] == True:
+    print("Using debug mode")
 else:
-	print("Using optimized mode")
-	if (str(env['DBC']) != '0'):
-		print("NOTICE: optimized build with non-zero dbcVal (%s)" % 
-					env.subst("${DBC}"))
+    print("Using optimized mode")
+    if (str(baseEnv['DBC']) != '0'):
+        print("NOTICE: optimized build with non-zero dbcVal (%s)" % 
+                    baseEnv.subst("${DBC}"))
 
-	env.MergeFlags('-O3')
-	#buildDir = '#build-optimized/'
-	#outputDirPath = '#bin-optimized/'
+    baseEnv.MergeFlags('-O3')
 
 ### have compiler warn about everything
-env.MergeFlags('-Wall')
+baseEnv.MergeFlags('-Wall')
 
 ### add the base directory so we can #include "Surfaces/blah.hpp" etc.
-env.Append(CPPPATH = [buildDir])
+baseEnv.Append(CPPPATH = [EnvHelper.BuildDir])
 
-# "export" variables to import in the other sconscript files
-Export('env')
-Export('buildDir')
-Export('outputDirPath')
-Export('useLibrary')
-Export('installHeaders')
-Export('installLibrary')
-Export('installBinary')
-Export('includePath')
+### set up the environment helper
+EnvHelper.BaseEnv = baseEnv
+Export('EnvHelper')
 
 ### TARGET OPTIONS ###
 # default to not building all the tests etc.; manually add libraries
@@ -138,11 +139,13 @@ Alias('all','.')
 projectNames = ['transupport', 'mcgeometry']
 
 for projectName in projectNames:
-	Export('projectName')
-	SConscript(projectName + '/SConscript', variant_dir=(buildDir + projectName))
+    Export('projectName')
+    SConscript(projectName + '/SConscript',
+            variant_dir=(EnvHelper.BuildDir + projectName))
 
 # optionally build examples
-SConscript('examples/SConscript',variant_dir=(buildDir + 'examples'))
+SConscript('examples/SConscript',
+        variant_dir=(EnvHelper.BuildDir + 'examples'))
 
 #print "BUILD_TARGETS is", map(str, BUILD_TARGETS)
 

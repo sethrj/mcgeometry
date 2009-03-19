@@ -1,23 +1,22 @@
 import re
 
-Import('env')
-Import('useLibrary')
-Import('includePath')
-e = env.Clone()
+Import('EnvHelper')
 
-useLibrary(e, 'transupport')
-useLibrary(e, 'mcgeometry')
-includePath(e, env['blitz'])
+envHelper = EnvHelper()
+e = envHelper.env
 
-Import('outputDirPath')
-testDirPath     = outputDirPath + 'test/mcgeometry/'
+envHelper.useLibrary('transupport')
+envHelper.useLibrary('mcgeometry')
+envHelper.includePath(e['blitz'])
+
+testDirPath     = EnvHelper.OutputDirPath + 'test/mcgeometry/'
 
 ################## SET UP REAL WORK ##################
 # Compile test executables
 sourceFiles = Glob('*.cpp', strings=True)
 
 for file in sourceFiles:
-	execName = re.sub(r'\.cpp$','',file)
-	if (execName != "tTemplate"):
-		prog = e.Program(testDirPath + execName, file)
-		Alias('test',prog)
+    execName = re.sub(r'\.cpp$','',file)
+    if (execName != "tTemplate"):
+        prog = e.Program(testDirPath + execName, file)
+        Alias('test',prog)

@@ -1,25 +1,23 @@
 import re
 
-Import('env')
-Import('useLibrary')
-Import('includePath')
-e = env.Clone()
+Import('EnvHelper')
 
-useLibrary(e, 'transupport')
-useLibrary(e, 'mcgeometry')
-includePath(e, env['blitz'])
+envHelper = EnvHelper()
+e = envHelper.env
 
-Import('outputDirPath')
+envHelper.useLibrary('transupport')
+envHelper.useLibrary('mcgeometry')
+envHelper.includePath(e['blitz'])
 
 # 'prog' is a list of files that get built with the 'examples' target
 prog = []
 
-prog += e.Program(outputDirPath + 'meshTiming', \
+prog += e.Program(EnvHelper.OutputDirPath + 'meshTiming', 
 			 ['meshTiming.cpp','createGeometry.cpp'])
-prog += e.Program(outputDirPath + 'meshComparison', \
+prog += e.Program(EnvHelper.OutputDirPath + 'meshComparison',
 			 ['meshComparison.cpp','createGeometry.cpp','extra/mtrand.cc'])
-prog += e.Program(outputDirPath + 'trickyGeometry', \
-			 ['trickyGeometry.cpp','createGeometry.cpp', 'visualizeSurfaces.cpp',\
-	  			'extra/mtrand.cc'])
+prog += e.Program(EnvHelper.OutputDirPath + 'trickyGeometry',
+			 ['trickyGeometry.cpp','createGeometry.cpp',
+                 'visualizeSurfaces.cpp', 'extra/mtrand.cc'])
 
 Alias('examples', prog)

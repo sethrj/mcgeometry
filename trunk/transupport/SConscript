@@ -1,19 +1,19 @@
 #import os
 
-Import('env')
-e = env.Clone()
+Import('EnvHelper')
+Import('projectName')
 
-sourceFiles = Glob('*.cpp')
+envHelper = EnvHelper(projectName)
+e = envHelper.env
 
 #Compile all the source files together into a library
+sourceFiles = Glob('*.cpp')
 lib = e.StaticLibrary(target = 'transupport', source = sourceFiles)
 Default(lib)
 
-#Install header files, optionally
-Import('installHeaders')
-Import('installLibrary')
-installHeaders(e, Glob('*.hpp'))
-installLibrary(e, lib)
+#Install header files (if the user specifies it)
+envHelper.installHeaders(Glob('*.hpp'))
+envHelper.installLibrary(lib)
 
 #compile unit tests
 SConscript('tests/SConscript')

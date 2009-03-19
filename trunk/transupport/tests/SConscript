@@ -1,41 +1,38 @@
 import re, os, atexit
 def runUnitTests(testerPath):
-	print '='*30, 'Running unit tests', '='*30
-	os.system(testerPath)
+    print '='*30, 'Running unit tests', '='*30
+    os.system(testerPath)
 
-Import('env')
-Import('useLibrary')
-e = env.Clone()
+Import('EnvHelper')
 
-useLibrary(e, 'transupport')
+envHelper = EnvHelper()
+e = envHelper.env
 
-Import('outputDirPath')
-testDirPath     = outputDirPath + 'test/transupport/'
+envHelper.useLibrary('transupport')
 
-#testSupportPath = testDirPath + 'aux/'
+testDirPath     = EnvHelper.OutputDirPath + 'test/transupport/'
 
 ################## SET UP REAL WORK ##################
 # Compile test executables
 sourceFiles = Glob('*.cpp', strings=True)
 
 for file in sourceFiles:
-	execName = re.sub(r'\.cpp$','',file)
-	if (execName != "tTemplate"):
-		prog = e.Program(testDirPath + execName, file)
-		Alias('test',prog)
+    execName = re.sub(r'\.cpp$','',file)
+    if (execName != "tTemplate"):
+        prog = e.Program(testDirPath + execName, file)
+        Alias('test',prog)
 
 # Copy auxiliary files
 #auxFiles = Glob('*.in', strings=True)
 #e.Install(testSupportPath, auxFiles)
 
 # Copy the python script
-runTests = e.Install(outputDirPath + 'test/', 'runTests.py')
+runTests = e.Install(EnvHelper.OutputDirPath + 'test/', 'runTests.py')
 Alias('test',runTests)
 
 # Run the unit tests if we're using 'test' mode
 if 'test' in map(str, BUILD_TARGETS):
-	atexit.register(runUnitTests, str(runTests[0]))
+    atexit.register(runUnitTests, str(runTests[0]))
 
 # copy the python script to the install directory maybe
-Import('installBinary')
-installBinary(e, 'runTests.py')
+envHelper.installBinary('runTests.py')
