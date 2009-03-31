@@ -16,9 +16,19 @@ namespace tranSupport {
 /*============================================================================*/
 
 //! Return the norm of a vector (the square root of the sum of the squares)
-inline double vectorNorm(const blitz::TinyVector<double, 3>& v)
+template<typename T>
+inline double vectorNorm(const T& v)
 {
     return std::sqrt(blitz::dot(v, v));
+}
+
+//! Return the distance between two points
+template<typename T>
+inline double distance(
+        const T& a,
+        const T& b)
+{
+    return vectorNorm(a - b);
 }
 
 /*! \brief Validate direction vectors in 3-D 
