@@ -29,7 +29,12 @@ class SuperTimer {
     typedef std::map<std::string, Timer* >  MapTimer;
 public:
 
-    //! Get the only global timer base instance
+    /*! \brief Get the only global timer base instance
+     *
+     *  \warning This is not multi-thread safe! In fact, this has been known to
+     *  fail to share timers between Python and C++ when using SWIG on AMD64
+     *  red hat systems.
+     */
     static SuperTimer& Instance()
     {
         static SuperTimer theOnlyTimer;
@@ -42,7 +47,7 @@ public:
     //\{
 
     //! Start a timer; return success
-    void startTimer(const std::string timerName)
+    void startTimer(const std::string& timerName)
     {
         MapTimer::iterator it = theTimers.find(timerName);
 
@@ -62,7 +67,7 @@ public:
     }
 
     //! Stop a timer; return success
-    void stopTimer(const std::string timerName)
+    void stopTimer(const std::string& timerName)
     {
         MapTimer::iterator it = theTimers.find(timerName);
 
@@ -73,7 +78,7 @@ public:
     }
 
     //! Reset a timer; return success
-    void resetTimer(const std::string timerName)
+    void resetTimer(const std::string& timerName)
     {
         MapTimer::iterator it = theTimers.find(timerName);
 
@@ -100,7 +105,7 @@ public:
     //\{
 
     //! Get the time (in seconds) from a timer
-    double getTimeForTimer(std::string timerName) const
+    double getTimeForTimer(std::string& timerName) const
     {
         MapTimer::const_iterator it = theTimers.find(timerName);
 
@@ -114,14 +119,14 @@ public:
     //\}
     /*------------------------------------------------------------*/
 private:
-    //! disallow construction from elsewhere
+    //! Disallow construction from elsewhere
     SuperTimer() {/* * */}
-    //! disallow copy constructor
+    //! Disallow copy constructor
     SuperTimer(SuperTimer const&) { /* * */ }
-    //! disallow assignment
+    //! Disallow assignment
     SuperTimer& operator=(SuperTimer const&) { return *this; }
 
-    //! destructor
+    //! Destructor deletes all timer instances
     ~SuperTimer()
     {
         // Iterator is a key (string)/value (timer pointer) pair
@@ -133,6 +138,7 @@ private:
     }
 
 private:
+    char dummy;
     //! All the timers in the problem.
     MapTimer theTimers;
 };
@@ -145,8 +151,8 @@ inline void SuperTimer::printTimers() const
 
     cout << "----------------------------------------"
             "-----------------------------------" << endl;
-    cout << "[Reported time resolution: " << Timer::TimeResolution() * 1000
-         << " ms]" << endl;
+//    cout << "[Reported time resolution: " << Timer::TimeResolution() * 1000
+//         << " ms]" << endl;
     cout << "TIMING DATA:                             Name";
     cout.width(30);
     cout << "Time" << endl;
@@ -155,8 +161,8 @@ inline void SuperTimer::printTimers() const
 
     for (it = theTimers.begin(); it != theTimers.end(); ++it)
     {
-        std::string timerName  = it->first;
-        Timer *curTimer        = it->second;
+        const std::string& timerName  = it->first;
+        const Timer*  curTimer        = it->second;
         
         cout.width(50);
         cout << timerName;
