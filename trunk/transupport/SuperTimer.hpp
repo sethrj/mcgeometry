@@ -105,7 +105,7 @@ public:
     //\{
 
     //! Get the time (in seconds) from a timer
-    double getTimeForTimer(std::string& timerName) const
+    double getTimeForTimer(const std::string& timerName) const
     {
         MapTimer::const_iterator it = theTimers.find(timerName);
 
