@@ -107,9 +107,8 @@ public:
     /*------------------------------------------------------------*/
 
     //! constructor: initialize the timer
-    Timer() : runStatus(NOTYETRUN), startClock(0), elapsedTime(0)
+    Timer() : runStatus(NOTYETRUN), startClock(0), elapsedTime(0.0)
     { /* * */ }
-
 private:
     //! Are we running?
     Timer::TimerStatus runStatus;
@@ -124,20 +123,26 @@ private:
 //! Print a timer to a stream.
 inline std::ostream& operator<<(std::ostream& os, const tranSupport::Timer& t)
 {
-    if (t.getRunStatus() == tranSupport::Timer::RUNNING) {
-        os << "STILL RUNNING";
-    } else if (t.getRunStatus() == tranSupport::Timer::NOTYETRUN) {
-        os << "NOT YET RUN";
-    } else {
-        // need to make an intermediate string in case we had just done
-        // setwidth or something (unless there is a better way I don't
-        // know about)
-        std::ostringstream temp;
+    switch (t.getRunStatus()) {
+        case tranSupport::Timer::RUNNING:
+            os << "STILL RUNNING";
+            break;
+        case tranSupport::Timer::NOTYETRUN:
+            os << "NOT YET RUN";
+            break;
+        case tranSupport::Timer::FINISHED:
+            {
+                std::ostringstream temp;
 
-        temp  << std::setprecision(3) << std::setiosflags(std::ios::fixed)
-              << t.getElapsedTime() * 1000 << "ms";
+                temp  << std::setprecision(3)
+                      << std::setiosflags(std::ios::fixed)
+                      << t.getElapsedTime() * 1000 << "ms";
 
-        os << temp.str();
+                os << temp.str();
+            }
+            break;
+        default:
+            os << "Something is VERY WRONG.";
     }
 
     return os;

@@ -1,0 +1,61 @@
+INLINING: why?
+
+
+A lot of inlining shouldn't matter (except POSSIBLY for homogeneous surface 
+types, if the compiler is really smart; see
+                    http://msdn.microsoft.com/en-us/magazine/cc301407.aspx ) 
+because of the polymorphism and pointer calls.
+
+So in a real-life situation, it seems like most inlining shouldn't even matter.
+
+generated 3/30/2009 on my mac:
+
+==============================REVISION 92 (before inlining)
+bin/meshTiming 50
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                 0 Create the mesh                339.408ms
+          1 Run without neighborhood (first sweep)              29590.964ms
+       2 Run with full neighborhood (second sweep)                 86.899ms
+   3 Run with most neighborhood (first full sweep)                209.654ms
+  4 Run with full neighborhood (second full sweep)                179.478ms
+   5 Run with full neighborhood (third full sweep)                178.397ms
+---------------------------------------------------------------------------
+==============================REVISION 98 (after inlining)
+bin/meshTiming 50
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                                 0 Create the mesh                360.899ms
+          1 Run without neighborhood (first sweep)              26736.081ms
+       2 Run with full neighborhood (second sweep)                 81.977ms
+   3 Run with most neighborhood (first full sweep)                216.196ms
+  4 Run with full neighborhood (second full sweep)                180.314ms
+   5 Run with full neighborhood (third full sweep)                179.859ms
+---------------------------------------------------------------------------
+========================================
+
+However, the effect isn't so noticeable on a more "real-life" scenario:
+==============================REVISION 92 (before inlining)
+bin/meshComparison 40 100000 0
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                  Creating the combinatorial mesh.                172.552ms
+            First transport in combinatorial mesh.              15475.082ms
+           Second transport in combinatorial mesh.               2029.973ms
+                  Transport in deterministic mesh.                671.523ms
+---------------------------------------------------------------------------
+==============================REVISION 98 (after inlining)
+bin/meshComparison 40 100000 0
+---------------------------------------------------------------------------
+TIMING DATA:                             Name                          Time
+---------------------------------------------------------------------------
+                  Creating the combinatorial mesh.                178.864ms
+            First transport in combinatorial mesh.              15372.574ms
+           Second transport in combinatorial mesh.               1940.553ms
+                  Transport in deterministic mesh.                693.950ms
+---------------------------------------------------------------------------
+
+
