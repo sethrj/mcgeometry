@@ -33,7 +33,7 @@ also required.
 The code has been tested with <tt>gcc 4.0.1</tt>, <tt>gcc 3.4.6</tt>, and 
 <tt>gcc 4.3.1</tt>, but it should be
 standards-compliant and compatible with any modern compiler. It produces no
-warnings when compiled with <tt>g++ -Wall</tt>.
+warnings when compiled with <tt>g++ -Wall -Wextra</tt>.
 
 \section Acknowledgements
 

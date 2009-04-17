@@ -196,8 +196,7 @@ unsigned int MCGeometry::getCellIndexFromUserId(
         _cellRevUserIds.find(userCellId);
 
     if (findCMResult == _cellRevUserIds.end()) {
-        Insist(0,
-        "FATAL ERROR: cell user ID does not exist.");
+        Insist(0, "FATAL ERROR: cell user ID does not exist.");
     }
     return findCMResult->second;
 }

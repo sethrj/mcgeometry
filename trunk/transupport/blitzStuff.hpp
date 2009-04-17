@@ -21,7 +21,7 @@ inline double vectorNorm(const T& v)
 {
     return std::sqrt(blitz::dot(v, v));
 }
-
+/*----------------------------------------------------------------------------*/
 //! Return the distance between two points
 template<typename T>
 inline double distance(
@@ -30,7 +30,7 @@ inline double distance(
 {
     return vectorNorm(a - b);
 }
-
+/*----------------------------------------------------------------------------*/
 /*! \brief Validate direction vectors in 3-D 
  *
  *  Three-D vectors must have $\norm{\vec{\Omega}} = 1$

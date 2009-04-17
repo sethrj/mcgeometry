@@ -138,7 +138,6 @@ private:
     }
 
 private:
-    char dummy;
     //! All the timers in the problem.
     MapTimer theTimers;
 };

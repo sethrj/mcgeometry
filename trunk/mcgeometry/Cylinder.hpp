@@ -132,23 +132,22 @@ private:
     //! Return unrolled (x .* x) for vector x tailored to this axis
     double _dotProduct( const TVecDbl& x,
                         const TVecDbl& y) const;
-
 private:
-    //! some point through which the cylinder's axis passes
+    //! Some point through which the cylinder's axis passes
     const TVecDbl _pointOnAxis;
-    //! axis about which the cylinder is centered
+    //! Axis about which the cylinder is centered
     const TVecDbl _axis;
-    //! cylinder radius
+    //! Cylinder radius
     const double _radius;
 };
 
 /*============================================================================*/
 
-//! provide typedefs for user interaction
+//! A cylinder along the X axis
 typedef CylinderNormal<0> CylinderX;
-//! provide typedefs for user interaction
+//! A cylinder along the Y axis
 typedef CylinderNormal<1> CylinderY;
-//! provide typedefs for user interaction
+//! A cylinder along the Z axis
 typedef CylinderNormal<2> CylinderZ;
 
 /*============================================================================*/

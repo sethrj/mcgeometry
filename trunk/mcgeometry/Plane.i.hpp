@@ -62,13 +62,9 @@ inline bool Plane::hasPosSense(const TVecDbl& position) const
 }
 /*----------------------------------------------------------------------------*/
 inline void Plane::normalAtPoint(
-                    const TVecDbl& position,
+                    const TVecDbl&,
                     TVecDbl& unitNormal) const
 {
-    // "position" should be on the surface
-    Require(softEquiv(blitz::dot(_normal, position)
-                        - blitz::dot(_normal, _coordinate), 0.0));
-    
     unitNormal = _normal;
 }
 /*----------------------------------------------------------------------------*/
@@ -111,12 +107,9 @@ inline void PlaneNormal<axis>::intersect(
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
 inline void PlaneNormal<axis>::normalAtPoint(
-                    const TVecDbl& position,
-                    TVecDbl& unitNormal) const
+        const TVecDbl&,
+        TVecDbl& unitNormal) const
 {
-    // "position" should be on the surface
-    Require(softEquiv(position[axis] - _coordinate, 0.0));
-
     unitNormal = 0.0;
     unitNormal[axis] = 1.0;
 }
