@@ -86,7 +86,9 @@ template<unsigned int axis>
 inline bool CylinderNormal<axis>::hasPosSense(
                 const TVecDbl& position) const
 {
-    return _hasPosSense( _dotProduct(position, position) - _radius * _radius);
+    TVecDbl trPos(position - _pointOnAxis);
+
+    return _hasPosSense( _dotProduct(trPos, trPos) - _radius * _radius);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
@@ -96,18 +98,17 @@ inline void CylinderNormal<axis>::intersect(
                 const bool posSense,
                 bool& hit, double& distance) const
 {
-    //temporary for now
-    Insist(softEquiv(_pointOnAxis, TVecDbl(0.0)),
-            "As of now, CylinderNormal must be on the axis.");
+    double A = 1 - direction[axis] * direction[axis];
+    
+    // (minor TODO: define a translate function that ignores the cylinder axis)
+    TVecDbl trPos(position - _pointOnAxis);
 
-    double A = _dotProduct(direction, direction);
+    // _dotProduct ignores the value on the cylinderaxis
+    double B = _dotProduct(direction, trPos);
 
-    double B = _dotProduct(direction, position);
+    double C = _dotProduct(trPos, trPos) - _radius*_radius;
 
-    double C = _dotProduct(position, position) - _radius*_radius;
-
-    return _calcQuadraticIntersect(A, B, C, posSense,
-                                   hit, distance);
+    _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
 }
 /*----------------------------------------------------------------------------*/
 template<unsigned int axis>
@@ -115,7 +116,15 @@ inline void CylinderNormal<axis>::normalAtPoint(
                         const TVecDbl& position,
                         TVecDbl& unitNormal) const
 {
-    Insist(0, "Not yet implemented.");
+    //move so we're relative to the axis
+    unitNormal = position - _pointOnAxis;
+
+    //zero component that's not on the axis
+    unitNormal[axis] = 0.0;
+
+    //normalize (since we know we are on the surface of the cylinder, we don't
+    // have to do an extra dot product)
+    unitNormal /= _radius;
 
     Ensure(tranSupport::checkDirectionVector(unitNormal));
 }
@@ -150,7 +159,7 @@ inline double CylinderNormal<2>::_dotProduct(
 template<>
 inline std::ostream& CylinderNormal<0>::_output( std::ostream& os ) const
 {
-    os  << "[ CYLX: "
+    os  << "[ CYLX   Point:  " << std::setw(10) << _pointOnAxis
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
@@ -158,7 +167,7 @@ inline std::ostream& CylinderNormal<0>::_output( std::ostream& os ) const
 template<>
 inline std::ostream& CylinderNormal<1>::_output( std::ostream& os ) const
 {
-    os  << "[ CYLY: "
+    os  << "[ CYLY   Point:  " << std::setw(10) << _pointOnAxis
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }
@@ -166,7 +175,7 @@ inline std::ostream& CylinderNormal<1>::_output( std::ostream& os ) const
 template<>
 inline std::ostream& CylinderNormal<2>::_output( std::ostream& os ) const
 {
-    os  << "[ CYLZ: "
+    os  << "[ CYLZ   Point:  " << std::setw(10) << _pointOnAxis
         << " Radius: " << std::setw(5) << _radius << " ]";
     return os;
 }

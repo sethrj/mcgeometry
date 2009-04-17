@@ -118,6 +118,7 @@ else:
                     baseEnv.subst("${DBC}"))
 
     baseEnv.MergeFlags('-O3')
+#    baseEnv.MergeFlags('-ftree-vectorize')
 
 ### have compiler warn about everything
 baseEnv.MergeFlags('-Wall')
