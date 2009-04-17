@@ -1,0 +1,41 @@
+TIMING TESTS WITH CACHEING
+
+In transport, a particle may have several possible ways to end its momentary
+period of travel; namely, it might enter a new cell, or it might collide. The
+existence of collisions means that to calculate the "new cell" every time we
+want to sample the distance is wasteful. However, a lot of the work done in the
+geometry routine is with finding which surface it hits next, and how far it has
+to go.
+
+The solution is then to only calculate the distance (and as part of that, the
+intersected surface) first, and then use the previously calculated information
+to move the particle only if necessary. There are several things that can be
+cached; the major penalty is with allocating memory (in the case of
+std::vector< double >) and moving it around. Several different ways are possible, so I tried using different combinations of private variables in mcgeometry.
+
+The meshTiming test is if a particle basically streams through the whole
+problem without collision, and it *always* goes to the new position and cell.
+This will test some of the overhead of splitting up what was one big routine
+into two smaller routines.
+
+A more realistic test is one in which a particle will not always go to the next
+cell, which will take into account the savings of not duplicating or wasting
+work.
+
+
+NOTE: cacheing has some danger in that somehow the user might unknowingly use
+change the position/direction passed into findNewCell after using findDistance,
+or somehow mixing up their order, but let us hope that he is not so foolish.
+
+
+bin/meshComparison 10 10000000 0
+bin/meshTiming 50
+
+cell regardless:           48957.322    ~170
+distance both times:       55744.260    ~170
+cache hit surface:         45762.254    205
+cache w/old cell:          44350.845    190
+cache w/pos+dir :          50207.822    230
+cache double[] pos:        45996.377    192
+final (struct)             44613.816    186
+

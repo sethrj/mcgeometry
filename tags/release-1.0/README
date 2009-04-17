@@ -1,0 +1,18 @@
+===== To build =====
+
+Download scons:
+http://www.scons.org/download.php
+
+Go to the root mcgeometry directory
+
+Type:
+	scons --help
+for help on the mcgeometry build options
+
+Type:
+	scons
+to build it, or use other options such as
+	scons VERBOSE=YES DBC=0
+
+To run unit tests:
+	./bin/test/runTests.py
