@@ -53,8 +53,7 @@ void someSubroutine() {
 }
 
 /*----------------------------------------------------------------------------*/
-void runTests ()
-{
+void runTests () {
 	// get a reference to the global timer object
 	SuperTimer &theTimer = SuperTimer::Instance();
 	double timeTolerance = tranSupport::Timer::TimeResolution()*1000.0;
@@ -148,6 +147,10 @@ int main(int argc, char *argv[]) {
     }
 
     TESTER_PRINTRESULT();
+
+    if (!TESTER_HASPASSED()) {
+        return 1;
+    }
 
     return 0;
 }
