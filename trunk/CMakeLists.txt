@@ -10,6 +10,9 @@ set( ${PROJECT_NAME}_MAJOR_VERSION 1 )
 set( ${PROJECT_NAME}_MINOR_VERSION 0 ) 
 set( ${PROJECT_NAME}_PATCH_LEVEL   0 )
 
+list(APPEND CMAKE_MODULE_PATH ${MCGeometry_SOURCE_DIR}/tools/)
+include(SRJutils)
+include(CheckCXXCompilerFlag)
 #------------------------------ OPTIONS ------------------------------#
 #---------- DBC
 set(DBC 0 CACHE STRING
@@ -32,6 +35,8 @@ option(DEBUG
   "Turn optimization off, enable debug code"
   OFF)
 
+message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+
 if( DEBUG )
   # DEBUG ON
   message(STATUS "Configuring with debug ON")
@@ -45,15 +50,15 @@ else( DEBUG )
   #full optimization
   add_definitions("-O3 -DNDEBUG")
 
-  #if GCC and version > 4.0 ?
-  if( CMAKE_COMPILER_IS_GNUCC )
+  check_cxx_compiler_flag("-ftree-vectorize" USE_VECTORIZE)
+  if( USE_VECTORIZE )
     add_definitions("-ftree-vectorize")
-  endif( CMAKE_COMPILER_IS_GNUCC )
+  endif( USE_VECTORIZE )
 
 endif( DEBUG )
 
 #---------- BLITZ
-add_definitions("-Wall -Wextra -ansi -pedantic")
+add_definitions("-Wall -Wextra")
 
 # Set default output directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -61,9 +66,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 #------------------------------ INCLUDES ------------------------------#
-list(APPEND CMAKE_MODULE_PATH ${MCGeometry_SOURCE_DIR}/tools/)
-include(SRJutils)
-
 # Set this directory as an include directory so we correctly get
 # transupport/blah.hpp and mcgeometry/blah.hpp
 include_directories(${PROJECT_SOURCE_DIR})

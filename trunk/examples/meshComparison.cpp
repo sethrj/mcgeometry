@@ -50,8 +50,7 @@ double  distanceToPlane(int, double, double);
 void    printPLTallies(int, const TallyVec&, const TallyVec&);
 void    diffTallies(int, const TallyVec&, const TallyVec& );
 
-void runProgram(int argc, char* argv[]){
-
+void runProgram(char* argv[]){
     int numCells( std::atoi(argv[1]) );
     int numParticles( std::atoi(argv[2]) );
     int printFlag( std::atoi(argv[3]) );
@@ -117,7 +116,7 @@ int main(int argc, char* argv[]){
     }
 
     try {
-        runProgram(argc, argv);
+        runProgram(argv);
     }
     catch (tranSupport::tranError &theErr) {
         cout<< "***********************************************************\n"
@@ -170,7 +169,6 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
 
             //cellNumber = getCell(position, size);
             Check(cellNumber < numCells);
-            Check(cellNumber >= 0);
 
             // Find distance to 'planes'
             for (int i = 0; i < 3; i++)
