@@ -251,7 +251,7 @@ void runTestD() {
     TESTER_CHECKFORPASS(softEquiv(returnedNormal, expectedNormal, 1.e-14));
 }
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     TESTER_INIT("Cylinder");
     try {
         runTestA();

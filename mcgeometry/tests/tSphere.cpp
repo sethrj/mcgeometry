@@ -101,7 +101,7 @@ void runTests() {
     delete newSphere;
 }
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     TESTER_INIT("Sphere");
     try {
         runTests();
