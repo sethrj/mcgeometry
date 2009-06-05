@@ -424,7 +424,7 @@ void testReflectingGeometry() {
 
 }
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     TESTER_INIT("MCGeometry");
     try {
         testGeometryErrorChecking();

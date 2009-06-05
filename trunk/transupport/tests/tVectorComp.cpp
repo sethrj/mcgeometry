@@ -96,7 +96,7 @@ void runTests() {
 }
 
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     TESTER_INIT("VectorComp");
     try {
         runTests();

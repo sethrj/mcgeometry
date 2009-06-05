@@ -308,7 +308,7 @@ void printComplexGeometry()
     visualizeSurfaces(geo, "complexOut.txt", bounds, subtract);
 }
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     try {
         cout << "================== TRICKY GEOMETRY 1 (AMR) =================="
              << endl;

@@ -272,7 +272,7 @@ void testPlaneZ() {
 }
 
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     TESTER_INIT("Plane");
     try {
         testPlane();

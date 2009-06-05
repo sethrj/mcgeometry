@@ -122,7 +122,7 @@ void runTests() {
 	TESTER_CHECKFORPASS(theTimer.getTimeForTimer(TIMERNAME_Reset) == -1.0);
 }
 /*============================================================================*/
-int main(int argc, char *argv[]) {
+int main(int, char**) {
     TESTER_INIT("SuperTimer");
     try {
         runTests();
