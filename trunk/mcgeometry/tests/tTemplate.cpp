@@ -6,20 +6,20 @@
 
 /*----------------------------------------------------------------------------*/
 
-#include "mcgeometry/<+header+>.hpp"
+#include "transupport/<+header+>.hpp"
 
 #include <iostream>
 #include "transupport/dbc.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
 
-using namespace mcGeometry;
-
 using std::cout;
 using std::endl;
 
 /*============================================================================*/
-void runTests() {   
+void runTests() {
+
+
 
     //   TESTER_CHECKFORPASS(softEquiv(1.0, 1.0));
 }
@@ -37,6 +37,10 @@ int main(int argc, char *argv[]) {
     }
 
     TESTER_PRINTRESULT();
+
+    if (!TESTER_HASPASSED()) {
+        return 1;
+    }
 
     return 0;
 }

@@ -74,20 +74,24 @@ private:
 
 //! initialize unit tester
 #define TESTER_INIT(name) \
-   tranSupport::UnitTester::Instance().setName((name));
+   tranSupport::UnitTester::Instance().setName((name))
 
 //! check passing condition, auto-insert file name and line number
 #define TESTER_CHECKFORPASS(cond) \
-   tranSupport::UnitTester::Instance().checkForPass((cond), #cond, __FILE__, __LINE__);
+   tranSupport::UnitTester::Instance().checkForPass((cond), #cond, __FILE__, __LINE__)
 
 //! check passing condition, but with verbose pass and failure messages
 #define TESTER_CHECKFORPASSV( cond, passMessage, failureMessage) \
    tranSupport::UnitTester::Instance().checkForPass((cond), (passMessage), (failureMessage), #cond, \
-         __FILE__, __LINE__);
+         __FILE__, __LINE__)
 
 //! print the report
 #define TESTER_PRINTRESULT() \
-   tranSupport::UnitTester::Instance().printResult();
+   tranSupport::UnitTester::Instance().printResult()
+
+//! print the report
+#define TESTER_HASPASSED() \
+   tranSupport::UnitTester::Instance().hasPassed()
 
 //! so that the output is more legible if we fail in the catch block
 #define CAUGHT_UNEXPECTED_EXCEPTION false

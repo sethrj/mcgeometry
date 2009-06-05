@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 
 /*============================================================================*/
-void runTests() {   
+void runTests() {
 
 
 
@@ -37,6 +37,10 @@ int main(int argc, char *argv[]) {
     }
 
     TESTER_PRINTRESULT();
+
+    if (!TESTER_HASPASSED()) {
+        return 1;
+    }
 
     return 0;
 }

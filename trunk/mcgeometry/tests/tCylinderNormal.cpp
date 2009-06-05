@@ -134,6 +134,10 @@ int main(int argc, char *argv[]) {
 
     TESTER_PRINTRESULT();
     
+    if (!TESTER_HASPASSED()) {
+        return 1;
+    }
+
     return 0;
 }
 
