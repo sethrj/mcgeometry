@@ -1,18 +1,29 @@
 ===== To build =====
 
-Download scons:
-http://www.scons.org/download.php
+Download cmake:
+http://www.cmake.org/cmake/resources/software.html
 
-Go to the root mcgeometry directory
+Create a build directory outside of the source directory (e.g., ../_buildmcg)
+and cd to it (cd ../_buildmcg)
 
-Type:
-	scons --help
-for help on the mcgeometry build options
+Run cmake and configure it once to see the options, change them as desired:
+cmake-gui ../mcgeometry
 
-Type:
-	scons
-to build it, or use other options such as
-	scons VERBOSE=YES DBC=0
+Compile using make (or XCode or Eclipse or whatever other build system you
+chose with cmake)
 
-To run unit tests:
-	./bin/test/runTests.py
+===== TARGETS =====
+make lib:
+    create the mcgeometry and transupport libraries
+
+make check:
+    build unit tests and runs them with CTest
+
+make examples:
+    build the examples
+
+make doc:
+	build doxygen documentation (experimental)
+
+make install:
+    install headers and libraries to the prefix directory
