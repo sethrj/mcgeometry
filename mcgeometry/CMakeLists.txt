@@ -12,14 +12,15 @@ set(SOURCES
   )
 
 add_library(${TARGET_NAME} ${SOURCES})
+
 # requires the transupport library
 target_link_libraries(${TARGET_NAME} transupport)
 
 add_dependencies(lib ${TARGET_NAME})
 
 ############ Install targets ############
-file(GLOB INC . "*.hpp")
-install(FILES ${INC}
+file(GLOB INSTALL_INCLUDE_FILES . "*.hpp")
+install(FILES ${INSTALL_INCLUDE_FILES}
   DESTINATION ${HEADER_DIRECTORY}
   )
 
