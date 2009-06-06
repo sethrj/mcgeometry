@@ -5,65 +5,42 @@
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 project(MCGeometry)
+set( SVN_REVISION "$Rev$")
 
 set( ${PROJECT_NAME}_MAJOR_VERSION 1 ) 
 set( ${PROJECT_NAME}_MINOR_VERSION 0 ) 
-set( ${PROJECT_NAME}_PATCH_LEVEL   0 )
+string(REGEX REPLACE "\\$Rev:? *([0-9]*) *\\$" "\\1" 
+  ${PROJECT_NAME}_PATCH_LEVEL ${SVN_REVISION})
+
+# these variables are used to set the correct numbering of shared libraries
+SET( ${PROJECT_NAME}_SOVERSION
+  "${${PROJECT_NAME}_MAJOR_VERSION}" )
+SET( ${PROJECT_NAME}_VERSION
+  "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL}" )
 
 list(APPEND CMAKE_MODULE_PATH ${MCGeometry_SOURCE_DIR}/tools/)
 include(SRJutils)
-include(CheckCXXCompilerFlag)
-#------------------------------ OPTIONS ------------------------------#
-#---------- DBC
-set(DBC 0 CACHE STRING
-  "Enable design-by-contract code, 0-7 (0 = off, 7 = all)"
-  )
-#verify DBC setting (if bad, pretend it's zero, and fail at the end)
-if(NOT DBC MATCHES "[0-7]")
-  message(SEND_ERROR "Invalid DBC value (must be 0-7);")
-  set(DBC 0)
-endif(NOT DBC MATCHES "[0-7]")
-message(STATUS "Using DBC=${DBC}")
-add_definitions("-DDBC=${DBC}")
-
-if(DBC EQUAL 0)
-  add_definitions("-DNOASSERT")
-endif(DBC EQUAL 0)
-
-#---------- DEBUG
-option(DEBUG
-  "Turn optimization off, enable debug code"
-  OFF)
-
-message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
-
-if( DEBUG )
-  # DEBUG ON
-  message(STATUS "Configuring with debug ON")
-else( DEBUG )
-  # DEBUG OFF
-  message(STATUS "Configuring with debug OFF")
-  if(NOT DBC EQUAL 0)
-    message(STATUS "WARNING: using non-zero DBC with Release configuration")
-  endif(NOT DBC EQUAL 0)
-
-  #full optimization
-  add_definitions("-O3 -DNDEBUG")
-
-  check_cxx_compiler_flag("-ftree-vectorize" USE_VECTORIZE)
-  if( USE_VECTORIZE )
-    add_definitions("-ftree-vectorize")
-  endif( USE_VECTORIZE )
-
-endif( DEBUG )
-
-#---------- BLITZ
-add_definitions("-Wall -Wextra")
 
 # Set default output directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+#------------------------------ OPTIONS ------------------------------#
+
+#Set the default build type
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+srj_set_compiler_defs()
+
+# on Linux systems, need to build shared library if linking for SWIG
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+  add_definitions( "-fPIC" )
+endif("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
 
 #------------------------------ INCLUDES ------------------------------#
 # Set this directory as an include directory so we correctly get
@@ -71,17 +48,25 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR})
 
 # blitz
-include(FindBlitz)
+include(FindBlitz REQUIRED)
 
 #------------------------------ TARGETS ------------------------------#
 ENABLE_TESTING()
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}) # deficiency in cmake
-
 add_custom_target(lib)
-
 
 #------------------------------  RECURSE ------------------------------#
 #recurse into subdirectories
 add_subdirectory(transupport)
 add_subdirectory(mcgeometry)
 add_subdirectory(examples)
+add_subdirectory(tools)
+add_subdirectory(doc)
+
+#------------------------------ OUTPUT ------------------------------#
+message(STATUS "${PROJECT_NAME} version ${${PROJECT_NAME}_VERSION}")
+message(STATUS "Build type:         ${CMAKE_BUILD_TYPE}")
+message(STATUS "Design by contract: DBC=${DBC}")
+#message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+#message(STATUS "CMAKE_CXX_FLAGS_RELEASE       : ${CMAKE_CXX_FLAGS_RELEASE}")       
+#message(STATUS "CMAKE_CXX_FLAGS_DEBUG         : ${CMAKE_CXX_FLAGS_DEBUG}")         

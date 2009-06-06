@@ -2,6 +2,49 @@
 #
 
 ################################################################################
+# Set up DBC and debug compiler options 
+#
+# srj_set_compiler_defs()
+#
+macro(srj_set_compiler_defs)
+  #---------- DBC
+  set(DBC 0 CACHE STRING
+    "Enable design-by-contract code, 0-7 (0 = off, 7 = all)"
+    )
+
+  #verify DBC setting (if bad, pretend it's zero, and fail at the end)
+  if(NOT DBC MATCHES "[0-7]")
+    message(SEND_ERROR "Invalid DBC value (must be 0-7);")
+    set(DBC 0)
+  endif(NOT DBC MATCHES "[0-7]")
+  add_definitions("-DDBC=${DBC}")
+
+  if(DBC EQUAL 0)
+    add_definitions("-DNOASSERT")
+  endif(DBC EQUAL 0)
+
+  #---------- COMPILER FLAGS
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    include(CheckCXXCompilerFlag)
+    # vectorize if it's supported, only on Release build
+    check_cxx_compiler_flag("-ftree-vectorize" USE_VECTORIZE)
+    if( USE_VECTORIZE )
+      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ftree-vectorize")
+    endif( USE_VECTORIZE )
+    
+    # turn on extra compiler warnings regardless
+    add_definitions("-Wall -Wextra")
+  endif (CMAKE_COMPILER_IS_GNUCXX)
+
+  #warn if release and DBC
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(NOT DBC EQUAL 0)
+      message(STATUS "WARNING: using non-zero DBC with Release configuration")
+    endif(NOT DBC EQUAL 0)
+  endif(CMAKE_BUILD_TYPE STREQUAL "Release")
+
+endmacro(srj_set_compiler_defs)
+################################################################################
 # Make a unit test 
 #
 # srj_make_test(TESTS [test1 test2 ...]
@@ -57,8 +100,7 @@ macro(srj_make_test)
 endmacro(srj_make_test)
 
 ################################################################################
-
-#PARSE_ARGUMENTS is from http://www.cmake.org/Wiki/CMakeMacroParseArguments
+# PARSE_ARGUMENTS is from http://www.cmake.org/Wiki/CMakeMacroParseArguments
 MACRO(PARSE_ARGUMENTS prefix arg_names option_names)
   SET(DEFAULT_ARGS)
   FOREACH(arg_name ${arg_names})    

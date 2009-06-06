@@ -8,15 +8,14 @@ set(SOURCES
   UnitTester.cpp
   )
 add_library(${TARGET_NAME} ${SOURCES})
-#set_target_properties(${TARGET_NAME} PROPERTIES
-#  VERSION ${${PROJECT_NAME}_VERSION}
-#  )
+set_target_properties(${TARGET_NAME} PROPERTIES
+  VERSION "${${PROJECT_NAME}_VERSION}"
+  )
 add_dependencies(lib ${TARGET_NAME})
 
 ############ Install targets ############
-file(GLOB INC . "*.hpp")
-#message(STATUS "Globbed headers: ${INC}")
-install(FILES ${INC}
+file(GLOB INSTALL_INCLUDE_FILES . "*.hpp")
+install(FILES ${INSTALL_INCLUDE_FILES}
   DESTINATION ${HEADER_DIRECTORY}
   )
 
