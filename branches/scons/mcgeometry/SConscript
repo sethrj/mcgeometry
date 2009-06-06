@@ -1,0 +1,22 @@
+#import os
+
+Import('EnvHelper')
+Import('projectName')
+
+envHelper = EnvHelper(projectName)
+e = envHelper.env
+
+envHelper.includePath(e['blitz'])
+
+sourceFiles = Glob('*.cpp')
+
+#Compile all the source files together into a library
+lib = e.StaticLibrary(target = 'mcgeometry', source = sourceFiles)
+Default(lib)
+
+#Install header files (if the user specifies it)
+envHelper.installHeaders(Glob('*.hpp'))
+envHelper.installLibrary(lib)
+
+#compile unit tests
+SConscript('tests/SConscript')
