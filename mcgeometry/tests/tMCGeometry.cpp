@@ -8,11 +8,8 @@
 
 #include "mcgeometry/MCGeometry.hpp"
 #include "mcgeometry/Plane.hpp"
+#include "mcgeometry/PlaneNormal.hpp"
 #include "mcgeometry/Sphere.hpp"
-
-#include "mcgeometry/MCGeometry.i.hpp"
-#include "mcgeometry/Plane.i.hpp"
-#include "mcgeometry/Sphere.i.hpp"
 
 #include <iostream>
 #include <vector>
@@ -59,7 +56,7 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     unsigned int surfaceIndex;
 
     surfaceIndex = theGeom.addSurface(5, theSphere);
-    
+
     if (doCheck)
     TESTER_CHECKFORPASS(surfaceIndex == 0);
 
@@ -67,7 +64,7 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     surfaceIndex = theGeom.addSurface(2, plane2);
     surfaceIndex = theGeom.addSurface(3, plane3);
     surfaceIndex = theGeom.addSurface(4, plane4);
-    
+
     if (doCheck)
     TESTER_CHECKFORPASS(surfaceIndex == 4);
 
@@ -115,12 +112,12 @@ void createGeometry( MCGeometry& theGeom, bool doCheck = false) {
     theSurfaces.resize(1);
     theSurfaces[0] = -5;
 
-    MCGeometry::CellT::CellFlags outsideFlags;
-    outsideFlags = MCGeometry::CellT::NEGATED;
+    Cell::CellFlags outsideFlags;
+    outsideFlags = Cell::NEGATED;
 
     cellIndex = theGeom.addCell(60, theSurfaces, outsideFlags);
 
-    if (doCheck) 
+    if (doCheck)
     TESTER_CHECKFORPASS(cellIndex == 5);
 }
 /*============================================================================*/
@@ -145,7 +142,7 @@ void testGeometryErrorChecking()
 
         try {
             theGeom.addSurface(2, aSphere);
-        } 
+        }
         catch (tranSupport::tranError &theErr) {
             caughtError = true;
         }
@@ -163,7 +160,7 @@ void testGeometryErrorChecking()
         bool caughtError = false;
         try {
             theGeom.addCell(100, theSurfaces);
-        } 
+        }
         catch (tranSupport::tranError &theErr) {
             caughtError = true;
         }
@@ -181,7 +178,7 @@ void testGeometryErrorChecking()
         bool caughtError = false;
         try {
             theGeom.addCell(10, theSurfaces);
-        } 
+        }
         catch (tranSupport::tranError &theErr) {
             caughtError = true;
         }
@@ -189,7 +186,7 @@ void testGeometryErrorChecking()
     }
 }
 /*============================================================================*/
-void testMainGeometry() {   
+void testMainGeometry() {
 
     MCGeometry theGeom;
 
@@ -212,7 +209,7 @@ void testMainGeometry() {
             index++;
         }
     }
-    
+
     index = 0;
     for (int j = 0; j < 2; j++) {
         for (unsigned int i = 0; i < 2; i++) {
@@ -222,13 +219,13 @@ void testMainGeometry() {
             index++;
         }
     }
-    
+
     // ==== cell translation
     unsigned int userCellIds[] = {10, 20, 30, 40, 50, 60};
     bool correctCellTranslation = true;
 
     for (unsigned int i = 0; i < 6; i++) {
-        correctCellTranslation = 
+        correctCellTranslation =
             correctCellTranslation &&
             (theGeom.getUserIdFromCellIndex(i) == userCellIds[i]);
     }
@@ -239,7 +236,7 @@ void testMainGeometry() {
     bool correctStartingCells = true;
 
     for (unsigned int i = 0; i < numLocs; i++) {
-        correctStartingCells = 
+        correctStartingCells =
             correctStartingCells &&
             (theGeom.findCell(locations[i]) == expectedStartingCellIndex[i]);
     }
@@ -286,7 +283,7 @@ void testMainGeometry() {
 //                     << endl;
 
 
-                correctEndingCells = 
+                correctEndingCells =
                     correctEndingCells &&
                     (theGeom.getUserIdFromCellIndex(newCellIndex)
                             == expectedEndingCells[startLoc][dir]);
@@ -297,7 +294,7 @@ void testMainGeometry() {
         }
         TESTER_CHECKFORPASS(correctEndingCells);
         TESTER_CHECKFORPASS(correctReturnStatus);
-        
+
     }
 
 //    theGeom.debugPrint();
@@ -318,7 +315,7 @@ void createReflectingGeometry( MCGeometry& theGeom) {
 
     surfaceIndex = theGeom.addSurface(1, thePlane);
     surfaceIndex = theGeom.addSurface(2, theSphere);
-    
+
     TESTER_CHECKFORPASS(surfaceIndex == 1);
 
     //========== ADD CELLS
@@ -341,14 +338,14 @@ void createReflectingGeometry( MCGeometry& theGeom) {
     theSurfaces.resize(1);
     theSurfaces[0] = 1;
 
-    MCGeometry::CellT::CellFlags outsideFlags = MCGeometry::CellT::DEADCELL;
+    Cell::CellFlags outsideFlags = Cell::DEADCELL;
     cellIndex = theGeom.addCell(60, theSurfaces, outsideFlags);
 
     TESTER_CHECKFORPASS(cellIndex == 2);
 
 }
 /*============================================================================*/
-void testReflectingGeometry() {   
+void testReflectingGeometry() {
     MCGeometry theGeom;
 
     createReflectingGeometry(theGeom);
@@ -392,7 +389,7 @@ void testReflectingGeometry() {
     TVecDbl newDirection;
 
     theGeom.reflectDirection(newPosition, direction, newDirection);
-    
+
     TVecDbl expectedDirection(0.0);
     expectedDirection[1] = -1.0;
     TESTER_CHECKFORPASS(softEquiv(newDirection, expectedDirection, 1e-14));
@@ -417,7 +414,7 @@ void testReflectingGeometry() {
 
     // reflect it
     theGeom.reflectDirection(newPosition, direction, newDirection);
-    
+
     expectedDirection = 0.0;
     expectedDirection[2] = -1.0;
     TESTER_CHECKFORPASS(softEquiv(newDirection, expectedDirection));

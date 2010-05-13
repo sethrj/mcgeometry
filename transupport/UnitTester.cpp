@@ -28,21 +28,16 @@ void UnitTester::setName(const string newName) {
 
 void UnitTester::checkForPass(
                   const bool cond, 
-                  const string passMessage, const string failureMessage,
                   const char code[], const char fileName[],
                   const int lineNumber)
 {
    if (cond) {
       //test passed
-      if (passMessage != "") {
-         cout << "  PASSED: " << passMessage << endl;
-      } else {
-         cout << "  PASSED: " << code << endl;
-      }
-
-   } else {
+     cout << "  PASSED: " << code << endl;
+   }
+   else {
       //test failure
-      cout << "  FAILED: " << failureMessage << endl;
+      cout << "  FAILED: " << endl;
       cout << "  |   in <" << fileName << "> on line " << lineNumber << endl;
       cout << "  |   " << code << endl;
       cout << "  +-------------------------------" << endl;
@@ -58,7 +53,8 @@ void UnitTester::printResult() const
 
    if (stillPassing) {
       cout << "PASSED" << endl;
-   } else {
+   }
+   else {
       cout << "FAILED" << endl;
    }
 

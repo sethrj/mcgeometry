@@ -12,10 +12,6 @@
 #include "mcgeometry/Plane.hpp"
 #include "mcgeometry/Sphere.hpp"
 
-#include "mcgeometry/MCGeometry.i.hpp"
-#include "mcgeometry/Plane.i.hpp"
-#include "mcgeometry/Sphere.i.hpp"
-
 #include <iostream>
 #include <vector>
 #include "transupport/VectorPrint.hpp"
@@ -25,7 +21,7 @@ using std::cout;
 using std::endl;
 
 //! Blitz++ TinyVector of length D stores position/direction/etc.
-typedef blitz::TinyVector<double, 3> TVecDbl; 
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 
 void MeshTiming(int, mcGeometry::MCGeometry&, bool);
@@ -45,11 +41,11 @@ int main(int argc, char* argv[]){
     cout << "===============================" << endl
          << "Example of creating/using a mesh-like geometry." << endl
          << "===============================" << endl;
-      
+
 
     mcGeometry::MCGeometry Geo;
 
-    
+
     cout << "Creating the mesh..." << endl;
     TIMER_START("0 Create the mesh");
     CreateMesh(N, Geo);
@@ -86,19 +82,19 @@ int main(int argc, char* argv[]){
     cout << "Running full sweep once more..." << endl;
     TIMER_START("5 Run with full neighborhood (third full sweep)");
     MeshTiming(N, Geo, true);
-    TIMER_STOP("5 Run with full neighborhood (third full sweep)");    
+    TIMER_STOP("5 Run with full neighborhood (third full sweep)");
 
     TIMER_PRINT();
     return 0;
 }
 
-//! MeshTiming will perform some timing tests to see how much faster the 
-//! the connected geometry is.  N is the number of mesh cells in each 
+//! MeshTiming will perform some timing tests to see how much faster the
+//! the connected geometry is.  N is the number of mesh cells in each
 //! dimension.
 void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
 
-    mcGeometry::MCGeometry::UserCellIDType ID(0);
-    mcGeometry::MCGeometry::UserCellIDType newID(0);
+    mcGeometry::MCGeometry::UserCellIdType ID(0);
+    mcGeometry::MCGeometry::UserCellIdType newID(0);
     mcGeometry::MCGeometry::ReturnStatus RS;
 
     TVecDbl position(0.0);
@@ -140,7 +136,7 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
                 for( dirIter = directions.begin(); dirIter != directions.end();
                         ++dirIter )
                 {
-                    Geo.findNewCell(position, *dirIter, ID, newPos, newID, 
+                    Geo.findNewCell(position, *dirIter, ID, newPos, newID,
                                     distance, RS);
                 }
                 ++ID;

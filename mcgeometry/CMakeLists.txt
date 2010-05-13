@@ -8,6 +8,13 @@ include_directories(${Blitz_INCLUDE_DIR})
 ############ Create a library ############
 set(TARGET_NAME ${SUBPROJECT_NAME})
 set(SOURCES
+  Surface.cpp
+  Cylinder.cpp
+  Plane.cpp
+  Sphere.cpp
+  inst_CylinderNormal.cpp
+  inst_PlaneNormal.cpp
+  Cell.cpp
   MCGeometry.cpp
   )
 

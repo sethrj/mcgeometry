@@ -7,14 +7,17 @@
 #include "MCGeometry.hpp"
 
 #include <utility>
+#include <limits>
+#include <map>
+#include <vector>
+
+#include <blitz/tinyvec-et.h>
 
 #include "transupport/dbc.hpp"
 #include "transupport/blitzStuff.hpp"
 
 #include "Surface.hpp"
 #include "Cell.hpp"
-
-#include "Cell.i.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -24,12 +27,354 @@ using std::endl;
 
 namespace mcGeometry {
 /*============================================================================*\
+ * subroutines that the user calls while running their monte carlo code
+\*============================================================================*/
+void MCGeometry::findDistance(
+        const TVecDbl& position,
+        const TVecDbl& direction,
+        const unsigned int oldCellIndex,
+        double& distanceTraveled)
+{
+    Require(tranSupport::checkDirectionVector(direction));
+    Require(oldCellIndex < getNumCells());
+
+    // call intersect on the old cell to find the surface and distance that it
+    // moves to
+    _cells[oldCellIndex]->intersect(
+                                position, direction,
+                                _findCache.hitSurface,
+                                _findCache.oldSurfaceSense,
+                                distanceTraveled);
+
+    // cache variables for later
+    _findCache.oldCellIndex = oldCellIndex;
+    _findCache.distanceToSurface = distanceTraveled;
+    IfDbc(_findCache.position = position; _findCache.direction = direction;)
+
+    Check(_findCache.hitSurface != NULL);
+    Ensure(distanceTraveled >= 0.0);
+}
+
+/*----------------------------------------------------------------------------*/
+void MCGeometry::findNewCell(
+        const TVecDbl& position,
+        const TVecDbl& direction,
+        TVecDbl& newPosition,
+        unsigned int& newCellIndex,
+        ReturnStatus& returnStatus)
+{
+//    cout << "unmatched surface count: " << _unMatchedSurfaces << endl;
+    Require( blitz::all(position  == _findCache.position) );
+    Require( blitz::all(direction == _findCache.direction) );
+    Require(_findCache.oldCellIndex < getNumCells());
+
+    // a reference to the pointer to the old cell
+    Cell& oldCell = *(_cells[_findCache.oldCellIndex]);
+
+    // ===== calculate transported position on the boundary of our new cell
+    //  (necessary for finding which cell the point belongs to)
+
+    // if the distance to the next surface is zero, we may be stuck at a corner!
+    // move the particle so that instead of
+    // $$ \vec{x}_\text{new} = \vec{x}_\text{old} + \vec{\Omega} d $$
+    // where $d=0$, use
+    // $$ d = \| \vec{x} \| 2 \varepsilon_\text{mach} $$
+    // so that the position is perturbed in the particle direction by
+    // machine epsilon times the particle's order of magnitude
+    //
+    // This is a very minor nudge and should happen only EXTREMELY infrequently
+    // (i.e. pretty much JUST on fabricated problems)
+    //  THIS IS A RARE CASE OF WHAT COULD HAPPEN
+    if (_findCache.distanceToSurface == 0.0) {
+        _findCache.distanceToSurface
+            = tranSupport::vectorNorm(position)
+                * 2 * std::numeric_limits<double>::epsilon();
+        _findCache.distanceToSurface = std::max(_findCache.distanceToSurface,
+                                    std::numeric_limits<double>::epsilon());
+
+        std::ostringstream message;
+        message << "crossing surface ID " << _findCache.hitSurface->getUserId()
+                << " and adding |dx| = " << _findCache.distanceToSurface;
+        _warnGeometry("Bumping the particle", position, direction, &oldCell,
+                      message.str());
+    }
+    // transport the particle
+    newPosition = position + _findCache.distanceToSurface * direction;
+
+    // ===== if we're reflecting, just return the reflected status
+    if ( _findCache.hitSurface->isReflecting() ) {
+        returnStatus = REFLECTED;
+
+        // particle stays in the same cell
+        newCellIndex = _findCache.oldCellIndex;
+
+        return;
+    }
+
+    returnStatus = NORMAL;
+    // ===== Loop over neighborhood cells
+    Cell::CellContainer& neighborhood =
+            oldCell.getNeighbors(_findCache.hitSurface);
+
+
+//    // if we've completed the geometry and there is only once cell on the other
+//    // side, then we know that it's the right cell
+//    if ((_unMatchedSurfaces == 0) && (neighborhood.size() == 1)) {
+//        newCellIndex = neighborhood.front()->getIndex();
+//
+//        if ( neighborhood.front()->isDeadCell() )
+//            returnStatus = DEADCELL;
+//        return;
+//    }
+
+    // loop through the old cell's hood to find if it's in one of those cells
+    for (Cell::CellContainer::const_iterator it  = neighborhood.begin();
+                                       it != neighborhood.end(); ++it)
+    {
+//        cout << "Checking if cell UserID " << (*it)->getUserId()
+//             << " contains point " << newPosition << endl;
+        // check if the point is inside (and pass _hitSurface to exclude
+        // checking it)
+        if ( (*it)->isPointInside( newPosition, _findCache.hitSurface ) )
+        {
+            //we have found the new cell
+            newCellIndex = (*it)->getIndex();
+
+//            cout << "Found ending cell index " << newCellIndex
+//                 << " already connected to starting cell index "
+//                 << _findCache.oldCellIndex << " through hood" << endl;
+
+            if ( (*it)->isDeadCell() )
+                returnStatus = DEADCELL;
+            return;
+        }
+    }
+
+    // ===== Loop through all cells that have the same surface as the one we
+    // intersected, and the opposite surface sense (i.e. if in our cell we hit
+    // surface 2, and our cell is defined as being -2, then the cell on the
+    // other side has to have orientation +2
+
+    SurfaceAndSense searchQas(_findCache.hitSurface,
+                                !(_findCache.oldSurfaceSense));
+
+    SCConnectMap::iterator cellList
+                 = _surfToCellConnectivity.find(searchQas);
+
+    if (cellList == _surfToCellConnectivity.end()) {
+        // NOTE: if position and newPosition reference the same vector,
+        // this will print the new position, not the starting position
+        _failGeometry("Surface connectivity not found for surface",
+                        _findCache.oldCellIndex, position, direction);
+    }
+
+    CellVec& cellsToCheck = cellList->second;
+
+    for (CellVec::iterator pNewCell  = cellsToCheck.begin();
+                           pNewCell != cellsToCheck.end(); ++pNewCell)
+    {
+//        cout << "Checking if cell UserID " << (*pNewCell)->getUserId()
+//             << " contains point " << newPosition << endl;
+        // check if the point is inside (and pass _hitSurface to exclude
+        // checking it)
+        if ( (*pNewCell)->isPointInside( newPosition, _findCache.hitSurface ) )
+        {
+            // we have found the new cell
+            newCellIndex = (*pNewCell)->getIndex();
+
+            _updateConnectivity(&oldCell, *pNewCell, neighborhood);
+
+            if ( (*pNewCell)->isDeadCell() )
+                returnStatus = DEADCELL;
+            return;
+        }
+    }
+
+    // after checking cells connected to the surface, check all cells in the
+    // problem to make sure it doesn't show up there
+    //  THIS IS A RARE CASE OF WHAT COULD HAPPEN
+    for (unsigned int i = 0; i < _cells.size(); ++i) {
+        if (i != _findCache.oldCellIndex) {
+            if (_cells[i]->isPointInside(newPosition, _findCache.hitSurface)) {
+
+                std::ostringstream message;
+                message << "crossing surface ID "
+                        << _findCache.hitSurface->getUserId()
+                        << " into new cell index " << _cells[i]->getIndex()
+                        << " (user ID " << _cells[i]->getUserId() << ")";
+
+                _warnGeometry("Used global search", position, direction,
+                                &oldCell, message.str());
+
+//                _unMatchedSurfaces++; // do this? or something more complicated?
+
+                _updateConnectivity(&oldCell, _cells[i], neighborhood);
+
+                newCellIndex = _cells[i]->getIndex();
+
+                if ( _cells[i]->isDeadCell() )
+                    returnStatus = DEADCELL;
+
+                return;
+            }
+        }
+    }
+
+
+    // TODO: when looping through the other cells in the problem, exclude the
+    // ones that we already checked in the cell's hood; means more loops but
+    // fewer flops in the "is inside" method calls ??
+
+    // at this point, particle is LOST. We pretend it's in the same cell as it
+    // was?
+    newCellIndex = _findCache.oldCellIndex;
+    returnStatus = LOST;
+
+    _failGeometry("Ruh-roh, new cell not found!",
+                    _findCache.oldCellIndex, position, direction);
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+//     SUBROUTINES USED IN findNewCell MULTIPLE TIMES
+void MCGeometry::_updateConnectivity(
+        Cell* oldCell,
+        Cell* newCell,
+        Cell::CellContainer& oldNeighborhood)
+{
+    // if this is the first cell linked to this surface, we decrement
+    // the unmatched surfaces
+    if (oldNeighborhood.size() == 0)
+        _unMatchedSurfaces--;
+
+    // add new cell to old cell's hood connectivity
+    oldNeighborhood.push_back(newCell);
+
+    Cell::CellContainer& newNeighborhood
+        = newCell->getNeighbors(_findCache.hitSurface);
+
+    // if this is the first cell linked to this surface, we decrement
+    // the unmatched surfaces
+    if (newNeighborhood.size() == 0)
+        _unMatchedSurfaces--;
+
+    // add old cell to new cell's hood connectivity
+    newNeighborhood.push_back(oldCell);
+
+    //            cout << "Connected ending cell index " << newCellIndex
+    //                 << " to starting cell index " << _findCache.oldCellIndex
+    //                 << endl;
+
+    if (_unMatchedSurfaces == 0)
+        _completedConnectivity();
+
+    Ensure(_unMatchedSurfaces >= 0);
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+void MCGeometry::reflectDirection(
+        const TVecDbl& newPosition,
+        const TVecDbl& oldDirection,
+        TVecDbl& newDirection)
+{
+    Require( blitz::all(oldDirection == _findCache.direction));
+    // law of reflection: omega = omega - 2 (n . omega) n
+    TVecDbl surfaceNormal;
+
+    // find the surface normal at the point of intersection
+    _findCache.hitSurface->normalAtPoint(newPosition, surfaceNormal);
+
+    // returned normal is with respect to the "positive" sense of the
+    // surface, so reverse if necessary
+    if (_findCache.oldSurfaceSense == false)
+    {
+        surfaceNormal = -surfaceNormal;
+    }
+
+    double doubleProjection
+        = 2 * blitz::dot(oldDirection, surfaceNormal);
+
+    // calculate the new direction
+    newDirection = oldDirection - doubleProjection * surfaceNormal;
+
+    Ensure(tranSupport::checkDirectionVector(newDirection));
+}
+
+/*----------------------------------------------------------------------------*/
+void MCGeometry::getSurfaceCrossing(
+        const TVecDbl& newPosition,
+        const TVecDbl& oldDirection,
+        MCGeometry::UserSurfaceIdType& surfaceCrossingUserId,
+        double&       dotProduct)
+{
+    Require(blitz::all(oldDirection == _findCache.direction));
+    Require(tranSupport::checkDirectionVector(oldDirection));
+
+    TVecDbl surfaceNormal;
+
+    // find the surface normal at the point of intersection
+    _findCache.hitSurface->normalAtPoint(newPosition, surfaceNormal);
+
+    // returned normal is with respect to the "positive" sense of the
+    // surface, so reverse if necessary
+    if (_findCache.oldSurfaceSense == false)
+    {
+        surfaceNormal = -surfaceNormal;
+    }
+
+    surfaceCrossingUserId = _findCache.hitSurface->getUserId();
+    dotProduct = blitz::dot(oldDirection, surfaceNormal);
+
+    Ensure(tranSupport::checkDirectionVector(surfaceNormal));
+}
+
+/*----------------------------------------------------------------------------*/
+unsigned int MCGeometry::findCell( const TVecDbl& position) const
+{
+  //  // loop through all cells in problem
+  //  for (CellVec::const_iterator itCel = _cells.begin();
+  //                               itCel != _cells.end();  ++itCel)
+  //  {
+  //      if ((*itCel)->isPointInside(position))  {
+  //          return itCel - _cells.begin(); // maybe valid?
+  //      }
+  //  }
+    // that might be faster than this:
+    for (unsigned int i = 0; i < _cells.size(); ++i) {
+        if (_cells[i]->isPointInside(position)) {
+            return i;
+        }
+    }
+
+    // return a status value or something instead of failing miserably?
+    _failGeometry("Could not find cell!", 0, position, TVecDbl());
+    return 0;
+}
+/*----------------------------------------------------------------------------*/
+bool MCGeometry::isDeadCell(const unsigned int cellIndex) const
+{
+    Require(cellIndex < getNumCells() );
+    return ( _cells[cellIndex]->isDeadCell() );
+}
+/*============================================================================*\
+ * other internal-use code
+\*============================================================================*/
+void MCGeometry::_completedConnectivity()
+{
+    // THIS CODE IS ALMOST ALWAYS VALID
+    //  difficulties: transporting across negative-sense surfaces into corners
+    //                doing global geometry search
+
+//    cout << "<<CONNECTIVITY IS COMPLETE>>" << endl;
+}
+
+/*============================================================================*\
  * subroutines that the user calls to create the geometry
  * and/or otherwise interface with the user ID
 \*============================================================================*/
 
 unsigned int MCGeometry::addSurface(
-        const MCGeometry::UserSurfaceIDType userSurfaceId,
+        const MCGeometry::UserSurfaceIdType userSurfaceId,
         const Surface& inSurface)
 {
     // this is ONLY if we are using MCNP-type input definitions
@@ -43,9 +388,9 @@ unsigned int MCGeometry::addSurface(
     _surfaces.push_back(newSurface);
     unsigned int newSurfaceIndex = _surfaces.size() - 1;
 
-    // add the reverse mapping and 
+    // add the reverse mapping and
     // verify that this surface has not been added already (i.e. the
-    // UserSurfaceIDType is unique)
+    // UserSurfaceIdType is unique)
     std::pair<SurfaceRevIDMap::iterator, bool> result
         = _surfaceRevUserIds.insert(
                 std::make_pair(userSurfaceId, newSurfaceIndex));
@@ -65,11 +410,11 @@ unsigned int MCGeometry::addSurface(
 //! basically, parse a list of unsigned ints with +/- into surfaces and senses,
 //  and add the cell
 unsigned int MCGeometry::addCell(
-        const UserCellIDType& userCellId,
+        const UserCellIdType& userCellId,
         const IntVec& surfaceIds,
-        const CellT::CellFlags flags)
+        const Cell::CellFlags flags)
 {
-    CellT::SASVec boundingSurfaces;
+    Cell::SASVec boundingSurfaces;
 
     // bounding surfaces should have same length as input list of surface IDs
     // so from the start just reserve that many spaces in memory
@@ -108,9 +453,9 @@ unsigned int MCGeometry::addCell(
 /*----------------------------------------------------------------------------*/
 //! add a cell based on a surface/sense vector
 unsigned int MCGeometry::_addCell(
-                                    const UserCellIDType&  userCellId,
-                                    const CellT::SASVec&   boundingSurfaces,
-                                    const CellT::CellFlags flags)
+                                    const UserCellIdType&  userCellId,
+                                    const Cell::SASVec&   boundingSurfaces,
+                                    const Cell::CellFlags flags)
 {
     // add a new "unmatched surface" for every surface in the cell
     _unMatchedSurfaces += boundingSurfaces.size();
@@ -118,16 +463,16 @@ unsigned int MCGeometry::_addCell(
     //====== add cell to the internal cell vector
     unsigned int newCellIndex = _cells.size();
 
-    CellT* newCell = new CellT(boundingSurfaces, userCellId, newCellIndex,
+    Cell* newCell = new Cell(boundingSurfaces, userCellId, newCellIndex,
                                flags);
     _cells.push_back(newCell);
 
 //    cout << "Added cell with ID " << userCellId
 //         << "that has index " << newCellIndex << endl;
 
-    // add the reverse mapping to go from User ID to index and 
+    // add the reverse mapping to go from User ID to index and
     // verify that this surface has not been added already (i.e. the
-    // UserSurfaceIDType is unique)
+    // UserSurfaceIdType is unique)
     std::pair<CellRevIDMap::iterator, bool> result
         = _cellRevUserIds.insert(
                 std::make_pair(userCellId, newCellIndex));
@@ -136,12 +481,12 @@ unsigned int MCGeometry::_addCell(
             "Tried to add a cell with an ID that was already there.");
 
     //====== loop back through the surfaces and add the connectivity
-    for (CellT::SASVec::const_iterator bsIt = boundingSurfaces.begin();
+    for (Cell::SASVec::const_iterator bsIt = boundingSurfaces.begin();
                                        bsIt != boundingSurfaces.end(); ++bsIt)
     {
         SurfaceAndSense newQandS = *bsIt;
 
-        if (flags & CellT::NEGATED) {
+        if (flags & Cell::NEGATED) {
             // cell is inside out, so reverse the sense of the surface
             // with respect to how it connects to other cells
             newQandS.second = !(newQandS.second);
@@ -149,13 +494,14 @@ unsigned int MCGeometry::_addCell(
 
         // using the "associative array" capability of maps lets us access a
         // key, and it will either automatically initialize an empty vector or
-        // return the vector that is already  
+        // return the vector that is already
         // see C++ Standard Library pp. 182-183
         _surfToCellConnectivity[newQandS].push_back(newCell);
     }
 
     return newCellIndex;
 }
+
 /*----------------------------------------------------------------------------*/
 void MCGeometry::completedGeometryInput()
 {
@@ -167,9 +513,10 @@ void MCGeometry::completedGeometryInput()
 
     cout << "This doesn't do anything yet." << endl;
 }
+
 /*----------------------------------------------------------------------------*/
 //! get a user ID internal index  from a cell index
-MCGeometry::UserCellIDType MCGeometry::getUserIdFromCellIndex(
+MCGeometry::UserCellIdType MCGeometry::getUserIdFromCellIndex(
                 const unsigned int index) const
 {
     Require( index < getNumCells() );
@@ -179,20 +526,21 @@ MCGeometry::UserCellIDType MCGeometry::getUserIdFromCellIndex(
 
 /*----------------------------------------------------------------------------*/
 //! get a user ID internal index  from a surface index
-MCGeometry::UserSurfaceIDType MCGeometry::getUserIdFromSurfaceIndex(
+MCGeometry::UserSurfaceIdType MCGeometry::getUserIdFromSurfaceIndex(
                 const unsigned int index) const
 {
     Require( index < getNumSurfaces() );
 
     return _surfaces[index]->getUserId();
 }
+
 /*----------------------------------------------------------------------------*/
 //! Get an internal index for a cell from a user ID.
 unsigned int MCGeometry::getCellIndexFromUserId(
-                const UserCellIDType userCellId) const
+                const UserCellIdType userCellId) const
 {
     // translate the user's given surface ID to a Surface pointer
-    CellRevIDMap::const_iterator findCMResult = 
+    CellRevIDMap::const_iterator findCMResult =
         _cellRevUserIds.find(userCellId);
 
     if (findCMResult == _cellRevUserIds.end()) {
@@ -200,13 +548,14 @@ unsigned int MCGeometry::getCellIndexFromUserId(
     }
     return findCMResult->second;
 }
+
 /*----------------------------------------------------------------------------*/
 //! Get an internal index for a surface from a user ID.
 unsigned int MCGeometry::getSurfaceIndexFromUserId(
-             const UserSurfaceIDType userSurfaceId) const
+             const UserSurfaceIdType userSurfaceId) const
 {
     // translate the user's given surface ID to a Surface pointer
-    SurfaceRevIDMap::const_iterator findSMResult = 
+    SurfaceRevIDMap::const_iterator findSMResult =
         _surfaceRevUserIds.find(userSurfaceId);
 
     if (findSMResult == _surfaceRevUserIds.end()) {
@@ -222,7 +571,7 @@ unsigned int MCGeometry::getSurfaceIndexFromUserId(
 void MCGeometry::_warnGeometry( const std::string& shortMessage,
                                 const TVecDbl& position,
                                 const TVecDbl& direction,
-                                const CellT* oldCell,
+                                const Cell* oldCell,
                                 const std::string& longMessage) const
 {
     std::ios_base::fmtflags ff;
@@ -244,7 +593,7 @@ void MCGeometry::_warnGeometry( const std::string& shortMessage,
 
     cout.flags(ff);
 }
-                               
+
 /*----------------------------------------------------------------------------*/
 void MCGeometry::_failGeometry(
         const std::string& failureMessage,
@@ -253,7 +602,7 @@ void MCGeometry::_failGeometry(
         const TVecDbl& direction) const
 {
     cout << "ERROR IN GEOMETRY: " << failureMessage << endl;
-    
+
     cout << "Current cell index [" << currentCellIndex << "] ";
 
     Require(currentCellIndex < getNumCells());
@@ -270,11 +619,11 @@ void MCGeometry::_failGeometry(
     {
         cout << *bsIt << ":[";
 
-        const CellT::CellContainer& otherCells =
+        const Cell::CellContainer& otherCells =
             _cells[currentCellIndex]->getNeighbors(bsIt->first);
 
-        for (CellT::CellContainer::const_iterator
-                                     outCelIt = otherCells.begin(); 
+        for (Cell::CellContainer::const_iterator
+                                     outCelIt = otherCells.begin();
                                      outCelIt != otherCells.end();
                                      ++outCelIt)
         {
@@ -309,17 +658,17 @@ void MCGeometry::debugPrint() const
 
     //-------------- PRINT CELLS TO SURFACES ----------------//
     cout << "CELLS: " << endl;
-    
+
     for (CellVec::const_iterator cellIt = _cells.begin();
                                  cellIt != _cells.end(); ++cellIt)
     {
         cout << " CELL " << (*cellIt)->getUserId() << ": ";
 
         // query cell for surface pointers
-        const CellT::SASVec& boundingSurfaces =
+        const Cell::SASVec& boundingSurfaces =
                         (*cellIt)->getBoundingSurfaces();
 
-        for (CellT::SASVec::const_iterator bsIt  = boundingSurfaces.begin(); 
+        for (Cell::SASVec::const_iterator bsIt  = boundingSurfaces.begin();
                                         bsIt != boundingSurfaces.end(); ++bsIt)
         {
             cout << *bsIt << " ";
@@ -344,7 +693,7 @@ void MCGeometry::debugPrint() const
     {
         // print the surface and orientation
         cout << " " << surfToCellIt->first << ": ";
-        
+
         // print the cells
         const CellVec& theCells = surfToCellIt->second;
 
@@ -365,19 +714,19 @@ void MCGeometry::debugPrint() const
         cout << " CELL " << (*cellIt)->getUserId() << ": ";
 
         // query cell for surface pointers
-        const CellT::SASVec& boundingSurfaces
+        const Cell::SASVec& boundingSurfaces
                     = (*cellIt)->getBoundingSurfaces();
 
-        for (CellT::SASVec::const_iterator bsIt = boundingSurfaces.begin();
+        for (Cell::SASVec::const_iterator bsIt = boundingSurfaces.begin();
                                     bsIt != boundingSurfaces.end(); bsIt++)
         {
             cout << *bsIt << ":{";
 
-            const CellT::CellContainer& otherCells =
+            const Cell::CellContainer& otherCells =
                 (*cellIt)->getNeighbors(bsIt->first);
 
-            for (CellT::CellContainer::const_iterator
-                                        outCelIt = otherCells.begin(); 
+            for (Cell::CellContainer::const_iterator
+                                        outCelIt = otherCells.begin();
                                         outCelIt != otherCells.end();
                                         ++outCelIt)
             {
@@ -387,8 +736,9 @@ void MCGeometry::debugPrint() const
         }
 
         cout << endl;
-    }  
+    }
 }
+
 /*----------------------------------------------------------------------------*/
 // creation
 MCGeometry::MCGeometry() :
@@ -396,6 +746,7 @@ MCGeometry::MCGeometry() :
 {
     /* * */
 }
+
 /*----------------------------------------------------------------------------*/
 // clean up after ourselves
 MCGeometry::~MCGeometry()
@@ -407,7 +758,7 @@ MCGeometry::~MCGeometry()
         // dereferenced iterator is a pointer to the surface we need to delete
         delete (*surfIt);
     }
-    
+
     for (CellVec::iterator cellIt = _cells.begin();
                            cellIt != _cells.end(); ++cellIt)
     {

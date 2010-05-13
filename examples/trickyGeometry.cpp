@@ -9,7 +9,6 @@
 #include "createGeometry.hpp"
 #include "visualizeSurfaces.hpp"
 #include "mcgeometry/MCGeometry.hpp"
-#include "mcgeometry/MCGeometry.i.hpp"
 
 #include <iostream>
 #include <blitz/tinyvec-et.h>
@@ -33,7 +32,7 @@ void transport(MCGeometry& theGeom, unsigned int oldCellIndex,
 
     while (returnStatus != MCGeometry::DEADCELL)
     {
-        cout << "Particle at " << position << " with direction " << direction 
+        cout << "Particle at " << position << " with direction " << direction
              << " in cell user ID "
              << theGeom.getUserIdFromCellIndex(oldCellIndex) << endl;
 
@@ -48,7 +47,7 @@ void transport(MCGeometry& theGeom, unsigned int oldCellIndex,
 
         if (returnStatus == MCGeometry::DEADCELL) {
             cout << "Particle is deeeeaaaad at " << newPosition
-                 << " in cell user ID " 
+                 << " in cell user ID "
                  << theGeom.getUserIdFromCellIndex(newCellIndex) << endl;
         } else if (returnStatus != MCGeometry::NORMAL) {
             cout << "Got unexpected return status " << returnStatus << endl;
@@ -99,7 +98,7 @@ void testAmrGeometry()
     transport(theGeom, oldCellIndex, position, direction);
 
     // throw around a bunch of particles to hopefully make sure there are
-    // no dead spots, and to build the connectivity 
+    // no dead spots, and to build the connectivity
     cout << "********** printing surfaces"
          << endl;
     TVecDbl bounds(3, 4.0);

@@ -15,7 +15,7 @@ Current capabilities:
  - Uses zero-based `unsigned int` internal index to refer to cells for
    constant-time connectivity with whatever cross section/tally code the
    developer wishes to use, but translates the internal index to "User ID"s
-   which are arbitrary `unsigned int`s but may be any arbitrary object.
+   which are arbitrary `unsigned int`s.
  - Uses the Blitz++ TinyVector class for directions/positions for speed
 
 MCGeometry is built with both speed and flexibility in mind. For interaction
@@ -41,6 +41,9 @@ Jesse R. Cheatham supplied the original idea of building up the cell-to-cell
 connectivity during run time. Seth R. Johnson refined this idea to using the
 surfaces and surface senses to further prune the required checking.
 
+Jeremy Conlin is the primary author of the presentation (in the \c doc 
+directory) and helped greatly in implementing the geometry tracking routines.
+
 A.F. Bielajew at University of Michigan and his class notes provided the
 basic implementation of quadratic surfaces with an "inside" sense.
 
@@ -58,7 +61,7 @@ The following statements apply to work done by Seth R. Johnson on this project:
 
 \section License
 
-Copyright (c) 2008, Seth R. Johnson, Jeremy L. Conlin
+Copyright (c) 2008&endash;2010, Seth R. Johnson, Jeremy L. Conlin
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

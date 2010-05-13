@@ -1,0 +1,11 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>Redirecting ${PROJECT_NAME} Documentation</title>
+  <meta http-equiv="refresh" content="0; URL=html/index.html" />
+</head>
+<body>
+You should have been redirected to	<a href="html/index.html">Documentation for ${PROJECT_NAME} version ${${PROJECT_NAME}_VERSION}</a>.
+</body>
+</html>
+

@@ -1,4 +1,4 @@
 srj_make_test(
-  TESTS   tFastTimer tSuperTimer tVectorComp
+  TESTS   tVectorComp
   DEPENDS transupport
   SUBPROJECT transupport)

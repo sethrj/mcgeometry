@@ -3,9 +3,9 @@
  * \brief  Contains interface for Cell class
  * \author Seth R. Johnson
  */
-
 #ifndef MCG_CELL_HPP
 #define MCG_CELL_HPP
+/*----------------------------------------------------------------------------*/
 
 #include <vector>
 #include <list>
@@ -19,10 +19,10 @@
 //using std::endl;
 
 namespace mcGeometry {
-/*----------------------------------------------------------------------------*/
+/*============================================================================*/
 
 class Surface;
-    
+
 /*!
  * \class Cell
  * \brief Cell object defined by bounding Surface/sense pairs.
@@ -37,16 +37,17 @@ class Surface;
  * everything inside a cube rather than six separate dead regions defined by
  * planes.)
  */
-template <typename UserIdType>
 class Cell {
 public:
     //! Blitz++ TinyVector of length D stores position/direction/etc.
-    typedef blitz::TinyVector<double, 3> TVecDbl; 
-    
+    typedef blitz::TinyVector<double, 3> TVecDbl;
+    //! User's cell IDs are unsigned ints for now.
+    typedef unsigned int UserCellIdType;
+
 public:
     //! bit flags with details about the cells
     //  use bitwise 'and' & to check for their being set
-    //  use bitwise 'or' | to set several of them at once 
+    //  use bitwise 'or' | to set several of them at once
     enum CellFlags {
         NONE     = 0u, //!< No special cell attributes
         DEADCELL = 1u, //!< Particles should be killed when entering us
@@ -66,7 +67,7 @@ public:
      * A std::list is used because this will be continually modified, and the
      * cost of reallocation is high.
      */
-    typedef std::list< Cell<UserIdType>* > CellContainer;
+    typedef std::list< Cell* > CellContainer;
 
     //! Map our surfaces to vectors of other cells attached to that surface.
     typedef std::map< Surface*, CellContainer > HoodMap;
@@ -83,7 +84,7 @@ public:
      * uses CellFlags to determine whether it is dead, negated, etc.
      */
     Cell(   const SASVec& boundingSurfaces,
-            const UserIdType userId,
+            const UserCellIdType userId,
             const unsigned int internalIndex,
             const CellFlags flags = NONE);
 
@@ -99,7 +100,7 @@ public:
 
     //! Get a writeable list of known cell neighbors for a quadric.
     CellContainer& getNeighbors(Surface* surface) {
-//        typename HoodMap::iterator findResult = _hood.find(surface);
+//        HoodMap::iterator findResult = _hood.find(surface);
 //        Require(findResult != _hood.end());
 //
 //        return findResult->second;
@@ -113,7 +114,7 @@ public:
     }
 
     //! Return the user ID.
-    const UserIdType& getUserId() const {
+    const UserCellIdType& getUserId() const {
         return _userId;
     }
 
@@ -150,14 +151,15 @@ public:
     bool isNegated() const {
         return (_flags & NEGATED);
     }
+
 private:
     //! A vector of surfaces and senses that define this Cell.
     const SASVec _boundingSurfaces;
 
     //! The object that we report to the user.
-    const UserIdType _userId;
+    const UserCellIdType _userId;
 
-    //! This Cell's index in the primary MCGeometry CellT* array.
+    //! This Cell's index in the primary MCGeometry Cell* array.
     const unsigned int _internalIndex;
 
     //! Other information about this cell.
@@ -166,7 +168,7 @@ private:
     //! Connectivity to other cells through each surface.
     HoodMap _hood;
 };
-/*----------------------------------------------------------------------------*/
+/*============================================================================*/
 } // end namespace mcGeometry
 #endif
 

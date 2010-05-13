@@ -1,11 +1,10 @@
 /*!
- * \file   Sphere.i.hpp
+ * \file   Sphere.cpp
  * \brief  Contains inline implementation for the \c Sphere class
  * \author Seth R. Johnson
  */
-
-#ifndef MCG_SPHERE_I_HPP
-#define MCG_SPHERE_I_HPP
+/*----------------------------------------------------------------------------*/
+#include "Sphere.hpp"
 
 #include <iostream>
 #include <blitz/tinyvec-et.h>
@@ -14,17 +13,13 @@
 #include "transupport/blitzStuff.hpp"
 #include "transupport/SoftEquiv.hpp"
 
-#include "Sphere.hpp"
-#include "Surface.i.hpp"
-
 namespace mcGeometry {
 /*============================================================================*/
 
-/*----------------------------------------------------------------------------*/
 // Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
 //      (x,y,z) = center of sphere
 //      (x0,y0,z0) = position
-inline bool Sphere::hasPosSense(const TVecDbl& position) const
+bool Sphere::hasPosSense(const TVecDbl& position) const
 {
     double eval = 0.0;
     double temp;
@@ -44,8 +39,8 @@ inline bool Sphere::hasPosSense(const TVecDbl& position) const
 }
 
 /*----------------------------------------------------------------------------*/
-inline void Sphere::intersect(
-        const TVecDbl& position, 
+void Sphere::intersect(
+        const TVecDbl& position,
         const TVecDbl& direction, const bool posSense,
         bool& hit, double& distance ) const
 {
@@ -62,8 +57,9 @@ inline void Sphere::intersect(
             hit, distance
             );
 }
+
 /*----------------------------------------------------------------------------*/
-inline void Sphere::normalAtPoint(
+void Sphere::normalAtPoint(
         const TVecDbl& position,
         TVecDbl& unitNormal ) const
 {
@@ -82,7 +78,7 @@ inline void Sphere::normalAtPoint(
 
 /*----------------------------------------------------------------------------*/
 //! output a stream which prints the Sphere's characteristics
-inline std::ostream& Sphere::_output( std::ostream& os ) const
+std::ostream& Sphere::printStream( std::ostream& os ) const
 {
     os  << "[ SPHERE Center: " << std::setw(10) << _center
         << " Radius: " << std::setw(5) << _radius
@@ -96,7 +92,7 @@ inline std::ostream& Sphere::_output( std::ostream& os ) const
 // Equation: (x-x0)^2 + (y-y0)^2 + (z-z0)^2 - R^2 = 0
 //      (x,y,z) = center of sphere
 //      (x0,y0,z0) = position
-inline bool SphereO::hasPosSense(
+bool SphereO::hasPosSense(
         const TVecDbl& position ) const
 {
     return _hasPosSense(
@@ -104,8 +100,8 @@ inline bool SphereO::hasPosSense(
 }
 
 /*----------------------------------------------------------------------------*/
-inline void SphereO::intersect(
-        const TVecDbl& position, 
+void SphereO::intersect(
+        const TVecDbl& position,
         const TVecDbl& direction, const bool posSense,
         bool& hit, double& distance ) const
 {
@@ -121,7 +117,7 @@ inline void SphereO::intersect(
             );
 }
 /*----------------------------------------------------------------------------*/
-inline void SphereO::normalAtPoint(
+void SphereO::normalAtPoint(
         const TVecDbl& position,
         TVecDbl& unitNormal ) const
 {
@@ -135,7 +131,7 @@ inline void SphereO::normalAtPoint(
 }
 /*----------------------------------------------------------------------------*/
 //! output a stream which prints the SphereO's characteristics
-inline std::ostream& SphereO::_output( std::ostream& os ) const
+std::ostream& SphereO::printStream( std::ostream& os ) const
 {
     os  << "[ SPHEREO Radius: " << std::setw(5) << _radius
         << " ]";
@@ -144,5 +140,4 @@ inline std::ostream& SphereO::_output( std::ostream& os ) const
 
 /*============================================================================*/
 } // end namespace mcGeometry
-#endif
 

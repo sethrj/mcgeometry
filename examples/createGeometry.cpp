@@ -25,7 +25,7 @@ using std::endl;
 using namespace mcGeometry;
 
 //! Blitz++ TinyVector of length D stores position/direction/etc.
-typedef blitz::TinyVector<double, 3> TVecDbl; 
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 
 //! Mesh will create and use a retangular mesh using N planes spaced 1.0 units
@@ -56,7 +56,7 @@ void CreateMesh(int N, MCGeometry& Geo){
     // Point is now corner opposite from origin
     mcGeometry::PlaneX maxX(N);
     Geo.addSurface(N+1, maxX);
-    
+
     mcGeometry::PlaneY maxY(N);
     Geo.addSurface(2*(N+1), maxY);
 
@@ -104,7 +104,7 @@ void CreateMesh(int N, MCGeometry& Geo){
 
     if (true) {
         // use a negated outside cell
-        typedef mcGeometry::MCGeometry::CellT CellT;
+        typedef mcGeometry::Cell Cell;
 
         Surfaces.resize(0);
 
@@ -114,7 +114,7 @@ void CreateMesh(int N, MCGeometry& Geo){
         Surfaces.push_back(-maxYId);
         Surfaces.push_back( minZId);
         Surfaces.push_back(-maxZId);
-        Geo.addCell(ID, Surfaces, CellT::generateFlags(true, true)); 
+        Geo.addCell(ID, Surfaces, Cell::generateFlags(true, true));
         cout << "Outside cell ID: " << ID << endl;
         ++ID;
 
@@ -188,12 +188,12 @@ void createComplexGeometry( MCGeometry& theGeom) {
     unsigned int surfaceIndex;
 
     surfaceIndex = theGeom.addSurface(5, theSphere);
-    
+
     surfaceIndex = theGeom.addSurface(1, plane1);
     surfaceIndex = theGeom.addSurface(2, plane2);
     surfaceIndex = theGeom.addSurface(3, plane3);
     surfaceIndex = theGeom.addSurface(4, plane4);
-    
+
     //========== ADD CELLS
     std::vector<int>  theSurfaces(4,0);
     unsigned int cellIndex;
@@ -236,8 +236,8 @@ void createComplexGeometry( MCGeometry& theGeom) {
     theSurfaces.resize(1);
     theSurfaces[0] = -5;
 
-    cellIndex = theGeom.addCell(60, theSurfaces, 
-            MCGeometry::CellT::generateFlags(true, true));
+    cellIndex = theGeom.addCell(60, theSurfaces,
+            mcGeometry::Cell::generateFlags(true, true));
 }
 
 /*============================================================================*/
@@ -312,7 +312,7 @@ void createTrickyGeometry(mcGeometry::MCGeometry& geo)
     surfaces[5] = -15;
 
     geo.addCell(100, surfaces,
-            MCGeometry::CellT::generateFlags(true, true));
+            mcGeometry::Cell::generateFlags(true, true));
 }
 /*============================================================================*/
 //! \fn createAnotherTrickyGeometry
@@ -357,19 +357,19 @@ void createAnotherTrickyGeometry(mcGeometry::MCGeometry& geo)
     surfaces[0] = -4;
     surfaces[1] =  1;
     geo.addCell(110, surfaces,
-            MCGeometry::CellT::generateFlags(true, false)); //dead cell
+            mcGeometry::Cell::generateFlags(true, false)); //dead cell
 
 
     surfaces[0] =  5;
     surfaces[1] =  2;
     geo.addCell(120, surfaces,
-            MCGeometry::CellT::generateFlags(true, false)); //dead cell
+            mcGeometry::Cell::generateFlags(true, false)); //dead cell
 
     surfaces.resize(3);
     surfaces[0] =  4;
     surfaces[1] = -5;
     surfaces[2] =  3;
     geo.addCell(130, surfaces,
-            MCGeometry::CellT::generateFlags(true, false)); //dead cell
+            mcGeometry::Cell::generateFlags(true, false)); //dead cell
 
 }

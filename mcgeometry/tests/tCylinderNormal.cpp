@@ -7,10 +7,7 @@
 /*----------------------------------------------------------------------------*/
 
 // put our headers at top to check for dependency problems
-#include "mcgeometry/Cylinder.hpp"
-#include "mcgeometry/Surface.hpp"
-
-#include "mcgeometry/Cylinder.i.hpp"
+#include "mcgeometry/CylinderNormal.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -20,8 +17,6 @@
 #include "transupport/constants.hpp"
 #include "transupport/UnitTester.hpp"
 #include "transupport/SoftEquiv.hpp"
-
-
 
 using namespace mcGeometry;
 using tranSupport::constants::SQRTHALF;
@@ -105,7 +100,7 @@ void runTestZ() {
     particleLoc = 0.20683, 0.544158, -0.726551;
 
     TESTER_CHECKFORPASS(anotherCylinder.hasPosSense(particleLoc) == false);
-    
+
     particleLoc = 1.79317,  0.544158, 0.0;
 
     TESTER_CHECKFORPASS(anotherCylinder.hasPosSense(particleLoc) == false);
@@ -133,7 +128,7 @@ int main(int, char**) {
     }
 
     TESTER_PRINTRESULT();
-    
+
     if (!TESTER_HASPASSED()) {
         return 1;
     }

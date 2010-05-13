@@ -2,24 +2,24 @@
  * \file   MCGeometry.hpp
  * \brief  Geometry class
  * \author Seth R. Johnson et al.
- * 
+ *
  * Copyright (c) 2008, Seth R. Johnson, Jeremy L. Conlin
  * All rights reserved.
- */ 
+ */
 
 /* Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer. 
+ *     this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution. 
+ *     documentation and/or other materials provided with the distribution.
  *     * Neither the name of
  *     the MCGeometry project nor the names of its contributors may be used to
  *     endorse or promote products derived from this software without specific
  *     prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,11 +31,11 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  */
-
 #ifndef MCG_MCGEOMETRY_HPP
 #define MCG_MCGEOMETRY_HPP
+/*----------------------------------------------------------------------------*/
 
 #include <map>
 #include <vector>
@@ -47,13 +47,13 @@
 #include "transupport/dbc.hpp"
 
 namespace mcGeometry {
+/*============================================================================*/
 
 class Surface;
 
-/*----------------------------------------------------------------------------*/
 /*!
  * \class MCGeometry
- * \brief MCGeometry is an umbrella class that coordinates the cells in a 
+ * \brief MCGeometry is an umbrella class that coordinates the cells in a
  *        problem.
  *
  * The MCGeometry parent class handles almost all the external associations
@@ -80,17 +80,14 @@ class Surface;
 class MCGeometry {
 public:
     //! User's surface IDs are unsigned ints for now. (Maybe templated later.)
-    typedef unsigned int UserSurfaceIDType;
+    typedef unsigned int UserSurfaceIdType;
 
     //! User's cell IDs are unsigned ints for now. (Maybe templated later.)
-    typedef unsigned int UserCellIDType;
-
-    //! We only use one kind of templated cell.
-    typedef Cell<UserCellIDType> CellT;
+    typedef unsigned int UserCellIdType;
 
     //! Blitz++ TinyVector of length D stores position/direction/etc.
-    typedef blitz::TinyVector<double, 3> TVecDbl; 
-    
+    typedef blitz::TinyVector<double, 3> TVecDbl;
+
     //! Vector of signed integers that are passed in by the user and parsed
     //! into surfaces and sense.
     typedef std::vector<signed int>                 IntVec;
@@ -112,7 +109,7 @@ public:
      *
      * Return INTERNAL index of the surface (0 to N_sur - 1).
      */
-    unsigned int addSurface(const UserSurfaceIDType userSurfaceId,
+    unsigned int addSurface(const UserSurfaceIdType userSurfaceId,
                             const Surface& newSurface);
 
     /*!
@@ -121,9 +118,9 @@ public:
      *
      * Return INTERNAL index of the surface (0 to N_cell - 1).
      */
-    unsigned int addCell(const UserCellIDType& userCellId,
+    unsigned int addCell(const UserCellIdType& userCellId,
                          const IntVec& surfaces,
-                         const CellT::CellFlags flags = CellT::NONE);
+                         const Cell::CellFlags flags = Cell::NONE);
 
     //! Do optimization after input is finished, check geometry for duplicate
     //! surfaces, etc.
@@ -143,7 +140,7 @@ public:
      *  \param[in]  direction    Current particle direction.
      *  \param[in]  oldCellIndex Current particle internal cell index.
      *  \param[out] distance     Distance to intersecting a surface.
-     *  
+     *
      *  This function loops over every surface inside the old cell, and finds
      *  the surface that is the smallest distance away. It caches this closest
      *  surface and distance for later, and returns to the user the closest
@@ -177,8 +174,8 @@ public:
      *
      *  Next, we ask the old cell for the "neighborhood" of cells that it knows
      *  are on the other side of that surface. We loop for each of those,
-     *  calling \c CellT::isPointInside(), passing the surface that the
-     *  particle just crossed. 
+     *  calling \c Cell::isPointInside(), passing the surface that the
+     *  particle just crossed.
      *  \note
      *  We \e never check the surface that a particle
      *  crossed, partly because it requires extra computational effort, and
@@ -192,7 +189,7 @@ public:
      *  corresponds to the hit surface in the opposite surface sense that the
      *  old cell has. (To restate, any cell on the other side of the current
      *  cell \e must have the opposite surface sense of the crossed surface.)
-     *  We call \c CellT::isPointInside() on each one of these, and eventually
+     *  We call \c Cell::isPointInside() on each one of these, and eventually
      *  find the new cell. When this occurs, we \c push_back a pointer to the
      *  new cell onto the old cell's neighborhood list, and we \c push_back a
      *  pointer to the old cell on the new cell's neighborhood list.
@@ -233,7 +230,7 @@ public:
         findNewCell(position, direction, newPosition,
                     newCellIndex, returnStatus);
     }
-    
+
      /*!
      * \brief If we found that the surface was reflecting, change the direction.
      *
@@ -261,14 +258,14 @@ public:
      */
     void getSurfaceCrossing(    const TVecDbl& newPosition,
                                 const TVecDbl& oldDirection,
-                                UserSurfaceIDType& surfaceCrossingUserId,
+                                UserSurfaceIdType& surfaceCrossingUserId,
                                 double&       dotProduct);
 
     //\}
     /*------------------------------------------------------------*/
     //! \name Problem information
     //\{
-    
+
     //! Find a cell given an arbitrary point in the problem.
     unsigned int findCell(const TVecDbl& position) const;
 
@@ -297,25 +294,25 @@ public:
 
     //! Get an internal index for a cell from a user ID.
     unsigned int getCellIndexFromUserId(
-                    const UserCellIDType userCellId) const;
+                    const UserCellIdType userCellId) const;
 
     //! Get an internal index for a surface from a user ID.
     unsigned int getSurfaceIndexFromUserId(
-                 const UserSurfaceIDType userSurfaceId) const;
+                 const UserSurfaceIdType userSurfaceId) const;
 
     //! Get a user ID for a cell from a cell internal index.
-    UserCellIDType getUserIdFromCellIndex(
+    UserCellIdType getUserIdFromCellIndex(
                     const unsigned int index) const;
 
     //! Get a user ID for a surface from a surface internal index.
-    UserSurfaceIDType getUserIdFromSurfaceIndex(
+    UserSurfaceIdType getUserIdFromSurfaceIndex(
                     const unsigned int index) const;
     //\}
     /*------------------------------------------------------------*/
 
     //! Constructor.
     MCGeometry();
-    
+
     //! Destructor must delete actual surfaces and cell memory.
     ~MCGeometry();
 
@@ -328,15 +325,15 @@ private:
     //! Vector of pointers to surfaces
     typedef std::vector< Surface* >               SurfaceVec;
     //! Vector of pointers to cells
-    typedef std::vector< CellT* >                 CellVec;
+    typedef std::vector< Cell* >                 CellVec;
 
     //! Connect surface-and-senses to a vector of cells on the other side
     typedef std::map< SurfaceAndSense, CellVec >  SCConnectMap;
 
     //! Map user surface IDs to surface internal index
-    typedef std::map< UserSurfaceIDType, unsigned int >   SurfaceRevIDMap;
+    typedef std::map< UserSurfaceIdType, unsigned int >   SurfaceRevIDMap;
     //! Map user cell IDs to cell internal index
-    typedef std::map< UserCellIDType, unsigned int >      CellRevIDMap;
+    typedef std::map< UserCellIdType, unsigned int >      CellRevIDMap;
 
     //====== INTERNAL ASSOCIATIVE VECTORS AND MAPS ======//
     // These use pointers and unsigned index values that handle
@@ -400,14 +397,14 @@ private:
 
     //! After finding two newly connecting cells, update their connections.
     void _updateConnectivity(
-                CellT* oldCell,
-                CellT* newCell,
-                CellT::CellContainer& oldNeighborhood);
+                Cell* oldCell,
+                Cell* newCell,
+                Cell::CellContainer& oldNeighborhood);
 
     //! Internal mechanism to add a cell based on a list of surface/senses.
-    unsigned int _addCell(          const UserCellIDType&  userCellId,
-                                    const CellT::SASVec&   boundingSurfaces,
-                                    const CellT::CellFlags flags);
+    unsigned int _addCell(          const UserCellIdType&  userCellId,
+                                    const Cell::SASVec&   boundingSurfaces,
+                                    const Cell::CellFlags flags);
 
     //! Do optimization whenever the last surface is linked.
     void _completedConnectivity();
@@ -416,7 +413,7 @@ private:
     void _warnGeometry(             const std::string& shortMessage,
                                     const TVecDbl& position,
                                     const TVecDbl& direction,
-                                    const CellT* oldCell,
+                                    const Cell* oldCell,
                                     const std::string& longMessage) const;
 
     //! Print geometry failure message.
@@ -425,7 +422,7 @@ private:
                                    const TVecDbl& position,
                                    const TVecDbl& direction) const;
 };
-/*----------------------------------------------------------------------------*/
+/*============================================================================*/
 } // end namespace mcGeometry
 #endif
 
