@@ -33,7 +33,7 @@ inline double distance(
 /*----------------------------------------------------------------------------*/
 /*! \brief Validate direction vectors in 3-D 
  *
- *  Three-D vectors must have $\norm{\vec{\Omega}} = 1$
+ *  Three-D vectors must have \f$ \left| \bm{\Omega} \right| = 1 \f$
  */
 inline bool checkDirectionVector(const blitz::TinyVector<double, 3>& omega)
 {

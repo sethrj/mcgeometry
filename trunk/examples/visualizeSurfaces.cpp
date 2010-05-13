@@ -8,7 +8,6 @@
 
 #include "createGeometry.hpp"
 #include "mcgeometry/MCGeometry.hpp"
-#include "mcgeometry/MCGeometry.i.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -23,7 +22,7 @@ using std::cout;
 using std::endl;
 
 //! Blitz++ TinyVector of length D stores position/direction/etc.
-typedef blitz::TinyVector<double, 3> TVecDbl; 
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 /*============================================================================*/
 mtRand::MTRand randGen;
@@ -36,7 +35,7 @@ inline double randDouble(){
 //! Pick a random direction on the unit sphere
 inline void randDirection(TVecDbl& v){
     double phi = tranSupport::constants::TWOPI*randDouble();
-    
+
     v[0] = 2*randDouble() - 1;
     double mu = std::sqrt(1 - v[0]*v[0]);
     v[1] = mu*std::cos(phi);

@@ -1,18 +1,29 @@
 ===== To build =====
 
-Download cmake:
+Download cmake and install it from
 http://www.cmake.org/cmake/resources/software.html
 
 Create a build directory outside of the source directory (e.g., ../_buildmcg)
 and cd to it (cd ../_buildmcg)
 
-Run cmake and configure it once to see the options, change them as desired:
-cmake-gui ../mcgeometry
+    mkdir ../_buildmcg
+    cd ../_buildmcg
 
-Compile using make (or XCode or Eclipse or whatever other build system you
-chose with cmake)
+Run cmake in the build directory; pass in the path to the mcgeometry source
+directory. Configure it once to see the build options (if using ccmake or
+cmake-gui), and change them as desired.
 
-===== TARGETS =====
+	cmake ../mcgeometry-source
+
+Compile using the makefile it generated. (Depending on what you told CMake, it
+might have created an XCode or Eclipse project instead of using make's build
+system. In most cases on a UNIXy system, make is the default.)
+
+    make check
+    
+
+===== Targets =====
+
 make lib:
     create the mcgeometry and transupport libraries
 

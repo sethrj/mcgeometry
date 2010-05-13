@@ -10,10 +10,6 @@
 #include "mcgeometry/Plane.hpp"
 #include "mcgeometry/Sphere.hpp"
 
-#include "mcgeometry/Cell.i.hpp"
-#include "mcgeometry/Plane.i.hpp"
-#include "mcgeometry/Sphere.i.hpp"
-
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -27,10 +23,9 @@ using std::cout;
 using std::endl;
 
 typedef blitz::TinyVector<double, 3> TVecDbl;
-typedef Cell<unsigned int> CellT;
 
 /*============================================================================*/
-void runTests() {   
+void runTests() {
 
     /* * * create sphere * * */
     TVecDbl center(0.0);
@@ -48,7 +43,7 @@ void runTests() {
     Plane thePlane(normal, center);
 
     /* * * create cell boundaries * * */
-    CellT::SASVec cellBoundaries;
+    Cell::SASVec cellBoundaries;
 
     // define it as inside sphere to the right of plane
     cellBoundaries.push_back(std::make_pair(&theSphere, false));
@@ -56,7 +51,7 @@ void runTests() {
 
 
     /* * * create the cell * * */
-    CellT theCell(cellBoundaries, 211, 1);
+    Cell theCell(cellBoundaries, 211, 1);
     TESTER_CHECKFORPASS(theCell.getUserId() == 211);
     TESTER_CHECKFORPASS(theCell.getIndex() == 1);
     TESTER_CHECKFORPASS(theCell.isDeadCell() == false);
@@ -91,7 +86,7 @@ void runTests() {
     TESTER_CHECKFORPASS( hitSurface   == &thePlane );
     TESTER_CHECKFORPASS( quadricSense == true );
     TESTER_CHECKFORPASS( softEquiv(distance, 0.5) );
-    
+
     particleLoc[0] = 1.5;
     particleDir[0] = 1.0;
 
@@ -108,8 +103,8 @@ void runTests() {
 
     // =================================================================== //
     /* * * check stuff with negated cells * * */
-    CellT::CellFlags invFlags =
-        static_cast<CellT::CellFlags>(CellT::NEGATED | CellT::DEADCELL);
+    Cell::CellFlags invFlags =
+        static_cast<Cell::CellFlags>(Cell::NEGATED | Cell::DEADCELL);
 
     // define it as not ( inside sphere to the left of plane)
     cellBoundaries.resize(0);
@@ -117,7 +112,7 @@ void runTests() {
     cellBoundaries.push_back(std::make_pair(&thePlane,  false));
 
     /* * * create the cell * * */
-    CellT invCell(cellBoundaries, 1337, 3, invFlags);
+    Cell invCell(cellBoundaries, 1337, 3, invFlags);
     TESTER_CHECKFORPASS(invCell.getUserId() == 1337);
     TESTER_CHECKFORPASS(invCell.getIndex() == 3);
     TESTER_CHECKFORPASS(invCell.isDeadCell() == true);
@@ -150,7 +145,7 @@ int main(int, char**) {
    }
 
    TESTER_PRINTRESULT();
-   
+
     if (!TESTER_HASPASSED()) {
         return 1;
     }

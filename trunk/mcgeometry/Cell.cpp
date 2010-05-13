@@ -1,12 +1,9 @@
 /*!
- * \file   Cell.i.hpp
+ * \file   Cell.cpp
  * \brief  Contains inline implementation for \c Cell
  * \author Seth R. Johnson
  */
-
-#ifndef MCG_CELL_I_HPP
-#define MCG_CELL_I_HPP
-
+/*----------------------------------------------------------------------------*/
 #include "Cell.hpp"
 #include "Surface.hpp"
 
@@ -23,9 +20,9 @@
 namespace mcGeometry {
 /*----------------------------------------------------------------------------*/
 //! Static function to make flag generation easier.
-template <typename UserIdType>
-inline typename Cell<UserIdType>::CellFlags Cell<UserIdType>::generateFlags(
-                                bool isDeadCell, bool isNegated  )
+Cell::CellFlags Cell::generateFlags(
+        bool isDeadCell,
+        bool isNegated )
 {
     CellFlags flags = NONE;
 
@@ -37,17 +34,17 @@ inline typename Cell<UserIdType>::CellFlags Cell<UserIdType>::generateFlags(
 
 /*============================================================================*/
 //! constructor requires an immutable bounding surface
-template <typename UserIdType>
-inline Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
-        const UserIdType userId,
+Cell::Cell(
+        const SASVec& boundingSurfaces,
+        const UserCellIdType userId,
         const unsigned int internalIndex,
-        const CellFlags flags) 
-    : _boundingSurfaces(boundingSurfaces),
-      _userId(userId),
-      _internalIndex(internalIndex),
-      _flags(flags)
+        const CellFlags flags) :
+    _boundingSurfaces(boundingSurfaces),
+    _userId(userId),
+    _internalIndex(internalIndex),
+    _flags(flags)
 {
-    typedef std::pair<typename HoodMap::iterator, bool> ReturnedPair;
+    typedef std::pair<HoodMap::iterator, bool> ReturnedPair;
     Require(_boundingSurfaces.size() > 0);
 
     // initialize hood map
@@ -55,7 +52,7 @@ inline Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
 
     // create empty neighborhood map, one entry for each surface
     while (bsIt != _boundingSurfaces.end()) {
-        ReturnedPair result = 
+        ReturnedPair result =
             _hood.insert(std::make_pair(bsIt->first, CellContainer()));
 
         Insist(result.second == true, "Duplicate surface in this cell.");
@@ -63,12 +60,12 @@ inline Cell<UserIdType>::Cell(   const SASVec& boundingSurfaces,
     }
 }
 /*----------------------------------------------------------------------------*/
-template <typename UserIdType>
-inline bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
-                                     const Surface* surfaceToSkip) const
+bool Cell::isPointInside(
+        const TVecDbl& position,
+        const Surface* surfaceToSkip) const
 {
     if (_flags & NEGATED) {
-        // the negated flag makes the whole cell greedy: 
+        // the negated flag makes the whole cell greedy:
         //  ANYWHERE that disagrees with one of the specified faces is
         //  considered part of the negated cell.
         for (SASVec::const_iterator it  = _boundingSurfaces.begin();
@@ -97,7 +94,7 @@ inline bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
         {
             // it->first is the pointer to the Surface object
             // it->second is the surface sense
-            
+
             // if we need to check it
             if (it->first != surfaceToSkip)
             {
@@ -106,7 +103,7 @@ inline bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
 //                        << " has the WRONG sense wrt "
 //                        << "surface UID " << it->first->getUserId()
 //                        << endl;
-                   // if the surface reports that the sense of the point is 
+                   // if the surface reports that the sense of the point is
                    // NOT the same sense as we know this cell is defined, then
                    // it is not inside.
                    return false;
@@ -129,13 +126,12 @@ inline bool Cell<UserIdType>::isPointInside(const TVecDbl& position,
     return true;
 }
 /*----------------------------------------------------------------------------*/
-template <typename UserIdType>
-inline void Cell<UserIdType>::intersect(
-                    const TVecDbl& position,
-                    const TVecDbl& direction,
-                    Surface*& hitSurface,
-                    bool&     quadricSense,
-                    double&   distance) const
+void Cell::intersect(
+        const TVecDbl& position,
+        const TVecDbl& direction,
+        Surface*& hitSurface,
+        bool&     quadricSense,
+        double&   distance) const
 {
     hitSurface   = NULL;
     quadricSense = false;
@@ -149,13 +145,13 @@ inline void Cell<UserIdType>::intersect(
         bool thisHit;
         double thisDistance;
 
-        // call "intersect" on the quadric, also passing our sense 
+        // call "intersect" on the quadric, also passing our sense
         // of the quadric (it->second)
         it->first->intersect(position, direction, it->second,
                              thisHit, thisDistance); //(return results)
 
 //        if (thisHit) {
-//            cout << "Calculated an intersection (distance " << thisDistance 
+//            cout << "Calculated an intersection (distance " << thisDistance
 //                 << ") with " << *(it->first) << endl;
 //        } else {
 //            cout << "No intersection with " << *(it->first) << endl;
@@ -185,7 +181,6 @@ inline void Cell<UserIdType>::intersect(
     Ensure(distance   != std::numeric_limits<double>::infinity());
 }
 
-/*----------------------------------------------------------------------------*/
+/*============================================================================*/
 } // end namespace mcGeometry
-#endif
 

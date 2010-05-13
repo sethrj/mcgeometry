@@ -10,8 +10,6 @@
 #include "mcgeometry/Cylinder.hpp"
 #include "mcgeometry/Surface.hpp"
 
-#include "mcgeometry/Cylinder.i.hpp"
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -211,7 +209,7 @@ void runTestC() {
     particleLoc = -0.726551, -0.79317, 0.544158;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
-    
+
     particleLoc = 0., 0.79317, 0.544158;
 
     TESTER_CHECKFORPASS(theCylinder.hasPosSense(particleLoc) == false);
@@ -266,7 +264,7 @@ int main(int, char**) {
     }
 
     TESTER_PRINTRESULT();
-    
+
     if (!TESTER_HASPASSED()) {
         return 1;
     }

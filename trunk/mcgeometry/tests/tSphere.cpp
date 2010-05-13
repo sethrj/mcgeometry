@@ -3,14 +3,11 @@
  * \brief Test the Sphere geometry capability
  * \author Seth R. Johnson
  */
-
 /*----------------------------------------------------------------------------*/
 
 // put our headers at top to check for dependency problems
 #include "mcgeometry/Sphere.hpp"
 #include "mcgeometry/Surface.hpp"
-
-#include "mcgeometry/Sphere.i.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -91,7 +88,7 @@ void runTests() {
         didHit, distance);
 
     TESTER_CHECKFORPASS(didHit == false);
-    
+
     /********************/
     Surface* newSphere = theSphere.clone(182);
 
@@ -113,7 +110,7 @@ int main(int, char**) {
     }
 
     TESTER_PRINTRESULT();
-    
+
     if (!TESTER_HASPASSED()) {
         return 1;
     }

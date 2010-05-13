@@ -2,7 +2,7 @@
  * \file   Sphere.hpp
  * \brief  Sphere surface
  * \author Seth R. Johnson
- * 
+ *
  */
 
 #ifndef MCG_SPHERE_HPP
@@ -26,13 +26,13 @@ namespace mcGeometry {
 class Sphere : public Surface {
 public:
     //! Blitz++ TinyVector of length D stores position/direction/etc.
-    typedef blitz::TinyVector<double, 3> TVecDbl; 
-    
+    typedef blitz::TinyVector<double, 3> TVecDbl;
+
 public:
     //! User-called constructor.
     Sphere(TVecDbl& C, double R)
         : _center(C), _radius(R)
-    { 
+    {
         Insist(R > 0, "Sphere must have positive radius.");
     }
 
@@ -51,8 +51,8 @@ public:
     //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
-    //! Determine distance to intersection with the surface.  
-    void intersect( const TVecDbl& position, 
+    //! Determine distance to intersection with the surface.
+    void intersect( const TVecDbl& position,
                     const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
@@ -66,7 +66,7 @@ public:
 
 protected:
     //! output to a stream
-    std::ostream& _output( std::ostream& os ) const;
+    std::ostream& printStream( std::ostream& os ) const;
 
 private:
     //! Center point of the sphere.
@@ -86,7 +86,7 @@ public:
     //! User-called constructor.
     SphereO(double radius)
         : _radius(radius)
-    { 
+    {
         Insist(_radius > 0, "SphereO must have positive radius.");
     }
 
@@ -104,8 +104,8 @@ public:
     //! Calculate whether a point has a positive sense to this surface
     bool hasPosSense(const TVecDbl& position) const;
 
-    //! Determine distance to intersection with the surface.  
-    void intersect( const TVecDbl& position, 
+    //! Determine distance to intersection with the surface.
+    void intersect( const TVecDbl& position,
                     const TVecDbl& direction,
                     const bool PosSense,
                     bool& hit,
@@ -119,7 +119,7 @@ public:
 
 protected:
     //! output to a stream
-    std::ostream& _output( std::ostream& os ) const;
+    std::ostream& printStream( std::ostream& os ) const;
 
 private:
     //! Radius of the sphere.
@@ -127,5 +127,5 @@ private:
 };
 /*============================================================================*/
 } // end namespace mcGeometry
-#endif 
+#endif
 

@@ -37,16 +37,8 @@ public:
 
    //! verify the check condition, report if failure
    void checkForPass(const bool cond, 
-                     const std::string passMessage,
-                     const std::string failureMessage,
                      const char code[], const char fileName[],
                      const int lineNumber);
-
-   //! verify the check condition, report if failure
-   void checkForPass(const bool cond, 
-                     const char code[], const char fileName[],
-                     const int lineNumber)
-   { checkForPass(cond, "", "", code, fileName, lineNumber); }
 
 
    //! print whether it passed or failed
@@ -79,11 +71,6 @@ private:
 //! check passing condition, auto-insert file name and line number
 #define TESTER_CHECKFORPASS(cond) \
    tranSupport::UnitTester::Instance().checkForPass((cond), #cond, __FILE__, __LINE__)
-
-//! check passing condition, but with verbose pass and failure messages
-#define TESTER_CHECKFORPASSV( cond, passMessage, failureMessage) \
-   tranSupport::UnitTester::Instance().checkForPass((cond), (passMessage), (failureMessage), #cond, \
-         __FILE__, __LINE__)
 
 //! print the report
 #define TESTER_PRINTRESULT() \

@@ -33,7 +33,7 @@ macro(srj_set_compiler_defs)
     endif( USE_VECTORIZE )
     
     # turn on extra compiler warnings regardless
-    add_definitions("-Wall -Wextra")
+    add_definitions(-Wall -Wextra)
   endif (CMAKE_COMPILER_IS_GNUCXX)
 
   #warn if release and DBC
