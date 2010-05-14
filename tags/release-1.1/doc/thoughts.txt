@@ -1,0 +1,14 @@
+Should look at either doing a template-based cell container to hold extra
+information in each cell, as Jeremy suggests, or returning an unsigned integer
+index that maps from each cell. This unsigned integer would be unrelated to the
+user's input ID, as it would be used exclusively for array indexing.
+
+Need to incorporate dead region information, reflecting surfaces, etc.
+
+second-iteration optimizations:
+   - add explicit px, py, pz etc. to save flops (no need to mult by zero)
+	- implement a function that the 'user' calls after the geometry is input to
+	  enact some of the optimizations
+	- do some optimization when _unMatchedSurfaces equals zero (i.e.
+	  connectivity is complete)
+		- use list when building connectivity, use vector after that ?

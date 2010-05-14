@@ -1,0 +1,90 @@
+/*! \mainpage MCGeometry Documentation
+ 
+ \section Introduction
+
+<b>Where to start</b>: most of the "developer" (the individual who links the
+MCGeometry geometry code to a transport/cross section/physics code) interaction
+will be through MCGeometry.hpp , which contains the mcGeometry::MCGeometry
+class.
+
+Current capabilities:
+ - Generalized cells bounded by planes, cylinders, and spheres
+ - Automatic cell-to-cell connectivity
+ - Completely lossless particle transport with no "soft equivalence" checking
+ - Constant-time operation after geometry is connected (no global searching)
+ - Uses zero-based `unsigned int` internal index to refer to cells for
+   constant-time connectivity with whatever cross section/tally code the
+   developer wishes to use, but translates the internal index to "User ID"s
+   which are arbitrary `unsigned int`s.
+ - Uses the Blitz++ TinyVector class for directions/positions for speed
+
+MCGeometry is built with both speed and flexibility in mind. For interaction
+with the rest of a developer's Monte Carlo code, the "internal index" should be
+used. Only when interfacing with the "user" at the end of the problem should
+the User IDs be used.
+
+\section Installation
+
+Currently, compilation of the MCGeometry library requires installation of
+the scons build system, available at http://www.scons.org/ . Use <tt>scons
+--help</tt> in the main directory to view build options. The Blitz++ library is 
+also required.
+
+The code has been tested with <tt>gcc 4.0.1</tt>, <tt>gcc 3.4.6</tt>, and 
+<tt>gcc 4.3.1</tt>, but it should be
+standards-compliant and compatible with any modern compiler. It produces no
+warnings when compiled with <tt>g++ -Wall -Wextra</tt>.
+
+\section Acknowledgements
+
+Jesse R. Cheatham supplied the original idea of building up the cell-to-cell
+connectivity during run time. Seth R. Johnson refined this idea to using the
+surfaces and surface senses to further prune the required checking.
+
+Jeremy Conlin is the primary author of the presentation (in the \c doc 
+directory) and helped greatly in implementing the geometry tracking routines.
+
+A.F. Bielajew at University of Michigan and his class notes provided the
+basic implementation of quadratic surfaces with an "inside" sense.
+
+The initial user input parsing is based on that of the MCNP5 region/surface
+syntax. ABSOLUTELY NO CODE IN THIS PROJECT IS BASED ON, DERIVED FROM,
+ENDORSED BY, OR DIRECTLY RELATED TO ANY CODE IN MCNP.
+
+The following statements apply to work done by Seth R. Johnson on this project:
+
+	This material is based upon work supported under a National Science
+	Foundation Graduate Research Fellowship. Any opinions, findings, conclusions
+	or recommendations expressed in this publication are those of the author(s)
+	and do not necessarily reflect the views of the National Science
+	Foundation.  
+
+\section License
+
+Copyright (c) 2008&endash;2010, Seth R. Johnson, Jeremy L. Conlin
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ - Redistributions of source code must retain the above copyright notice, this
+	list of conditions and the following disclaimer.
+ - Redistributions in binary form must reproduce the above copyright notice,
+	this list of conditions and the following disclaimer in the documentation
+	and/or other materials provided with the distribution.
+ - Neither the name of the MCGeometry project nor the names of its contributors
+	may be used to endorse or promote products derived from this software
+	without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
