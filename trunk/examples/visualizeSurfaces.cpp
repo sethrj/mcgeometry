@@ -34,12 +34,14 @@ inline double randDouble(){
 
 //! Pick a random direction on the unit sphere
 inline void randDirection(TVecDbl& v){
-    double phi = tranSupport::constants::TWOPI*randDouble();
+    double phi = randDouble() * tranSupport::constants::TWOPI;
+    double mu  = 2*randDouble() - 1;
 
-    v[0] = 2*randDouble() - 1;
-    double mu = std::sqrt(1 - v[0]*v[0]);
-    v[1] = mu*std::cos(phi);
-    v[2] = mu*std::sin(phi);
+    double sinPolar = std::sqrt(1 - mu * mu);
+
+    v[0] = mu;
+    v[1] = sinPolar*std::cos(phi);
+    v[2] = sinPolar*std::sin(phi);
 }
 
 //! Pick a random position in our geometry
@@ -75,12 +77,14 @@ void visualizeSurfaces( mcGeometry::MCGeometry& geo,
     for (int i = 0; (i < 10000) && (j < 20000); i++) {
         randDirection(direction);
 
+        // sample in a box until we're somewhere inside the valid geometry
         do {
             randPosition(bounds, subtract, position);
             oldCellIndex = geo.findCell(position);
             j++;
         } while ( geo.isDeadCell(oldCellIndex) && (j < 20000));
 
+        // cross surfaces until we leave the system
         returnStatus = MCGeometry::NORMAL;
         while (returnStatus != MCGeometry::DEADCELL)
         {
@@ -90,7 +94,7 @@ void visualizeSurfaces( mcGeometry::MCGeometry& geo,
             geo.getSurfaceCrossing( newPosition, direction, surfaceCrossId,
                     dotProduct);
 
-            // print the surface crossing position
+            // write the surface crossing position to the file
             outFile << surfaceCrossId << "\t" << newPosition[0] << "\t"
                     << newPosition[1] << "\t" << newPosition[2] << endl;
 

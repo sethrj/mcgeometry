@@ -101,12 +101,12 @@ void testAmrGeometry()
     // no dead spots, and to build the connectivity
     cout << "********** printing surfaces"
          << endl;
-    TVecDbl bounds(3, 4.0);
-    TVecDbl subtract(2.0, 0.0, 2.0);
+    TVecDbl bounds(4., 4., 4.);
+    TVecDbl subtract(2., 0., 2.);
 
     visualizeSurfaces(theGeom, "amrOut.txt", bounds, subtract);
 
-//    theGeom.debugPrint();
+    theGeom.debugPrint();
 }
 /*============================================================================*/
 void testMeshGeometry() {
@@ -189,11 +189,12 @@ void testMeshGeometry() {
     oldCellIndex = numSides * numSides * numSides - 1;
     transport(geom2, oldCellIndex, position, direction);
 
+    geom2.debugPrint();
     // throw particles around
     cout << "********** printing surfaces"
          << endl;
-    TVecDbl bounds(3, numSides);
-    TVecDbl subtract(0.0);
+    TVecDbl bounds(numSides, numSides, numSides);
+    TVecDbl subtract(0.,0.,0.);
     visualizeSurfaces(geom2, "meshOut.txt", bounds, subtract);
 }
 /*============================================================================*/
@@ -285,15 +286,12 @@ void testSphereGeometry() {
     cout << "********** printing surfaces"
          << endl;
 
-    TVecDbl bounds(0.0);
-    TVecDbl subtract(0.0);
-    bounds[0] = 4.0; subtract[0] = 2.0;
-    bounds[1] = 2.0; subtract[1] = 1.0;
-    bounds[2] = 2.0; subtract[2] = 1.0;
+    TVecDbl bounds(4.,2.,2.);
+    TVecDbl subtract(2.,1.,1.);
 
     visualizeSurfaces(geom3, "sphereOut.txt", bounds, subtract);
 
-//    geom3.debugPrint();
+    geom3.debugPrint();
 }
 
 void printComplexGeometry()
@@ -301,8 +299,8 @@ void printComplexGeometry()
     MCGeometry geo;
     createComplexGeometry(geo);
 
-    TVecDbl bounds(3, 6.0);
-    TVecDbl subtract(3, 3.0);
+    TVecDbl bounds(6., 6., 6.);
+    TVecDbl subtract(3., 3., 3.);
 
     visualizeSurfaces(geo, "complexOut.txt", bounds, subtract);
 }
