@@ -1,6 +1,6 @@
 /*!
  * \file   Cell.cpp
- * \brief  Contains inline implementation for \c Cell
+ * \brief  Contains implementation for \c Cell
  * \author Seth R. Johnson
  */
 /*----------------------------------------------------------------------------*/

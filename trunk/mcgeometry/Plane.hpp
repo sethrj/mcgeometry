@@ -4,17 +4,15 @@
  * \author Seth R. Johnson
  * A regular Plane, and PlaneNormal to an axis, templated on that axis.
  */
-
 #ifndef MCG_PLANE_HPP
 #define MCG_PLANE_HPP
+/*----------------------------------------------------------------------------*/
+#include "Surface.hpp"
 
-#include <iostream>
 #include <blitz/tinyvec.h>
 
 #include "transupport/dbc.hpp"
 #include "transupport/blitzStuff.hpp"
-
-#include "Surface.hpp"
 
 namespace mcGeometry {
 /*============================================================================*/

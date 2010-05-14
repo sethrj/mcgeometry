@@ -9,7 +9,7 @@
 #include "PlaneNormal.hpp"
 
 #include <algorithm>
-#include <iostream>
+#include <ostream>
 
 #include <blitz/tinyvec-et.h>
 

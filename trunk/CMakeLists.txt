@@ -8,7 +8,7 @@ project(MCGeometry)
 
 #------------------------------ VERSION INFO ------------------------------#
 set( ${PROJECT_NAME}_MAJOR_VERSION 1 ) 
-set( ${PROJECT_NAME}_MINOR_VERSION 0 ) 
+set( ${PROJECT_NAME}_MINOR_VERSION 1 ) 
 
 find_package(Subversion)
 if(Subversion_FOUND)

@@ -55,13 +55,15 @@ bool Plane::hasPosSense(const TVecDbl& position) const
 
     return _hasPosSense(eval);
 }
+
 /*----------------------------------------------------------------------------*/
 void Plane::normalAtPoint(
-                    const TVecDbl&,
-                    TVecDbl& unitNormal) const
+        const TVecDbl&,
+        TVecDbl& unitNormal) const
 {
     unitNormal = _normal;
 }
+
 /*----------------------------------------------------------------------------*/
 std::ostream& Plane::printStream( std::ostream& os ) const
 {

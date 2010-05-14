@@ -13,7 +13,7 @@
 
 #include "Surface.hpp"
 
-#include <iostream>
+#include <iosfwd>
 
 namespace mcGeometry {
 /*============================================================================*/

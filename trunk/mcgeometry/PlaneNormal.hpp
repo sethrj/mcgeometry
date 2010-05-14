@@ -6,14 +6,12 @@
 #ifndef mcgeometry_PlaneNormal_hpp
 #define mcgeometry_PlaneNormal_hpp
 /*----------------------------------------------------------------------------*/
+#include "Surface.hpp"
 
-#include <iostream>
 #include <blitz/tinyvec.h>
 
 #include "transupport/dbc.hpp"
 #include "transupport/blitzStuff.hpp"
-
-#include "Surface.hpp"
 
 namespace mcGeometry {
 /*============================================================================*/
