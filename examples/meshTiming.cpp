@@ -97,13 +97,13 @@ void MeshTiming(int N, mcGeometry::MCGeometry& Geo, bool fullDirections){
     mcGeometry::MCGeometry::UserCellIdType newID(0);
     mcGeometry::MCGeometry::ReturnStatus RS;
 
-    TVecDbl position(0.0);
-    TVecDbl newPos(0.0);
+    TVecDbl position(0.,0.,0.);
+    TVecDbl newPos(0.,0.,0.);
     double distance;
 
 
     // Create possible directions
-    TVecDbl dir(0.0);
+    TVecDbl dir(0.,0.,0.);
     std::vector< TVecDbl > directions;
     dir[0] = 1.0;                   // Positive x-direction
     directions.push_back(dir);

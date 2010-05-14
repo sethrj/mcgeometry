@@ -32,7 +32,7 @@ using std::endl;
 typedef std::vector<monteCarlo::BasicTally<double> > TallyVec;
 
 //! Blitz++ TinyVector of length D stores position/direction/etc.
-typedef blitz::TinyVector<double, 3> TVecDbl; 
+typedef blitz::TinyVector<double, 3> TVecDbl;
 
 //===== function declarations
 void    SimulateMCComb(const int, const int, mcGeometry::MCGeometry&,
@@ -60,9 +60,9 @@ void runProgram(char* argv[]){
     Insist( printFlag > -1, "printFlag must be either 0, 1 or 2.");
     Insist( printFlag < 3, "printFlag must be either 0, 1 or 2.");
 
-    cout << "\n=====================================================" 
-         << "\nComparing combinatorial mesh with deterministic mesh." 
-         << "\nSize of mesh: " << numCells << "x" << numCells << "x"<<numCells 
+    cout << "\n====================================================="
+         << "\nComparing combinatorial mesh with deterministic mesh."
+         << "\nSize of mesh: " << numCells << "x" << numCells << "x"<<numCells
          << "\nTracking " << numParticles << " particles"
          << "\n=====================================================" << endl;
 
@@ -97,7 +97,7 @@ void runProgram(char* argv[]){
         printPLTallies(numCells, combPL1, detPL);
         printPLTallies(numCells, combPL2, detPL);
     }
-    
+
     cout << "Difference between pathlength tallies." << endl;
     if( printFlag > 1 ){
         diffTallies(numCells, combPL1, detPL);
@@ -138,14 +138,14 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
     unsigned int numCells = size*size*size;    // Number of cells in mesh
     PLTally.resize(numCells);
 
-    TVecDbl position(0.0);
-    TVecDbl new_position(0.0);
-    TVecDbl direction(0.0);
+    TVecDbl position(0.,0.,0.);
+    TVecDbl new_position(0.,0.,0.);
+    TVecDbl direction(0.,0.,0.);
 
     double d;           // Distance traveled
     TVecDbl point;       // Point on plane
 
-    TVecDbl dPlane(0.0); //distance to each plane
+    TVecDbl dPlane(0.,0.,0.); //distance to each plane
 
     double xT;    // Total cross section
     unsigned int cellNumber;
@@ -157,7 +157,7 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
     for( int n = 0; n < numParticles; ++n ){
         // source particle
         source(size, position, direction);
-        
+
         for (int i = 0; i < 3; i++)
             cellIndex[i] = static_cast<int>(position[i]); // floors it
 
@@ -201,18 +201,18 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
                 PLTally[cellNumber].flush();
 
                 // update our cell index
-                cellIndex[chosenDistanceIndex] += 
+                cellIndex[chosenDistanceIndex] +=
                     (direction[chosenDistanceIndex] > 0 ? 1 : -1);
             }
-                 
+
             position[0] += direction[0]*d;
             position[1] += direction[1]*d;
             position[2] += direction[2]*d;
 
             // Score pathlength tally
             if( cellNumber > numCells ){
-                cout << "cellNumber: " << cellNumber << ", numCells = " 
-                     << numCells << ", n = " << n 
+                cout << "cellNumber: " << cellNumber << ", numCells = "
+                     << numCells << ", n = " << n
                      << "\n\tposition: " << position << endl;
             }
         }
@@ -224,21 +224,21 @@ void SimulateMCDet(const int numParticles, const int size, TallyVec& PLTally)
     }
 }
 
-//! SimulateMCComb will simulate a Monte Carlo transport through the mesh.  It 
-//! will track particles along a random direction until it leaves the mesh.  A 
+//! SimulateMCComb will simulate a Monte Carlo transport through the mesh.  It
+//! will track particles along a random direction until it leaves the mesh.  A
 //! particle never changes direction even at a collision.
 //! size: The size of the mesh
 //! numParticles: Number of 'particles' to track
-void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo, 
+void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
                     TallyVec& PLTally)
 {
 
     unsigned int numCells = size*size*size;    // Number of cells in mesh
     PLTally.resize(numCells);
 
-    TVecDbl position(0.0);
-    TVecDbl new_position(0.0);
-    TVecDbl direction(0.0);
+    TVecDbl position(0.,0.,0.);
+    TVecDbl new_position(0.,0.,0.);
+    TVecDbl direction(0.,0.,0.);
     unsigned int cell;
     unsigned int new_cell;
     mcGeometry::MCGeometry::ReturnStatus returnStatus;
@@ -251,7 +251,7 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
     for( int n = 0; n < numParticles; ++n ){
         //create new particle
         source(size, position, direction);
-        
+
         cell = getCell(position, size);
         //Check(cell == Geo.findCell(position));
 
@@ -291,10 +291,10 @@ void SimulateMCComb(int numParticles, int size, mcGeometry::MCGeometry& Geo,
 
 }
 
-//! distanceToPlane will calculate the distance of a point to a plane 
+//! distanceToPlane will calculate the distance of a point to a plane
 //! it assumes normal component is always 1 so no need to complicate this.
-// Distance to plane is: t = n.(a-p)/(n.d) n is normal vector, a is point on 
-// plane, p is position d is direction vector.  Since all of our n's have only 
+// Distance to plane is: t = n.(a-p)/(n.d) n is normal vector, a is point on
+// plane, p is position d is direction vector.  Since all of our n's have only
 // one non-zero term the dot products are just the product of two numbers
 inline double distanceToPlane(int cellIndex, double x, double v)
 {
@@ -319,7 +319,7 @@ inline bool isInside(const int size, const std::vector<int>& index)
 inline void source(const int size, TVecDbl& position,
                     TVecDbl& direction)
 {
-    // source along one face in normal direction, should result in each 
+    // source along one face in normal direction, should result in each
     // cell having 1/(size^2) tally result
 
 //    position[0] = randDouble() * size;
@@ -339,7 +339,7 @@ inline void source(const int size, TVecDbl& position,
 //! Pick a random direction on the unit sphere
 inline void randDirection(TVecDbl& v){
     double phi = tranSupport::constants::TWOPI*randDouble();
-    
+
     v[0] = 2*randDouble() - 1;
     double mu = std::sqrt(1 - v[0]*v[0]);
     v[1] = mu*std::cos(phi);
@@ -421,7 +421,7 @@ void printPLTallies(int numCells, const TallyVec& comb, const TallyVec& det)
 
 }
 
-//! diffTallies will show the difference between the two tallies so it is 
+//! diffTallies will show the difference between the two tallies so it is
 //! easier to compare them.
 void diffTallies(int numCells, const TallyVec& A, const TallyVec& B)
 {
@@ -438,7 +438,7 @@ void diffTallies(int numCells, const TallyVec& A, const TallyVec& B)
     for( int k = 0; k < numCells; ++k ){
         for( int j = 0; j < numCells; ++j ){
             for( int i = 0; i < numCells; ++i, ++n ){
-                diff = std::fabs(A[n].getMean() - B[n].getMean()) / 
+                diff = std::fabs(A[n].getMean() - B[n].getMean()) /
                         std::max(A[n].getMeanStdev(), B[n].getMeanStdev());
                 if (A[n].getMean() != 0) {
                     deviationStats += diff;
