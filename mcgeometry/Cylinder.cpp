@@ -1,6 +1,6 @@
 /*!
  * \file   Cylinder.cpp
- * \brief  Contains inline implementation for \c Cylinder
+ * \brief  Contains implementation for \c Cylinder
  * \author Seth R. Johnson
  */
 /*----------------------------------------------------------------------------*/
@@ -52,6 +52,7 @@ void Cylinder::intersect(
 
     _calcQuadraticIntersect(A, B, C, posSense, hit, distance);
 }
+
 /*----------------------------------------------------------------------------*/
 void Cylinder::normalAtPoint(
         const TVecDbl& position,

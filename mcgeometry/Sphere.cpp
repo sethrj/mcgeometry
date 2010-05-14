@@ -1,12 +1,12 @@
 /*!
  * \file   Sphere.cpp
- * \brief  Contains inline implementation for the \c Sphere class
+ * \brief  Contains implementation for the \c Sphere class
  * \author Seth R. Johnson
  */
 /*----------------------------------------------------------------------------*/
 #include "Sphere.hpp"
 
-#include <iostream>
+#include <ostream>
 #include <blitz/tinyvec-et.h>
 
 #include "transupport/dbc.hpp"

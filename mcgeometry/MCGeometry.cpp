@@ -3,7 +3,7 @@
  * \brief  Contains implementation for the \c MCGeometry class
  * \author Seth R. Johnson
  */
-
+/*----------------------------------------------------------------------------*/
 #include "MCGeometry.hpp"
 
 #include <utility>
@@ -234,7 +234,7 @@ void MCGeometry::findNewCell(
                     _findCache.oldCellIndex, position, direction);
 }
 
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/*----------------------------------------------------------------------------*/
 //     SUBROUTINES USED IN findNewCell MULTIPLE TIMES
 void MCGeometry::_updateConnectivity(
         Cell* oldCell,
@@ -270,8 +270,7 @@ void MCGeometry::_updateConnectivity(
     Ensure(_unMatchedSurfaces >= 0);
 }
 
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
+/*----------------------------------------------------------------------------*/
 void MCGeometry::reflectDirection(
         const TVecDbl& newPosition,
         const TVecDbl& oldDirection,
@@ -769,3 +768,4 @@ MCGeometry::~MCGeometry()
 
 /*============================================================================*/
 } // end namespace mcGeometry
+

@@ -13,9 +13,6 @@
 
 #include "transupport/dbc.hpp"
 
-//using std::cout;
-//using std::endl;
-
 namespace mcGeometry {
 /*============================================================================*/
 

@@ -4,16 +4,14 @@
  * \author Seth R. Johnson
  *
  */
-
 #ifndef MCG_SPHERE_HPP
 #define MCG_SPHERE_HPP
+/*----------------------------------------------------------------------------*/
+#include "Surface.hpp"
 
 #include <cmath>
-#include <iostream>
 #include <blitz/tinyvec.h>
 #include "transupport/dbc.hpp"
-
-#include "Surface.hpp"
 
 namespace mcGeometry {
 /*============================================================================*/
